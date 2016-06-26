@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Diagnostics;
 
@@ -23,16 +23,26 @@ namespace IntelliTect.ConsoleView
             Test(expected, action, (left, right) => left == right);
         }
 
+        static public void Test(string expected, Func<string[], int> func, int expectedReturn = default(int), params string[] args)
+        {
+            Test<int>(expected, func, expectedReturn, args);
+        }
 
         static public void Test<T>(string expected, Func<string[], T> func, T expectedReturn = default(T), params string[] args)
         {
             T @return = default(T);
             Test(expected, () => { @return = func(args); });
 
-            Assert.AreEqual<T>(expectedReturn, @return, 
-                $"The value returned from {nameof(func)} ({@return}) was not the { nameof(expectedReturn) }({expectedReturn}) value.");
+            if (!expectedReturn.Equals(@return))
+            {
+                throw new Exception($"The value returned from {nameof(func)} ({@return}) was not the { nameof(expectedReturn) }({expectedReturn}) value.");
+            }
         }
 
+        static public void Test(string expected, Func<int> func, int expectedReturn)
+        {
+            Test(expected, (args) => func(), expectedReturn);
+        }
 
         static public void Test<T>(string expected, Func<T> func, T expectedReturn)
         {
@@ -106,28 +116,33 @@ namespace IntelliTect.ConsoleView
             bool failTest = !areEquivalentOperator(expectedOutput, output);
             if (failTest)
             {
-                Assert.IsFalse(failTest, GetMessageText(expectedOutput, output));
+                throw new Exception(GetMessageText(expectedOutput, output));
             }
         }
 
+        readonly static object ExecuteLock = new object();
+
         public static string Execute(string givenInput, Action action)
         {
-            string output;
-            using (TextWriter writer = new StringWriter())
-            using (TextReader reader = new StringReader(string.IsNullOrWhiteSpace(givenInput) ? "" : givenInput))
+            lock (ExecuteLock)
             {
-                System.Console.SetOut(writer);
+                string output;
+                using (TextWriter writer = new StringWriter())
+                using (TextReader reader = new StringReader(string.IsNullOrWhiteSpace(givenInput) ? "" : givenInput))
+                {
+                    System.Console.SetOut(writer);
 
-                System.Console.SetIn(reader);
-                action();
+                    System.Console.SetIn(reader);
+                    action();
 
-                // TODO: This trim should be removed but there are too
-                //       many tests still depending on it so....
-                output = writer.ToString().Trim('\n').Trim('\r');
+                    // TODO: This trim should be removed but there are too
+                    //       many tests still depending on it so....
+                    output = writer.ToString().Trim('\n').Trim('\r');
 
+                }
+
+                return output;
             }
-
-            return output;
         }
 
         private static string GetMessageText(string expectedOutput, string output)
