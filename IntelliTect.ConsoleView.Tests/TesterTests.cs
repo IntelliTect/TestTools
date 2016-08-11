@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace IntelliTect.ConsoleView.Tests
+namespace Intellitect.ConsoleView.Tests
 {
     [TestClass]
     public class TesterTests
@@ -14,16 +14,16 @@ namespace IntelliTect.ConsoleView.Tests
 >>Last name: <<Montoya
 >>Hello, Inigo Montoya.";
 
-            IntelliTect.ConsoleView.Tester.Test(view,
+            Tester.Test(view,
             () =>
             {
-                System.Console.Write("First name: ");
-                string fname = System.Console.ReadLine();
+                Console.Write("First name: ");
+                string fname = Console.ReadLine();
 
-                System.Console.Write("Last name: ");
-                string lname = System.Console.ReadLine();
+                Console.Write("Last name: ");
+                string lname = Console.ReadLine();
 
-                System.Console.Write("Hello, {0} {1}.", fname, lname);
+                Console.Write("Hello, {0} {1}.", fname, lname);
             });
         }
 
@@ -32,9 +32,9 @@ namespace IntelliTect.ConsoleView.Tests
         {
             string view = @"Hello World";
 
-            IntelliTect.ConsoleView.Tester.Test(view, () =>
+            Tester.Test(view, () =>
             {
-                System.Console.Write("Hello World");
+                Console.Write("Hello World");
             });
         }
 
@@ -43,9 +43,9 @@ namespace IntelliTect.ConsoleView.Tests
         {
             string view = @"Hello World";
 
-            IntelliTect.ConsoleView.Tester.Test(view, () =>
+            Tester.Test(view, () =>
             {
-                System.Console.WriteLine("Hello World");
+                Console.WriteLine("Hello World");
             });
         }
 
@@ -53,10 +53,10 @@ namespace IntelliTect.ConsoleView.Tests
         [TestMethod]
         public void ExecuteProcess_PingLocalhost_Success()
         {
-            ConsoleView.Tester.ExecuteProcess(
-$@"
-Pinging { Environment.MachineName } * with 32 bytes of data:
-Reply from *: time*", 
+            Tester.ExecuteProcess(
+$@"^
+Pinging { Environment.MachineName } \[::1\] with 32 bytes of data:
+Reply from ::1: time", 
                 "ping.exe", "localhost");
         }
     }

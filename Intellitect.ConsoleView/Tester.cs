@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Diagnostics;
 
-namespace IntelliTect.ConsoleView
+namespace Intellitect.ConsoleView
 {
     static public class Tester
     {
@@ -73,8 +72,7 @@ namespace IntelliTect.ConsoleView
         }
 
         static private Func<string, string, bool> LikeOperator =
-            (expected, output) => Microsoft.VisualBasic.CompilerServices.LikeOperator.LikeString(
-                output, expected, Microsoft.VisualBasic.CompareMethod.Text);
+            (expected, output) => output.IsLike(expected);
 
         /// <summary>
         /// Performs a unit test on a console-based method. A "view" of
@@ -210,17 +208,20 @@ namespace IntelliTect.ConsoleView
         /// </example>
         private static string CSharpStringEncode(string text)
         {
-            string result = "";
-            using (var stringWriter = new StringWriter())
-            {
-                using (var provider = System.CodeDom.Compiler.CodeDomProvider.CreateProvider("CSharp"))
-                {
-                    provider.GenerateCodeFromExpression(
-                        new System.CodeDom.CodePrimitiveExpression(text), stringWriter, null);
-                    result = stringWriter.ToString();
-                }
-            }
-            return result;
+            return text;
+            // TODO: Can we recreate this in .Net Core?
+            //string result = "";
+            //using (var stringWriter = new StringWriter())
+            //{
+                
+            //    using (var provider = System.CodeDom.Compiler.CodeDomProvider.CreateProvider("CSharp"))
+            //    {
+            //        provider.GenerateCodeFromExpression(
+            //            new System.CodeDom.CodePrimitiveExpression(text), stringWriter, null);
+            //        result = stringWriter.ToString();
+            //    }
+            //}
+            //return result;
         }
         private static string CSharpStringEncode(char character) =>
             CSharpStringEncode(character.ToString());
@@ -274,14 +275,13 @@ namespace IntelliTect.ConsoleView
 
         public static Process ExecuteProcess(string expected, string fileName, string args, string directory = null)
         {
-            System.Diagnostics.ProcessStartInfo processStartInfo =
-                    new System.Diagnostics.ProcessStartInfo(fileName, args);
-            processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            ProcessStartInfo processStartInfo = new ProcessStartInfo(fileName, args);
+            //processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             processStartInfo.CreateNoWindow = true;
-            processStartInfo.WorkingDirectory = directory ?? Environment.CurrentDirectory;
+            processStartInfo.WorkingDirectory = directory ?? Directory.GetCurrentDirectory();
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.UseShellExecute = false;
-            System.Diagnostics.Process process = System.Diagnostics.Process.Start(processStartInfo);
+            Process process = Process.Start(processStartInfo);
             process.WaitForExit();
             AssertExpectation(expected, process.StandardOutput.ReadToEnd(), (left, right) => LikeOperator(left, right));
             return process;
