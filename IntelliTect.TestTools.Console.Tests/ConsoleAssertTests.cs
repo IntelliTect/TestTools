@@ -1,20 +1,20 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace IntelliTect.ConsoleView.Tests
+namespace IntelliTect.TestTools.Console.Tests
 {
     [TestClass]
-    public class TesterTests
+    public class ConsoleAssertTests
     {
         [TestMethod]
-        public void ConsoleView_Sample_InigoMontoya()
+        public void ConsoleTester_Sample_InigoMontoya()
         {
             string view =
 @"First name: <<Inigo
 >>Last name: <<Montoya
 >>Hello, Inigo Montoya.";
 
-            IntelliTect.ConsoleView.Tester.Test(view,
+            ConsoleAssert.Expect(view,
             () =>
             {
                 System.Console.Write("First name: ");
@@ -28,22 +28,22 @@ namespace IntelliTect.ConsoleView.Tests
         }
 
         [TestMethod]
-        public void ConsoleView_HelloWorld_NoInput()
+        public void ConsoleTester_HelloWorld_NoInput()
         {
             string view = @"Hello World";
 
-            IntelliTect.ConsoleView.Tester.Test(view, () =>
+            ConsoleAssert.Expect(view, () =>
             {
                 System.Console.Write("Hello World");
             });
         }
 
         [TestMethod]
-        public void ConsoleView_HelloWorld_MissingNewline()
+        public void ConsoleTester_HelloWorld_MissingNewline()
         {
             string view = @"Hello World";
 
-            IntelliTect.ConsoleView.Tester.Test(view, () =>
+            ConsoleAssert.Expect(view, () =>
             {
                 System.Console.WriteLine("Hello World");
             });
@@ -53,10 +53,10 @@ namespace IntelliTect.ConsoleView.Tests
         [TestMethod]
         public void ExecuteProcess_PingLocalhost_Success()
         {
-            ConsoleView.Tester.ExecuteProcess(
+            ConsoleAssert.ExecuteProcess(
 $@"
-Pinging { Environment.MachineName } * with 32 bytes of data:
-Reply from *: time*", 
+Pinging { Environment.MachineName } ?::1? with 32 bytes of data:
+Reply from ::1: time*", 
                 "ping.exe", "localhost");
         }
     }
