@@ -135,8 +135,8 @@ namespace IntelliTect.TestTools.Console
 
                     // TODO: This trim should be removed but there are too
                     //       many tests still depending on it so....
-                    output = writer.ToString().Trim('\n').Trim('\r');
-
+                    output = writer.ToString(); //.Trim('\n').Trim('\r');
+                    if (output.EndsWith("\r\n")) output = output.Substring(0, output.Length - 2);
                 }
 
                 return output;
