@@ -3,14 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Intellitect.ConsoleView", "Intellitect.ConsoleView\Intellitect.ConsoleView.xproj", "{210FAD29-2D8B-46D5-9F62-2BACD00D4A2C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{56A23227-DDA9-492C-86D7-5A8CA891524C}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "IntelliTect.ConsoleView.Tests", "IntelliTect.ConsoleView.Tests\IntelliTect.ConsoleView.Tests.xproj", "{F0C5CA5B-7383-47EB-8DB5-6F5866632938}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "IntelliTect.TestTools.Console", "IntelliTect.TestTools.Console\IntelliTect.TestTools.Console.xproj", "{210FAD29-2D8B-46D5-9F62-2BACD00D4A2C}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "IntelliTect.TestTools.Console.Tests", "IntelliTect.TestTools.Console.Tests\IntelliTect.TestTools.Console.Tests.xproj", "{F0C5CA5B-7383-47EB-8DB5-6F5866632938}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

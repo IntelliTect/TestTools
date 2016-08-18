@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 
-namespace Intellitect.ConsoleView
+namespace IntelliTect.TestTools.Console
 {
-    static public class Tester
+    static public class ConsoleAssert
     {
 
         /// <summary>
@@ -17,20 +17,20 @@ namespace Intellitect.ConsoleView
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static public void Test(string expected, Action action)
+        static public void Expect(string expected, Action action)
         {
-            Test(expected, action, (left, right) => left == right);
+            Expect(expected, action, (left, right) => left == right);
         }
 
-        static public void Test(string expected, Func<string[], int> func, int expectedReturn = default(int), params string[] args)
+        static public void Expect(string expected, Func<string[], int> func, int expectedReturn = default(int), params string[] args)
         {
-            Test<int>(expected, func, expectedReturn, args);
+            Expect<int>(expected, func, expectedReturn, args);
         }
 
-        static public void Test<T>(string expected, Func<string[], T> func, T expectedReturn = default(T), params string[] args)
+        static public void Expect<T>(string expected, Func<string[], T> func, T expectedReturn = default(T), params string[] args)
         {
             T @return = default(T);
-            Test(expected, () => { @return = func(args); });
+            Expect(expected, () => { @return = func(args); });
 
             if (!expectedReturn.Equals(@return))
             {
@@ -38,18 +38,18 @@ namespace Intellitect.ConsoleView
             }
         }
 
-        static public void Test(string expected, Func<int> func, int expectedReturn)
+        static public void Expect(string expected, Func<int> func, int expectedReturn)
         {
-            Test(expected, (args) => func(), expectedReturn);
+            Expect(expected, (args) => func(), expectedReturn);
         }
 
-        static public void Test<T>(string expected, Func<T> func, T expectedReturn)
+        static public void Expect<T>(string expected, Func<T> func, T expectedReturn)
         {
-            Test(expected, (args) => func(), expectedReturn);
+            Expect(expected, (args) => func(), expectedReturn);
         }
 
-        static public void Test(string expected, Action<string[]> func, params string[] args) =>
-            Test(expected, () => func(args));
+        static public void Expect(string expected, Action<string[]> func, params string[] args) =>
+            Expect(expected, () => func(args));
 
         /// <summary>
         /// Performs a unit test on a console-based method. A "view" of
@@ -60,7 +60,7 @@ namespace Intellitect.ConsoleView
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static private void Test(string expected, Action action, Func<string, string, bool> comparisonOperator)
+        static private void Expect(string expected, Action action, Func<string, string, bool> comparisonOperator)
         {
 
             string[] data = Parse(expected);
@@ -83,9 +83,9 @@ namespace Intellitect.ConsoleView
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static public void AreLike(string expected, Action action)
+        static public void ExpectLike(string expected, Action action)
         {
-            Test(expected, action, LikeOperator);
+            Expect(expected, action, LikeOperator);
         }
 
 

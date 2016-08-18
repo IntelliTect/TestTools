@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Intellitect.ConsoleView
+namespace IntelliTect.TestTools.Console
 {
     public static class StringExtensions
     {

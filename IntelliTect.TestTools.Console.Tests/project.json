@@ -6,7 +6,7 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "Intellitect.ConsoleView": "1.0.0",
+    "IntelliTect.TestTools.Console": "1.0.0",
     "dotnet-test-mstest": "1.0.1-preview",
     "MSTest.TestFramework": "1.0.1-preview"
   },
