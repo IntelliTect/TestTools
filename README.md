@@ -1,10 +1,15 @@
+
+AspNetCore
+==========
+
+Provides test helper classes for instantiating ASP.NET Core classes like RoleManager and UserManager.
+
 Console
 ===========
 
 Console is a simple end-to-end test framework for .NET console applications.
 
 This currently has non-optimal nomenclature and is not guaranteed to be efficient, but it appears to work.
-
 
 Usage
 -----
