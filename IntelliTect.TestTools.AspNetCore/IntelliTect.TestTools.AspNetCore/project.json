@@ -1,9 +1,10 @@
-﻿{
+{
   "version": "1.0.0-*",
 
   "dependencies": {
     "Microsoft.AspNetCore.Identity": "1.0.0",
     "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.0.1",
     "NETStandard.Library": "1.6.0"
   },
 
