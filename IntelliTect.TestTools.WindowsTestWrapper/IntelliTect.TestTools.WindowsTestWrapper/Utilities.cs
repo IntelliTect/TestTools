@@ -14,8 +14,8 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         public string ParseTextFile(string path)
         {
             string text = null;
-            int seconds = 0;
-            while (seconds < 10)
+            int retryAttempts = 0;
+            while (retryAttempts < 10)
             {
                 try
                 {
@@ -33,7 +33,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
                 }
 
                 Thread.Sleep(500);
-                seconds++;
+                retryAttempts++;
             }
             return text;
         }
@@ -47,7 +47,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         {
             try
             {
-                File.Delete(location + "\\" + filename);
+                File.Delete(Path.Combine(location, filename));
             }
             catch (Exception e)
             {

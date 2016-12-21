@@ -23,9 +23,7 @@
             <ListBox ItemsSource="{Binding Path=MyList}" AutomationProperties.AutomationId="autoListBoxMyList">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock>
-                        <Run Text="{Binding Path=MyListItem}"/>
-                        </TextBlock>
+                        <TextBlock Text="{Binding Path=MyListItem}"/>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

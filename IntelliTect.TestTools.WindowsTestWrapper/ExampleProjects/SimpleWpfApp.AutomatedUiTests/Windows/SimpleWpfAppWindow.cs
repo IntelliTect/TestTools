@@ -19,7 +19,7 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
 
         public static void LaunchApplicationUnderTest()
         {
-            LaunchApplication( Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\..\ExampleProjects\SimpleWpfApp\bin\Debug\SimpleWpfApp.exe")) );
+            LaunchApplication( Path.GetFullPath(@"..\..\..\ExampleProjects\SimpleWpfApp\bin\Debug\SimpleWpfApp.exe") );
         }
 
         public WpfEdit ListEntry
@@ -42,7 +42,7 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
             get { return BuildControlHeirarchy( SearchTypes.AutomationId, "autoExpanderList", "autoListBoxMyList" ); }
         }
 
-        public IEnumerable<WpfListItem> ListItemsList
+        public IEnumerable<WpfListItem> GetAllListItems
         {
             get { return GetListOfControlsByType( c => new WpfListItem( c ), ListItems ); }
         }
@@ -52,21 +52,19 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
             if ( expectedItems == null )
                 throw new ArgumentNullException( nameof( expectedItems ) );
 
-            var existingListItems = ListItemsList;
+            List<WpfListItem> existingListItems = GetAllListItems?.ToList();
 
-            if ( expectedItems.Length != ListItemsList.Count() )
+            if ( expectedItems.Length != existingListItems?.Count() )
             {
                 throw new Exception("CheckAllListItems parameter count did not match the number of ListItems returned");
             }
             bool allExpectedItemsPresent = true;
-            int i = 0;
 
-            foreach ( var item in existingListItems )
+            for (int i = 0; i < expectedItems.Length; i++)
             {
                 try
                 {
-                    var test1 = item.GetChildren().FirstOrDefault().Name;
-                    if (item.GetChildren().FirstOrDefault()?.Name != expectedItems[i])
+                    if (existingListItems[i].GetChildren().FirstOrDefault()?.Name != expectedItems[i])
                     {
                         allExpectedItemsPresent = false;
                         break;

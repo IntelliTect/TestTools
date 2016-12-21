@@ -27,45 +27,32 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
                 throw new ArgumentNullException(nameof(searchType));
             if (baseControl == null)
                 throw new ArgumentNullException(nameof(baseControl));
-
-            UITestControl foundControl = new UITestControl();
-
-            if (searchType == SearchTypes.AutomationId)
+            UITestControl foundControl;
+            switch (searchType)
             {
-                foundControl = FindWpfControlByAutomationId(baseControl, c => new WpfControl(c), FindWinWindowUnderTest());
+                case SearchTypes.AutomationId:
+                    foundControl = FindControlImpl((controlName, rootControl) => FindWpfControlByAutomationId(controlName, c => new WpfControl(c), rootControl), baseControl, controlList);
+                    break;
+                case SearchTypes.ControlName:
+                    foundControl = FindControlImpl((controlName, rootControl) => FindControlByName(controlName, c => new UITestControl(c), rootControl), baseControl, controlList);
+                    break;
+                default:
+                    foundControl = new UITestControl();
+                    break;
+            }
+            return foundControl;
+        }
 
-                if ( controlList?.Any() != true )
+        private UITestControl FindControlImpl(Func<string, UITestControl, UITestControl> findMethod, string baseControl, string[] childControls)
+        {
+            UITestControl foundControl = findMethod(baseControl, FindWinWindowUnderTest());
+            if (childControls?.Any() == true)
+            {
+                foreach (string control in childControls)
                 {
-                    return foundControl;
-                }
-
-                if ( controlList.Any() )
-                {
-                    foreach (string control in controlList)
-                    {
-                        foundControl = FindWpfControlByAutomationId(control, c => new WpfControl(c), foundControl);
-                    }
+                    foundControl = findMethod(control, foundControl);
                 }
             }
-
-            if (searchType == SearchTypes.ControlName)
-            {
-                foundControl = FindControlByName(baseControl, c => new UITestControl(c), FindWinWindowUnderTest());
-
-                if (controlList?.Any() != true)
-                {
-                    return foundControl;
-                }
-
-                if ( controlList.Any() )
-                {
-                    foreach (string control in controlList)
-                    {
-                        foundControl = FindControlByName(control, c => new UITestControl(c), foundControl);
-                    }
-                }
-            }
-
             return foundControl;
         }
     }

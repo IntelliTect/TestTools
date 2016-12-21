@@ -5,10 +5,11 @@ namespace Calculator.AutomatedTests.Helpers
 {
     public class CalculatorHelpers
     {
-        readonly CalculatorWindow _CalculatorWindow = new CalculatorWindow();
+        private readonly CalculatorWindow _CalculatorWindow = new CalculatorWindow();
+
         public bool VerifyResults(string expectedValue)
         {
-            return expectedValue == _CalculatorWindow.FindResultsControl().Name;
+            return expectedValue == _CalculatorWindow.FindResultsControl()?.Name;
         }
     }
 }

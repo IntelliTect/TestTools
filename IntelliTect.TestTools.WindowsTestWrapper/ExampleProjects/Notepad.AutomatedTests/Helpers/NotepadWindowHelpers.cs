@@ -7,17 +7,17 @@ namespace Notepad.AutomatedTests.Helpers
 {
     public class NotepadWindowHelpers
     {
-        readonly NotepadWindow _NotepadWindow = new NotepadWindow();
-        readonly SaveAsWindow _SaveAsWindow = new SaveAsWindow();
+        private readonly NotepadWindow _NotepadWindow = new NotepadWindow();
+        private readonly SaveAsWindow _SaveAsWindow = new SaveAsWindow();
 
-        //Ordinarily this would contain more complex operations.
-        //Use this to abstract away some of the complexity to help the test author.
+        //TODO: Is there a better way to handle saving a document for a test?
         public void SaveDocument(string location, string filename)
         {
             //Check if doc with same name already exists in location before saving
-            string formattedPath = location + "\\" + filename;
+            string formattedPath = Path.Combine(location, filename);
             if (File.Exists(formattedPath))
             {
+                //TODO: Fix this so it appends to the name BEFORE the extension, per Kevin's suggestion
                 filename += "1";
             }
             Mouse.Click();
