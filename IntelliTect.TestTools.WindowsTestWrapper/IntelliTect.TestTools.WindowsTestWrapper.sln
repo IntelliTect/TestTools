@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.TestTools.WindowsTestWrapper", "IntelliTect.TestTools.WindowsTestWrapper\IntelliTect.TestTools.WindowsTestWrapper.csproj", "{AFFE1E79-C820-495E-A6AA-0CF9BA076D9B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExampleProjects", "ExampleProjects", "{32F089D8-4D89-4304-9E53-A6D993E9185E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calculator.AutomatedTests", "ExampleProjects\Calculator.AutomatedTests\Calculator.AutomatedTests.csproj", "{02923D67-EE7B-4629-9903-4B4757FA1DFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotepadExample.AutomatedTests", "ExampleProjects\Notepad.AutomatedTests\NotepadExample.AutomatedTests.csproj", "{AD38A67F-2DB3-42D9-A28C-0E8BBA7D0227}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleWpfAppExample", "ExampleProjects\SimpleWpfApp\SimpleWpfAppExample.csproj", "{0F75ABE0-B138-47EE-9D35-905BD600F8FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleWpfAppExample.AutomatedUiTests", "ExampleProjects\SimpleWpfApp.AutomatedUiTests\SimpleWpfAppExample.AutomatedUiTests.csproj", "{FE0DAE7B-CBCC-4B60-9440-D5C544D9A174}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AFFE1E79-C820-495E-A6AA-0CF9BA076D9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFFE1E79-C820-495E-A6AA-0CF9BA076D9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFFE1E79-C820-495E-A6AA-0CF9BA076D9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFFE1E79-C820-495E-A6AA-0CF9BA076D9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02923D67-EE7B-4629-9903-4B4757FA1DFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02923D67-EE7B-4629-9903-4B4757FA1DFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02923D67-EE7B-4629-9903-4B4757FA1DFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02923D67-EE7B-4629-9903-4B4757FA1DFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD38A67F-2DB3-42D9-A28C-0E8BBA7D0227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD38A67F-2DB3-42D9-A28C-0E8BBA7D0227}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD38A67F-2DB3-42D9-A28C-0E8BBA7D0227}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD38A67F-2DB3-42D9-A28C-0E8BBA7D0227}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F75ABE0-B138-47EE-9D35-905BD600F8FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F75ABE0-B138-47EE-9D35-905BD600F8FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F75ABE0-B138-47EE-9D35-905BD600F8FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F75ABE0-B138-47EE-9D35-905BD600F8FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE0DAE7B-CBCC-4B60-9440-D5C544D9A174}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE0DAE7B-CBCC-4B60-9440-D5C544D9A174}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE0DAE7B-CBCC-4B60-9440-D5C544D9A174}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE0DAE7B-CBCC-4B60-9440-D5C544D9A174}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{02923D67-EE7B-4629-9903-4B4757FA1DFA} = {32F089D8-4D89-4304-9E53-A6D993E9185E}
+		{AD38A67F-2DB3-42D9-A28C-0E8BBA7D0227} = {32F089D8-4D89-4304-9E53-A6D993E9185E}
+		{0F75ABE0-B138-47EE-9D35-905BD600F8FF} = {32F089D8-4D89-4304-9E53-A6D993E9185E}
+		{FE0DAE7B-CBCC-4B60-9440-D5C544D9A174} = {32F089D8-4D89-4304-9E53-A6D993E9185E}
+	EndGlobalSection
+EndGlobal
