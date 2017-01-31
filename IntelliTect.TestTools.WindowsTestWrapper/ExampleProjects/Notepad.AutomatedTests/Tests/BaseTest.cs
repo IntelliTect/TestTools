@@ -15,7 +15,6 @@ namespace Notepad.AutomatedTests.Tests
         protected readonly NotepadWindow NotepadWindow = new NotepadWindow();
         protected readonly SaveAsWindow SaveAsWindow = new SaveAsWindow();
         protected readonly NotepadWindowHelpers NotePadWindowHelpers = new NotepadWindowHelpers();
-        protected readonly Utilities Utilities = new Utilities();
 
         //Use TestInitialize to run code before running each test 
         [TestInitialize()]

@@ -29,17 +29,17 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
 
         public UITestControl SaveButton
         {
-            get { return BuildControlHeirarchy( SearchTypes.AutomationId, "autoButtonSave" ); }
+            get { return BuildControlHierarchy( SearchType.AutomationId, "autoButtonSave" ); }
         }
 
         public UITestControl ExpandListItem
         {
-            get { return BuildControlHeirarchy( SearchTypes.AutomationId, "autoExpanderList", "HeaderSite" ); }
+            get { return BuildControlHierarchy( SearchType.AutomationId, "autoExpanderList", "HeaderSite" ); }
         }
 
         private UITestControl ListItems
         {
-            get { return BuildControlHeirarchy( SearchTypes.AutomationId, "autoExpanderList", "autoListBoxMyList" ); }
+            get { return BuildControlHierarchy( SearchType.AutomationId, "autoExpanderList", "autoListBoxMyList" ); }
         }
 
         public IEnumerable<WpfListItem> GetAllListItems

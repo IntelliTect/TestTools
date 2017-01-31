@@ -14,9 +14,10 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
     public abstract partial class DesktopControls
     {
         public static ApplicationUnderTest Aut { get; set; }
+        public static string ApplicationLocation { get; set; }
         public abstract string AutWindowTitle { get; }
         public abstract string WindowClassName { get; }
-
+        
         /// <summary>
         /// Launch the application
         /// </summary>
@@ -24,7 +25,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         {
             if ( applicationLocation == null )
                 throw new ArgumentNullException( nameof( applicationLocation ) );
-            Aut = ApplicationUnderTest.Launch(applicationLocation);
+            Aut = ApplicationUnderTest.Launch(ApplicationLocation);
             Assert.IsTrue(Aut.Exists, "The application was not launched");
         }
 

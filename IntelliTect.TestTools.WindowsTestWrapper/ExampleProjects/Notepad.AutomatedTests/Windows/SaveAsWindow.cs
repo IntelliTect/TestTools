@@ -25,12 +25,12 @@ namespace Notepad.AutomatedTests.Windows
 
         public UITestControl SaveButton
         {
-            get { return BuildControlHeirarchy(SearchTypes.ControlName, "Save"); }
+            get { return BuildControlHierarchy(SearchType.ControlName, "Save"); }
         }
 
         public UITestControl CancelButton
         {
-            get { return BuildControlHeirarchy(SearchTypes.ControlName, "Cancel"); }
+            get { return BuildControlHierarchy(SearchType.ControlName, "Cancel"); }
         }
 
         public UITestControl FindSaveLocationToolbar
