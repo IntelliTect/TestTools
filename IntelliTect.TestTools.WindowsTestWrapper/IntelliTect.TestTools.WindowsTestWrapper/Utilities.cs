@@ -6,6 +6,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
 {
     public static class Utilities
     {
+        //TODO: Think about moving or renaming this. Handle exception cases better than below.
         /// <summary>
         /// Parse a text file and return a string of its contents
         /// </summary>
@@ -15,34 +16,12 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         {
             string text = null;
             int retryAttempts = 0;
-            while (retryAttempts < 10)
+            do
             {
-                try
-                {
-                    text = File.ReadAllText(path);
-                }
-                catch (FileNotFoundException e)
-                {
-                    Console.WriteLine("The file could not be found");
-                    Console.Write(e.Message);
-                    throw;
-                }
-
-                catch (Exception e)
-                {
-                    Console.WriteLine("The file could not be read");
-                    Console.Write(e.Message);
-                    throw;
-                }
-
-                if (text != null)
-                {
-                    break;
-                }
-
-                Thread.Sleep(500);
+                text = File.ReadAllText(path);
+                Thread.Sleep( 100 );
                 retryAttempts++;
-            }
+            } while ( retryAttempts < 10 );
             return text;
         }
 
@@ -53,15 +32,21 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="fileName">The name and extension of the file</param>
         public static void DeleteDocument(string location, string fileName)
         {
-            try
+            int retryAttempts = 0;
+            do
             {
                 File.Delete(Path.Combine(location, fileName));
-            }
-            catch (Exception e)
+                Thread.Sleep( 100 );
+                if (!File.Exists(Path.Combine(location, fileName)))
+                {
+                    break;
+                }
+                retryAttempts++;
+
+            } while ( retryAttempts < 10 );
+            if ( File.Exists(Path.Combine(location, fileName)) )
             {
-                Console.WriteLine("Issue with DeleteDocument method");
-                Console.Write(e.Message);
-                throw;
+                throw new Exception("File not properly deleted");
             }
         }
     }

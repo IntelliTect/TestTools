@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using IntelliTect.TestTools.WindowsTestWrapper;
 using Microsoft.VisualStudio.TestTools.UITesting;
 using Microsoft.VisualStudio.TestTools.UITesting.WinControls;
@@ -9,7 +10,6 @@ namespace Notepad.AutomatedTests.Windows
     {
         //Name of the window created when saving for the first time or choosing "Save As"
         public override string AutWindowTitle => "Save As";
-
         //Class of the window created when saving for the first time or choosing "Save As"
         public override string WindowClassName => "#32770";
 

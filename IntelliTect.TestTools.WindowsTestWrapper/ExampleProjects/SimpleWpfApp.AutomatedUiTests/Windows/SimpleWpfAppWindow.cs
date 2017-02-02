@@ -17,10 +17,10 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
         //More application support MSAA and so is a safer bet at this time.
         public override string WindowClassName => "HwndWrapper";
 
-        public static void LaunchApplicationUnderTest()
-        {
-            LaunchApplication( Path.GetFullPath(@"..\..\..\ExampleProjects\SimpleWpfApp\bin\Debug\SimpleWpfApp.exe") );
-        }
+        //public static void LaunchApplicationUnderTest()
+        //{
+        //    LaunchApplication( Path.GetFullPath(@"..\..\..\ExampleProjects\SimpleWpfApp\bin\Debug\SimpleWpfApp.exe") );
+        //}
 
         public WpfEdit ListEntry
         {
