@@ -32,19 +32,20 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="fileName">The name and extension of the file</param>
         public static void DeleteDocument(string location, string fileName)
         {
+            var combinedPath = Path.Combine( location, fileName );
             int retryAttempts = 0;
             do
             {
-                File.Delete(Path.Combine(location, fileName));
+                File.Delete(combinedPath);
                 Thread.Sleep( 100 );
-                if (!File.Exists(Path.Combine(location, fileName)))
+                if (!File.Exists(combinedPath))
                 {
                     break;
                 }
                 retryAttempts++;
 
             } while ( retryAttempts < 10 );
-            if ( File.Exists(Path.Combine(location, fileName)) )
+            if ( File.Exists(combinedPath) )
             {
                 throw new Exception("File not properly deleted");
             }
