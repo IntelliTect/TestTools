@@ -3,9 +3,7 @@ using Calculator.AutomatedTests.Helpers;
 using Calculator.AutomatedTests.Windows;
 using IntelliTect.TestTools.WindowsTestWrapper;
 using Microsoft.VisualStudio.TestTools.UITesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-//TODO: Look into making this an inherited class
 namespace Calculator.AutomatedTests.Tests
 {
     [CodedUITest]

@@ -1,11 +1,9 @@
 ﻿using System;
 using IntelliTect.TestTools.WindowsTestWrapper;
 using Microsoft.VisualStudio.TestTools.UITesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Notepad.AutomatedTests.Helpers;
 using Notepad.AutomatedTests.Windows;
 
-//TODO: Look into making this an inherited class
 namespace Notepad.AutomatedTests.Tests
 {
     /// <summary>
