@@ -4,13 +4,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IntelliTect.TestTools.WindowsTestWrapper
 {
+    /// <summary>
+    /// Inherit from this to create an application-specific base test class with generic settings to further inherit tests from
+    /// 
+    /// </summary>
     [CodedUITest]
     public abstract class BaseTestInherit
     {
         public abstract string ApplicationLocation { get; }
 
         //Use TestInitialize to run code before running each test 
-        [TestInitialize()]
+        [TestInitialize]
         public void MyTestInitialize()
         {
             //GenericPlaybackSettings.SetPlaybackSettings();
