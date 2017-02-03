@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using IntelliTect.TestTools.WindowsTestWrapper;
 using Microsoft.VisualStudio.TestTools.UITesting;
 using Notepad.AutomatedTests.Helpers;
@@ -12,7 +13,7 @@ namespace Notepad.AutomatedTests.Tests
     [CodedUITest]
     public partial class BaseTest : BaseTestInherit
     {
-        public override string ApplicationLocation => Environment.SystemDirectory + "\\notepad.exe";
+        public override string ApplicationLocation => Path.Combine( Environment.SystemDirectory, "notepad.exe" );
         protected readonly NotepadWindow NotepadWindow = new NotepadWindow();
         protected readonly SaveAsWindow SaveAsWindow = new SaveAsWindow();
         protected readonly NotepadWindowHelpers NotePadWindowHelpers = new NotepadWindowHelpers();
