@@ -1,23 +1,30 @@
-﻿using Microsoft.VisualStudio.TestTools.UITest.Extension;
+﻿using System.Diagnostics;
+using Microsoft.VisualStudio.TestTools.UITest.Extension;
 using Microsoft.VisualStudio.TestTools.UITesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IntelliTect.TestTools.WindowsTestWrapper
 {
     /// <summary>
-    /// Inherit from this to create an application-specific base test class with generic settings to further inherit tests from
-    /// 
+    /// Inherit from this to create an application-specific base test class with generic settings to further inherit test classes from
     /// </summary>
     [CodedUITest]
     public abstract class BaseTestInherit
     {
+        /// <summary>
+        /// Used in the DesktopApplication.LaunchApplication method
+        /// If overriding [TestInitialize] BaseTestInitialize(),
+        /// do not forget to add a call to DesktopControls.LaunchApplication(ApplicationLocation) to your own test initialize method
+        /// </summary>
         public abstract string ApplicationLocation { get; }
 
-        //Use TestInitialize to run code before running each test 
+        /// <summary>
+        /// Use TestInitialize to run code before running each test 
+        /// </summary>
         [TestInitialize]
-        public void MyTestInitialize()
+        public void BaseTestInitialize()
         {
-            //GenericPlaybackSettings.SetPlaybackSettings();
+            Debug.Write( "Default test initialize start" );
             DesktopControls.LaunchApplication(ApplicationLocation);
 
             Playback.PlaybackSettings.WaitForReadyLevel = WaitForReadyLevel.Disabled;
@@ -31,13 +38,16 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
             //Don't know why this works, but it did when Mike Curn checked using VS2010.
             Playback.PlaybackError -= PlaybackErrorHandler;
             Playback.PlaybackError += PlaybackErrorHandler;
+            Debug.Write("Default test initialize finished");
         }
+        /// <summary>
+        /// Use TestCleanup to run code after each test has run
+        /// </summary>
+        [TestCleanup()]
+        public void BaseTestCleanup()
+        {
 
-        //Use TestCleanup to run code after each test has run
-        //[TestCleanup()]
-        //public void MyTestCleanup()
-        //{
-        //}
+        }
 
         private static void PlaybackErrorHandler(object sender, PlaybackErrorEventArgs e)
         {

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.TestTools.UITesting;
 using Notepad.AutomatedTests.Windows;
@@ -9,6 +11,37 @@ namespace Notepad.AutomatedTests.Helpers
     {
         private readonly NotepadWindow _NotepadWindow = new NotepadWindow();
         private readonly SaveAsWindow _SaveAsWindow = new SaveAsWindow();
+
+        public bool ValidateTextFile(string location, string fileName, string expectedText)
+        {
+            bool comparisonPass = false;
+            string combinedPath = Path.Combine( location, fileName );
+            if ( combinedPath == expectedText )
+            {
+                comparisonPass = true;
+            }
+            return comparisonPass;
+        }
+
+        public void DeleteDocument(string location, string fileName)
+        {
+            var combinedPath = Path.Combine(location, fileName);
+            int retryAttempts = 0;
+            do
+            {
+                File.Delete(combinedPath);
+                if (!File.Exists(combinedPath))
+                {
+                    break;
+                }
+                Thread.Sleep(100);
+                retryAttempts++;
+            } while (retryAttempts < 10);
+            if (File.Exists(combinedPath))
+            {
+                throw new Exception("File not properly deleted");
+            }
+        }
 
         //TODO: Is there a better way to handle saving a document for a test? E.G. a randomly generated filename in the specified location?
         //TODO: Assess if part of this should be pulled out and put into the wrapper Utilities.cs class

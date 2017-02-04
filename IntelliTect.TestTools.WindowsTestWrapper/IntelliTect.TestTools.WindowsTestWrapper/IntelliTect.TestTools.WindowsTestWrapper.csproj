@@ -60,9 +60,7 @@
     <Compile Include="BaseTestInherit.cs" />
     <Compile Include="DesktopControlHelpers.cs" />
     <Compile Include="DesktopControls.cs" />
-    <Compile Include="GenericPlaybackSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />

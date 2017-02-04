@@ -15,9 +15,8 @@ namespace Notepad.AutomatedTests.Tests
         {
             NotepadWindow.NotepadEdit.Text = Empty;
             NotePadWindowHelpers.SaveDocument(SaveLocation, "testNoCharacters.txt");
-            var text = Utilities.ParseTextFile(SaveLocation + @"\testNoCharacters.txt");
-            Assert.AreEqual(Empty, text, "Unexpected text was found");
-            Utilities.DeleteDocument(SaveLocation, "testNoCharacters.txt");
+            Assert.AreEqual( NotePadWindowHelpers.ValidateTextFile(SaveLocation, "testNoCharacters.txt", Empty), "Unexpected text was found" );
+            NotePadWindowHelpers.DeleteDocument(SaveLocation, "testNoCharacters.txt");
         }
 
         [TestMethod]
@@ -26,9 +25,8 @@ namespace Notepad.AutomatedTests.Tests
         {
             NotepadWindow.NotepadEdit.Text = AlphaMin;
             NotePadWindowHelpers.SaveDocument(SaveLocation, "testMinAlpha.txt");
-            var text = Utilities.ParseTextFile(SaveLocation + @"\testMinAlpha.txt");
-            Assert.AreEqual(AlphaMin, text, "Unexpected text was found");
-            Utilities.DeleteDocument(SaveLocation, "testMinAlpha.txt");
+            Assert.IsTrue(NotePadWindowHelpers.ValidateTextFile(SaveLocation, "testNoCharacters.txt", AlphaMin), "Unexpected text was found");
+            NotePadWindowHelpers.DeleteDocument(SaveLocation, "testMinAlpha.txt");
         }
 
         [TestMethod]
@@ -37,9 +35,8 @@ namespace Notepad.AutomatedTests.Tests
         {
             NotepadWindow.NotepadEdit.Text = NumericMin;
             NotePadWindowHelpers.SaveDocument(SaveLocation, "testMinNumeric.txt");
-            var text = Utilities.ParseTextFile(SaveLocation + @"\testMinNumeric.txt");
-            Assert.AreEqual(NumericMin, text, "Unexpected text was found");
-            Utilities.DeleteDocument(SaveLocation, "testMinNumeric.txt");
+            Assert.IsTrue(NotePadWindowHelpers.ValidateTextFile(SaveLocation, "testNoCharacters.txt", NumericMin), "Unexpected text was found");
+            NotePadWindowHelpers.DeleteDocument(SaveLocation, "testMinNumeric.txt");
         }
     }
 }
