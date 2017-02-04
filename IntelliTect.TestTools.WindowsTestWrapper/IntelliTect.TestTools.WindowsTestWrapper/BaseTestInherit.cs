@@ -24,7 +24,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         [TestInitialize]
         public void BaseTestInitialize()
         {
-            Debug.Write( "Default test initialize start" );
+            Debug.WriteLine( "Default test initialize start" );
             DesktopControls.LaunchApplication(ApplicationLocation);
 
             Playback.PlaybackSettings.WaitForReadyLevel = WaitForReadyLevel.Disabled;
@@ -38,7 +38,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
             //Don't know why this works, but it did when Mike Curn checked using VS2010.
             Playback.PlaybackError -= PlaybackErrorHandler;
             Playback.PlaybackError += PlaybackErrorHandler;
-            Debug.Write("Default test initialize finished");
+            Debug.WriteLine("Default test initialize finished");
         }
         /// <summary>
         /// Use TestCleanup to run code after each test has run

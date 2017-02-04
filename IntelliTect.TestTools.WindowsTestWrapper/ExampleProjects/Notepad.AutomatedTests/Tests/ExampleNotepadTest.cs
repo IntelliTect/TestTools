@@ -15,7 +15,7 @@ namespace Notepad.AutomatedTests.Tests
         {
             NotepadWindow.NotepadEdit.Text = Empty;
             NotePadWindowHelpers.SaveDocument(SaveLocation, "testNoCharacters.txt");
-            Assert.AreEqual( NotePadWindowHelpers.ValidateTextFile(SaveLocation, "testNoCharacters.txt", Empty), "Unexpected text was found" );
+            Assert.AreEqual( NotePadWindowHelpers.CheckTextFileForExpectedText(SaveLocation, "testNoCharacters.txt", Empty), "Unexpected text was found" );
             NotePadWindowHelpers.DeleteDocument(SaveLocation, "testNoCharacters.txt");
         }
 
@@ -25,7 +25,7 @@ namespace Notepad.AutomatedTests.Tests
         {
             NotepadWindow.NotepadEdit.Text = AlphaMin;
             NotePadWindowHelpers.SaveDocument(SaveLocation, "testMinAlpha.txt");
-            Assert.IsTrue(NotePadWindowHelpers.ValidateTextFile(SaveLocation, "testNoCharacters.txt", AlphaMin), "Unexpected text was found");
+            Assert.IsTrue(NotePadWindowHelpers.CheckTextFileForExpectedText(SaveLocation, "testNoCharacters.txt", AlphaMin), "Unexpected text was found");
             NotePadWindowHelpers.DeleteDocument(SaveLocation, "testMinAlpha.txt");
         }
 
@@ -35,7 +35,7 @@ namespace Notepad.AutomatedTests.Tests
         {
             NotepadWindow.NotepadEdit.Text = NumericMin;
             NotePadWindowHelpers.SaveDocument(SaveLocation, "testMinNumeric.txt");
-            Assert.IsTrue(NotePadWindowHelpers.ValidateTextFile(SaveLocation, "testNoCharacters.txt", NumericMin), "Unexpected text was found");
+            Assert.IsTrue(NotePadWindowHelpers.CheckTextFileForExpectedText(SaveLocation, "testNoCharacters.txt", NumericMin), "Unexpected text was found");
             NotePadWindowHelpers.DeleteDocument(SaveLocation, "testMinNumeric.txt");
         }
     }

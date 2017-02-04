@@ -12,15 +12,9 @@ namespace Notepad.AutomatedTests.Helpers
         private readonly NotepadWindow _NotepadWindow = new NotepadWindow();
         private readonly SaveAsWindow _SaveAsWindow = new SaveAsWindow();
 
-        public bool ValidateTextFile(string location, string fileName, string expectedText)
+        public bool CheckTextFileForExpectedText(string location, string fileName, string expectedText)
         {
-            bool comparisonPass = false;
-            string combinedPath = Path.Combine( location, fileName );
-            if ( combinedPath == expectedText )
-            {
-                comparisonPass = true;
-            }
-            return comparisonPass;
+            return Path.Combine( location, fileName ) == expectedText;
         }
 
         public void DeleteDocument(string location, string fileName)
