@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -14,27 +15,14 @@ namespace Notepad.AutomatedTests.Helpers
 
         public bool CheckTextFileForExpectedText(string location, string fileName, string expectedText)
         {
-            return Path.Combine( location, fileName ) == expectedText;
+            Thread.Sleep( 100 );    //Wait just in case the file is being saved. If this ever fails, write a polling loop
+            return File.ReadAllText( Path.Combine( location, fileName ) ) == expectedText;
         }
 
         public void DeleteDocument(string location, string fileName)
         {
-            var combinedPath = Path.Combine(location, fileName);
-            int retryAttempts = 0;
-            do
-            {
-                File.Delete(combinedPath);
-                if (!File.Exists(combinedPath))
-                {
-                    break;
-                }
-                Thread.Sleep(100);
-                retryAttempts++;
-            } while (retryAttempts < 10);
-            if (File.Exists(combinedPath))
-            {
-                throw new Exception("File not properly deleted");
-            }
+            Thread.Sleep( 100 );    //Wait just in case the file is being saved. If this ever fails, write a polling loop
+            File.Delete( Path.Combine( location, fileName ) );
         }
 
         //TODO: Is there a better way to handle saving a document for a test? E.G. a randomly generated filename in the specified location?
