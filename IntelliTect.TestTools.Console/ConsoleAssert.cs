@@ -145,7 +145,7 @@ namespace IntelliTect.TestTools.Console
 
         private static string GetMessageText(string expectedOutput, string output)
         {
-            string result=$"int:{(int)output[output.Length - 1]}";
+            string result=string.Empty;
             char[] wildCardChars = new char[]{ '[', ']', '?', '*', '#'};
             if (wildCardChars.Any(c=>expectedOutput.Contains(c)))
             {
