@@ -136,7 +136,7 @@ namespace IntelliTect.TestTools.Console
                     // TODO: This trim should be removed but there are too
                     //       many tests still depending on it so....
                     output = writer.ToString(); //.Trim('\n').Trim('\r');
-                    if (output.EndsWith("\r\n")) output = output.Substring(0, output.Length - 2);
+                    if (output.EndsWith(Environment.NewLine)) output = output.Substring(0, output.Length - Environment.NewLine.Length);
                 }
 
                 return output;
@@ -145,7 +145,7 @@ namespace IntelliTect.TestTools.Console
 
         private static string GetMessageText(string expectedOutput, string output)
         {
-            string result="";
+            string result=$"int:{(int)output[output.Length - 1]}";
             char[] wildCardChars = new char[]{ '[', ']', '?', '*', '#'};
             if (wildCardChars.Any(c=>expectedOutput.Contains(c)))
             {
@@ -162,6 +162,7 @@ namespace IntelliTect.TestTools.Console
                 result += string.Join(Environment.NewLine, "AreEqual failed:",
                     "Expected: ", expectedOutput,
                     "Actual:   ", output);
+                
             }
 
             int expectedOutputLength = expectedOutput.Length;
