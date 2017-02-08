@@ -17,10 +17,10 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
         //More application support MSAA and so is a safer bet at this time.
         public override string WindowClassName => "HwndWrapper";
 
-        public static void LaunchApplicationUnderTest()
-        {
-            LaunchApplication( Path.GetFullPath(@"..\..\..\ExampleProjects\SimpleWpfApp\bin\Debug\SimpleWpfApp.exe") );
-        }
+        //public static void LaunchApplicationUnderTest()
+        //{
+        //    LaunchApplication( Path.GetFullPath(@"..\..\..\ExampleProjects\SimpleWpfApp\bin\Debug\SimpleWpfApp.exe") );
+        //}
 
         public WpfEdit ListEntry
         {
@@ -29,17 +29,17 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
 
         public UITestControl SaveButton
         {
-            get { return BuildControlHeirarchy( SearchTypes.AutomationId, "autoButtonSave" ); }
+            get { return BuildControlHierarchy( SearchType.AutomationId, "autoButtonSave" ); }
         }
 
         public UITestControl ExpandListItem
         {
-            get { return BuildControlHeirarchy( SearchTypes.AutomationId, "autoExpanderList", "HeaderSite" ); }
+            get { return BuildControlHierarchy( SearchType.AutomationId, "autoExpanderList", "HeaderSite" ); }
         }
 
         private UITestControl ListItems
         {
-            get { return BuildControlHeirarchy( SearchTypes.AutomationId, "autoExpanderList", "autoListBoxMyList" ); }
+            get { return BuildControlHierarchy( SearchType.AutomationId, "autoExpanderList", "autoListBoxMyList" ); }
         }
 
         public IEnumerable<WpfListItem> GetAllListItems

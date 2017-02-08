@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using IntelliTect.TestTools.WindowsTestWrapper;
 using Microsoft.VisualStudio.TestTools.UITesting;
 using Microsoft.VisualStudio.TestTools.UITesting.WinControls;
@@ -9,7 +10,6 @@ namespace Notepad.AutomatedTests.Windows
     {
         //Name of the window created when saving for the first time or choosing "Save As"
         public override string AutWindowTitle => "Save As";
-
         //Class of the window created when saving for the first time or choosing "Save As"
         public override string WindowClassName => "#32770";
 
@@ -25,12 +25,12 @@ namespace Notepad.AutomatedTests.Windows
 
         public UITestControl SaveButton
         {
-            get { return BuildControlHeirarchy(SearchTypes.ControlName, "Save"); }
+            get { return BuildControlHierarchy(SearchType.ControlName, "Save"); }
         }
 
         public UITestControl CancelButton
         {
-            get { return BuildControlHeirarchy(SearchTypes.ControlName, "Cancel"); }
+            get { return BuildControlHierarchy(SearchType.ControlName, "Cancel"); }
         }
 
         public UITestControl FindSaveLocationToolbar

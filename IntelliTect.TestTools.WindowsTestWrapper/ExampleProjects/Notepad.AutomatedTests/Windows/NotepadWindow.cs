@@ -14,10 +14,10 @@ namespace Notepad.AutomatedTests.Windows
         //Control type for the window you want to manipulate. Obtain through Inspect.exe, Spy++, or the CodedUI test builder inspect
         public override string WindowClassName => Aut?.ClassName;
 
-        public static void LaunchApplicationUnderTest()
-        {
-            LaunchApplication( Environment.SystemDirectory + "\\notepad.exe" );
-        }
+        //public static void LaunchApplicationUnderTest()
+        //{
+        //    LaunchApplication( Environment.SystemDirectory + "\\notepad.exe" );
+        //}
 
         //In the control hierarchy, the only edit control available is the one we want to manipulate
         public WinEdit NotepadEdit

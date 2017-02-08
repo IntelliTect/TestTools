@@ -13,14 +13,25 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
     /// </summary>
     public abstract partial class DesktopControls
     {
+        /// <summary>
+        /// Stores information about the application under test
+        /// </summary>
         public static ApplicationUnderTest Aut { get; set; }
+        /// <summary>
+        /// The title of the window. Often it is equal to Aut.WindowTitle
+        /// An exception to this is if your application spawns additional windows,
+        /// in which case you can use Window's Inspect.exe too, Spy++ (the property is called "Caption"), or the Coded UI Inspector
+        /// </summary>
         public abstract string AutWindowTitle { get; }
+        /// <summary>
+        /// Class name for the window. Can be discovered with Window's Inspect.exe tool, Spy++, or the Coded Ui Inspector
+        /// </summary>
         public abstract string WindowClassName { get; }
-
+        
         /// <summary>
         /// Launch the application
         /// </summary>
-        protected static void LaunchApplication(string applicationLocation)
+        public static void LaunchApplication(string applicationLocation)
         {
             if ( applicationLocation == null )
                 throw new ArgumentNullException( nameof( applicationLocation ) );
