@@ -13,13 +13,13 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
     {
         /// <summary>
         /// Used in the DesktopApplication.LaunchApplication method
-        /// If overriding [TestInitialize] BaseTestInitialize(),
-        /// do not forget to add a call to DesktopControls.LaunchApplication(ApplicationLocation) to your own test initialize method
         /// </summary>
         public abstract string ApplicationLocation { get; }
 
         /// <summary>
-        /// Use TestInitialize to run code before running each test 
+        /// Default settings suitable for many desktop applications that do not have considerable delays in UI responses
+        /// If overriding [TestInitialize] BaseTestInitialize(),
+        /// do not forget to add a call to DesktopControls.LaunchApplication(ApplicationLocation) to your own test initialize method
         /// </summary>
         [TestInitialize]
         public void BaseTestInitialize()
