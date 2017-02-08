@@ -31,6 +31,15 @@ namespace Notepad.AutomatedTests.Helpers
                     if ( File.ReadAllText( combinedPath ) == expectedText )
                     {
                         result = true;
+                        break;
+                    }
+                    if ( File.ReadAllText( combinedPath ) != expectedText )
+                    {
+                        Debug.WriteLine( "Text did not match" );
+                        Debug.Write( $"Starting text: {combinedPath}" );
+                        Debug.Write( $"Ending text: {expectedText}" );
+                        result = false;
+                        break;
                     }
                 }
                 //Catch just in case the file has not yet been saved
@@ -61,6 +70,7 @@ namespace Notepad.AutomatedTests.Helpers
                 try
                 {
                     File.Delete( combinedPath );
+                    return;
                 }
                 //Catch just in case the file is read only
                 catch (UnauthorizedAccessException)
@@ -120,7 +130,7 @@ namespace Notepad.AutomatedTests.Helpers
             return Path.Combine(dir ?? "", string.Concat(fileName, toAppend, extension));
         }
 
-        private bool CheckForErrorSharingViolation(int hResult)
+        private static bool CheckForErrorSharingViolation(int hResult)
         {
             return (uint)hResult == 0x80070020;
         }
