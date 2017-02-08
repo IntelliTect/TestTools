@@ -16,9 +16,6 @@ namespace Notepad.AutomatedTests.Helpers
 
         public bool CheckTextFileForExpectedText(string location, string fileName, string expectedText)
         {
-            //Thread.Sleep( 100 );    //Wait just in case the file is being saved. If this ever fails, write a polling loop
-            //return File.ReadAllText( Path.Combine( location, fileName ) ) == expectedText;
-
             bool result = false;
             string combinedPath = Path.Combine(location, fileName);
             int retryCount = 0;
