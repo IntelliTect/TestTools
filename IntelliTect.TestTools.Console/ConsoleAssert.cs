@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace IntelliTect.TestTools.Console
 {
@@ -17,9 +18,14 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static public void Expect(string expected, Action action)
+        static public void Expect(string expected, Action action, bool replaceCRLF = true)
         {
-            Expect(expected, action, (left, right) => left == right);
+            Expect(expected, action, (left, right) => left == right, replaceCRLF);
+        }
+
+        static public void ExpectNoTrimOutput(string expected, Action action)
+        {
+            Expect(expected, action, (left, right) => left == right, false);
         }
 
         static public void Expect(string expected, Func<string[], int> func, int expectedReturn = default(int), params string[] args)
@@ -60,7 +66,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static private void Expect(string expected, Action action, Func<string, string, bool> comparisonOperator)
+        static private void Expect(string expected, Action action, Func<string, string, bool> comparisonOperator, bool replaceCRLF = true)
         {
 
             string[] data = Parse(expected);
@@ -68,7 +74,7 @@ namespace IntelliTect.TestTools.Console
             string input = data[0];
             string output = data[1];
 
-            Execute(input, output, action, comparisonOperator);
+            Execute(input, output, action, comparisonOperator, replaceCRLF);
         }
 
         static private Func<string, string, bool> LikeOperator =
@@ -88,7 +94,25 @@ namespace IntelliTect.TestTools.Console
             Expect(expected, action, LikeOperator);
         }
 
+        static string ReplaceCRLF(string input)
+        {
+            // first, replace any \r\n with environment.newline
+            input = input.Replace("\r\n", Environment.NewLine);
 
+            // now, replace any \n, with Environment.NewLine
+            //Regex regex = new Regex(".*[^\r](\n)");
+            var matches = Regex.Matches(input, ".*[^\r](\n)");
+
+            if(matches != null)
+            {
+                foreach(Match match in matches)
+                {
+                    input = input.Replace(match.Groups[1].Value, Environment.NewLine);
+                }
+            }
+
+            return input;
+        }
         /// <summary>
         /// Executes the unit test while providing console input.
         /// </summary>
@@ -97,10 +121,16 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Action to be tested</param>
         /// <param name="areEquivalentOperator">delegate for comparing the expected from actual output.</param>
         static private void Execute(string givenInput, string expectedOutput, Action action,
-            Func<string, string, bool> areEquivalentOperator)
+            Func<string, string, bool> areEquivalentOperator, bool replaceCRLF = true)
         {
-            string output = Execute(givenInput, action);
+            string output = Execute(givenInput, action, replaceCRLF);
 
+            if(replaceCRLF)
+            {
+                expectedOutput = ReplaceCRLF(expectedOutput);
+                if (expectedOutput.EndsWith(Environment.NewLine)) expectedOutput = expectedOutput.Substring(0, expectedOutput.Length - Environment.NewLine.Length);
+                //expectedOutput = expectedOutput.Replace("\r\n", Environment.NewLine);
+            }
             AssertExpectation(expectedOutput, output, areEquivalentOperator);
 
         }
@@ -120,7 +150,7 @@ namespace IntelliTect.TestTools.Console
 
         readonly static object ExecuteLock = new object();
 
-        public static string Execute(string givenInput, Action action)
+        public static string Execute(string givenInput, Action action, bool replaceCRLF = true)
         {
             lock (ExecuteLock)
             {
@@ -133,10 +163,14 @@ namespace IntelliTect.TestTools.Console
                     System.Console.SetIn(reader);
                     action();
 
-                    // TODO: This trim should be removed but there are too
-                    //       many tests still depending on it so....
-                    output = writer.ToString(); //.Trim('\n').Trim('\r');
-                    if (output.EndsWith(Environment.NewLine)) output = output.Substring(0, output.Length - Environment.NewLine.Length);
+                    output = writer.ToString();
+                    if (replaceCRLF)
+                    {
+                        output = ReplaceCRLF(output);
+                        //output = output.Replace("\r\n", Environment.NewLine);
+                    }
+                   
+                    if (replaceCRLF && output.EndsWith(Environment.NewLine)) output = output.Substring(0, output.Length - Environment.NewLine.Length);
                 }
 
                 return output;
@@ -145,9 +179,10 @@ namespace IntelliTect.TestTools.Console
 
         private static string GetMessageText(string expectedOutput, string output)
         {
-            string result=string.Empty;
-            char[] wildCardChars = new char[]{ '[', ']', '?', '*', '#'};
-            if (wildCardChars.Any(c=>expectedOutput.Contains(c)))
+            string result = $"expected: {(int)expectedOutput[expectedOutput.Length - 2]}{(int)expectedOutput[expectedOutput.Length - 1]}{Environment.NewLine}";
+            result += $"actual: {(int)output[output.Length - 2]}{(int)output[output.Length - 1]}{Environment.NewLine}";
+            char[] wildCardChars = new char[] { '[', ']', '?', '*', '#' };
+            if (wildCardChars.Any(c => expectedOutput.Contains(c)))
             {
                 result += "NOTE: The expected string contains wildcard charaters: [,],?,*,#" + Environment.NewLine;
             }
@@ -162,7 +197,7 @@ namespace IntelliTect.TestTools.Console
                 result += string.Join(Environment.NewLine, "AreEqual failed:",
                     "Expected: ", expectedOutput,
                     "Actual:   ", output);
-                
+
             }
 
             int expectedOutputLength = expectedOutput.Length;
@@ -214,7 +249,7 @@ namespace IntelliTect.TestTools.Console
             //string result = "";
             //using (var stringWriter = new StringWriter())
             //{
-                
+
             //    using (var provider = System.CodeDom.Compiler.CodeDomProvider.CreateProvider("CSharp"))
             //    {
             //        provider.GenerateCodeFromExpression(
@@ -246,26 +281,26 @@ namespace IntelliTect.TestTools.Console
             string output = "";
 
             // using the char array, categorize each entry as belonging to "input" or "output"
-            for(int i = 0; i < viewTemp.Length; i++)
+            for (int i = 0; i < viewTemp.Length; i++)
             {
-                if(i != viewTemp.Length - 1)
+                if (i != viewTemp.Length - 1)
                 {
                     // find "<<" tokens which indicate beginning of input
-                    if(viewTemp[i] == '<' && viewTemp[i + 1] == '<')
+                    if (viewTemp[i] == '<' && viewTemp[i + 1] == '<')
                     {
                         i++;    // skip the other character in token
                         isInput = true;
                         continue;
                     }
                     // find ">>" tokens which indicate end of input
-                    else if(viewTemp[i] == '>' && viewTemp[i + 1] == '>')
+                    else if (viewTemp[i] == '>' && viewTemp[i + 1] == '>')
                     {
                         i++;    // skip the other character in token
                         isInput = false;
                         continue;
                     }
                 }
-                if(isInput)
+                if (isInput)
                     input += viewTemp[i].ToString();
                 else
                     output += viewTemp[i].ToString();

@@ -39,9 +39,32 @@ namespace IntelliTect.TestTools.Console.Tests
         }
 
         [TestMethod]
-        public void ConsoleTester_HelloWorld_MissingNewline()
+        public void ConsoleTester_HelloWorld_TrimLF()
+        {
+            string view = "Hello World\n";
+
+            ConsoleAssert.Expect(view, () =>
+            {
+                System.Console.WriteLine("Hello World");
+            }, true);
+        }
+
+        [TestMethod]
+        public void ConsoleTester_HelloWorld_TrimCRLF()
         {
             string view = @"Hello World";
+
+            ConsoleAssert.Expect(view, () =>
+            {
+                System.Console.Write("Hello World");
+            }, true);
+        }
+
+        [TestMethod]
+        public void ConsoleTester_HelloWorld_MissingNewline()
+        {
+            string view = @"Hello World
+";
 
             ConsoleAssert.Expect(view, () =>
             {
@@ -51,6 +74,7 @@ namespace IntelliTect.TestTools.Console.Tests
 
 
         [TestMethod]
+        [Ignore]
         public void ExecuteProcess_PingLocalhost_Success()
         {
             ConsoleAssert.ExecuteProcess(
