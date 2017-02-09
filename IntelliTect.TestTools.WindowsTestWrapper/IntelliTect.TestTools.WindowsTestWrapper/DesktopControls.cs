@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.VisualStudio.TestTools.UITest.Extension;
 using Microsoft.VisualStudio.TestTools.UITesting;
 using Microsoft.VisualStudio.TestTools.UITesting.WinControls;
@@ -47,6 +48,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindControlByChild<T>(Func<UITestControl, T> controlType, UITestControl parent = null) where T : UITestControl
         {
             if (controlType == null)
@@ -63,6 +65,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindControlByName<T>(string controlName, Func<UITestControl, T> controlType, UITestControl parent = null) where T : UITestControl
         {
             if (controlName == null)
@@ -83,6 +86,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindWpfControlByAutomationId<T>(string automationId, Func<UITestControl, T> controlType, UITestControl parent = null) where T : UITestControl
         {
             if (automationId == null)
@@ -103,6 +107,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindWinRowByValue<T>(string value, Func<UITestControl, T> controlType, UITestControl parent = null)
                 where T : UITestControl
         {
@@ -124,6 +129,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindWinControlByControlId<T>(string controlId, Func<UITestControl, T> controlType, UITestControl parent = null)
                 where T : UITestControl
         {
@@ -145,6 +151,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected IEnumerable<T> GetListOfControlsByType<T>(Func<UITestControl, T> controlType, UITestControl parent = null) where T : UITestControl
         {
             if (controlType == null)
