@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.VisualStudio.TestTools.UITest.Extension;
 using Microsoft.VisualStudio.TestTools.UITesting;
 using Microsoft.VisualStudio.TestTools.UITesting.WinControls;
@@ -13,14 +14,25 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
     /// </summary>
     public abstract partial class DesktopControls
     {
+        /// <summary>
+        /// Stores information about the application under test
+        /// </summary>
         public static ApplicationUnderTest Aut { get; set; }
+        /// <summary>
+        /// The title of the window. Often it is equal to Aut.WindowTitle
+        /// An exception to this is if your application spawns additional windows,
+        /// in which case you can use Window's Inspect.exe too, Spy++ (the property is called "Caption"), or the Coded UI Inspector
+        /// </summary>
         public abstract string AutWindowTitle { get; }
+        /// <summary>
+        /// Class name for the window. Can be discovered with Window's Inspect.exe tool, Spy++, or the Coded Ui Inspector
+        /// </summary>
         public abstract string WindowClassName { get; }
-
+        
         /// <summary>
         /// Launch the application
         /// </summary>
-        protected static void LaunchApplication(string applicationLocation)
+        public static void LaunchApplication(string applicationLocation)
         {
             if ( applicationLocation == null )
                 throw new ArgumentNullException( nameof( applicationLocation ) );
@@ -36,6 +48,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindControlByChild<T>(Func<UITestControl, T> controlType, UITestControl parent = null) where T : UITestControl
         {
             if (controlType == null)
@@ -52,6 +65,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindControlByName<T>(string controlName, Func<UITestControl, T> controlType, UITestControl parent = null) where T : UITestControl
         {
             if (controlName == null)
@@ -72,6 +86,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindWpfControlByAutomationId<T>(string automationId, Func<UITestControl, T> controlType, UITestControl parent = null) where T : UITestControl
         {
             if (automationId == null)
@@ -92,6 +107,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindWinRowByValue<T>(string value, Func<UITestControl, T> controlType, UITestControl parent = null)
                 where T : UITestControl
         {
@@ -113,6 +129,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected T FindWinControlByControlId<T>(string controlId, Func<UITestControl, T> controlType, UITestControl parent = null)
                 where T : UITestControl
         {
@@ -134,6 +151,7 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
         /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
         /// <param name="parent">The parent control if it is not the main window</param>
         /// <returns>Returns the found control</returns>
+        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
         protected IEnumerable<T> GetListOfControlsByType<T>(Func<UITestControl, T> controlType, UITestControl parent = null) where T : UITestControl
         {
             if (controlType == null)
