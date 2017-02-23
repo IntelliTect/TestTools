@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>IntelliTect.TestTools.WindowsTestWrapper</id>
+    <version>1.0.0</version>
+    <title>IntelliTect Windows UI Test Wrapper</title>
+    <authors>Michael Curn - IntelliTect</authors>
+    <licenseUrl>https://raw.githubusercontent.com/IntelliTect/TestTools/master/IntelliTect.TestTools.WindowsTestWrapper/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/IntelliTect/TestTools</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>"Wrapper project for more efficient usage of Microsoft's UITestControl class (and derived classes) methods and properties"</description>
+    <releaseNotes>Initial release</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>IntelliTect QA Automated Test UI CodedUI UITestControl WinForms WPF</tags>
+  </metadata>
+</package>

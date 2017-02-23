@@ -65,6 +65,13 @@
   <ItemGroup>
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="IntelliTect.TestTools.WindowsTestWrapper.1.0.0.nupkg" />
+    <None Include="IntelliTect.TestTools.WindowsTestWrapper.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="nuget.exe" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
