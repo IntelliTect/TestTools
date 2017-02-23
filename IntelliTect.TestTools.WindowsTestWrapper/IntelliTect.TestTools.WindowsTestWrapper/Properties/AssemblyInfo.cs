@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("AutomatedWindowsTestFramework")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("WindowsTestWrapper")]
+[assembly: AssemblyDescription("Wrapper project for more efficient usage of Microsoft's UITestControl class methods and properties")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("AutomatedWindowsTestFramework")]
+[assembly: AssemblyCompany("IntelliTect")]
+[assembly: AssemblyProduct("WindowsTestWrapper")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
