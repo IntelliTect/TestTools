@@ -34,10 +34,12 @@ Provides wrappers for calling Microsoft's UiTestControl classes for WPF and WinF
 
 Usage
 -----
-To use, inherit a class from the solution's DesktopControls class and make application-specific calls there using generic types:
-e.g. FindWpfControlByAutomationId( "textBoxControl1", c => new WpfEdit( c ) );
+To use, inherit a class from the solution's DesktopControls class and make application-specific calls in the inherited class using generic types:
+```
+FindWpfControlByAutomationId( "textBoxControl1", c => new WpfEdit( c ) );
+```
 
-Inherit a class from BaseTestInherit and set the ApplicationLocation and create a new field for the above class.
+Inherit a class from BaseTestInherit and set the ApplicationLocation and create a new field for the above inherited class.
 
 Inherit test classes from the BaseTestInherit inherited class, and call methods via the new field.
 
