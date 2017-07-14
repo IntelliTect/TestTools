@@ -94,6 +94,20 @@ namespace IntelliTect.TestTools.Console
             Expect(expected, action, LikeOperator);
         }
 
+        /// <summary>
+        /// Performs a unit test on a console-based method. A "view" of
+        /// what a user would see in their console is provided as a string,
+        /// where their input (including line-breaks) is surrounded by double
+        /// less-than/greater-than signs, like so: "Input please: &lt;&lt;Input&gt;&gt;"
+        /// </summary>
+        /// <param name="expected">Expected "view" to be seen on the console,
+        /// including both input and output</param>
+        /// <param name="action">Method to be run</param>
+        static public void ExpectLike(string expected, char escapeCharacter, Action action)
+        {
+            Expect(expected, action, (expectedPattern, output) => output.IsLike(expected, escapeCharacter));
+        }
+
         static public string ReplaceCRLF(string input)
         {
             // first, replace any \r\n with environment.newline

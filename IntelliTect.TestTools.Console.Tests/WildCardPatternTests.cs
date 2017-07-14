@@ -12,7 +12,8 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void Escape_GivenUnescapedPattern_EscapeWildCards()
         {
-            string escapedText = WildcardPattern.Escape(UnescapedString);
+            string escapedText = WildcardPattern.Escape(
+                UnescapedString, '\\');
             Assert.AreEqual<string>(
                 EscapedString, escapedText);
 
@@ -21,7 +22,8 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void Escape_GivenEscapedPattern_UnescapeWildCards()
         {
-            string escapedText = WildcardPattern.Unescape(EscapedString);
+            string escapedText = WildcardPattern.Unescape(
+                EscapedString, '\\');
             Assert.AreEqual<string>(
                 UnescapedString, escapedText);
         }

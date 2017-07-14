@@ -31,7 +31,7 @@ namespace IntelliTect.TestTools.Console.Tests
         {
             string output = @"*3";
 
-            Assert.IsTrue(output.IsLike("\\*3"));
+            Assert.IsTrue(output.IsLike("\\*3", '\\'));
         }
 
         [TestMethod]
@@ -48,7 +48,7 @@ namespace IntelliTect.TestTools.Console.Tests
         {
             string output = @"*3";
 
-            Assert.IsTrue(output.IsLike(@"\3"));
+            Assert.IsTrue(output.IsLike(@"\3", '\\'));
         }
     }
 }

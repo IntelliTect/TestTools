@@ -19,18 +19,16 @@ namespace IntelliTect.TestTools.Console
         // is hopefully simpler to use this one because no thinking 
         // about escapeCharacter is required.  
         public static bool IsLike(
-            this string text, string pattern) => IsLike(text, pattern, WildcardPattern.DefaultEscapeCharacter);
+            this string text, string pattern) => 
+                new WildcardPattern(pattern).IsMatch(text);
 
         /// <summary>
         /// Implement's VB's Like operator logic.
         /// </summary>
         public static bool IsLike(
-            this string text, string pattern, char escapeCharacter = WildcardPattern.DefaultEscapeCharacter)
-        {
-            WildcardPattern wildcardPattern = 
-                new WildcardPattern(pattern, escapeCharacter );
-            return wildcardPattern.IsMatch(text);
-        }
+            this string text, string pattern, char escapeCharacter) =>
+                new WildcardPattern(
+                    pattern, escapeCharacter).IsMatch(text);
 
         /// <summary>
         /// Converts a string of characters to a HashSet of characters. If the string

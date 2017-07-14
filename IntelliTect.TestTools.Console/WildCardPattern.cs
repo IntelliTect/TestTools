@@ -48,8 +48,7 @@ namespace IntelliTect.TestTools.Console
         //
         // char that escapes special chars
         //
-        public char EscapeCharacter { get; set; } = DefaultEscapeCharacter;
-        public const char DefaultEscapeCharacter = '\\';
+        public char? EscapeCharacter { get; set; }
 
         //
         // we convert a wildcard pattern to a predicate
@@ -86,7 +85,7 @@ namespace IntelliTect.TestTools.Console
         /// <returns>The constructed WildcardPattern object</returns>
         /// <remarks> if wildCardType == None, the pattern does not have wild cards</remarks>
         public WildcardPattern(string pattern) : 
-            this(pattern, DefaultEscapeCharacter, WildcardOptions.None ) { }
+            this(pattern, WildcardOptions.None ) { }
 
         /// <summary>
         /// Initializes an instance of the WildcardPattern class for
@@ -110,9 +109,15 @@ namespace IntelliTect.TestTools.Console
         /// <param name="options">Wildcard options</param>
         /// <returns>The constructed WildcardPattern object</returns>
         /// <remarks> if wildCardType == None, the pattern does not have wild cards  </remarks>
-        public WildcardPattern(string pattern, WildcardOptions options) :
-            this(pattern, DefaultEscapeCharacter, options)
-        { }
+        public WildcardPattern(string pattern, WildcardOptions options)
+        {
+            if (pattern == null)
+            {
+                throw new ArgumentNullException(nameof(pattern));
+            }
+            Pattern = pattern;
+            Options = options;
+        }
 
         /// <summary>
         /// Initializes an instance of the WildcardPattern class for
@@ -124,14 +129,10 @@ namespace IntelliTect.TestTools.Console
         /// <param name="options">Wildcard options</param>
         /// <returns>The constructed WildcardPattern object</returns>
         /// <remarks> if wildCardType == None, the pattern does not have wild cards  </remarks>
-        public WildcardPattern(string pattern, char escapeCharacter = DefaultEscapeCharacter,
-            WildcardOptions options = WildcardOptions.None)
+        public WildcardPattern(string pattern, char escapeCharacter,
+            WildcardOptions options = WildcardOptions.None) :
+            this(pattern, options)
         {
-            if (pattern == null)
-            {
-                throw new ArgumentNullException(nameof(pattern));
-            }
-
             EscapeCharacter = escapeCharacter;
 
             bool previousCharacterWasEscape = false;
@@ -155,10 +156,6 @@ namespace IntelliTect.TestTools.Console
                     
                 }
             }
-
-
-            Pattern = pattern;
-            Options = options;
         }
 
         private static readonly WildcardPattern s_matchAllIgnoreCasePattern = new WildcardPattern("*", WildcardOptions.None);
@@ -226,7 +223,7 @@ namespace IntelliTect.TestTools.Console
         /// A string of characters with any metacharacters, except for those specified in <paramref name="charsNotToEscape"/>, converted to their escaped form.
         /// </returns>
         internal static string Escape(string pattern, 
-            char[] charsNotToEscape, char escapeCharacter = DefaultEscapeCharacter)
+            char[] charsNotToEscape, char escapeCharacter)
         {
 #pragma warning disable 56506
 
@@ -283,7 +280,7 @@ namespace IntelliTect.TestTools.Console
         /// A string of characters with any metacharacters converted to their escaped form.
         /// </returns>
         public static string Escape(
-            string pattern, char escapeCharacter = DefaultEscapeCharacter)
+            string pattern, char escapeCharacter)
         {
             return Escape(pattern, new char[] { }, escapeCharacter);
         }
@@ -302,7 +299,7 @@ namespace IntelliTect.TestTools.Console
         /// To override the default escape character, specify the <paramref name="escapeCharacter"/> value.
         /// </remarks>
         public static bool ContainsWildcardCharacters(string pattern, 
-            char escapeCharacter = DefaultEscapeCharacter)
+            char escapeCharacter)
         {
             if (string.IsNullOrEmpty(pattern))
             {
@@ -345,7 +342,7 @@ namespace IntelliTect.TestTools.Console
         /// If <paramref name="pattern" /> is null.
         /// </exception>
         public static string Unescape(
-            string pattern, char escapeCharacter = DefaultEscapeCharacter)
+            string pattern, char escapeCharacter)
         {
             if (pattern == null)
             {
