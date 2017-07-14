@@ -15,4 +15,13 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Linux|AnyCPU'" />
+
+  <ItemGroup>
+    <Compile Remove="LikeOperator.cs" />
+    <Compile Remove="Strings.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNet.Glob" Version="1.6.3" />
+  </ItemGroup>
 </Project>

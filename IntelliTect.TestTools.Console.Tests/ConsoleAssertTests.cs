@@ -50,6 +50,21 @@ namespace IntelliTect.TestTools.Console.Tests
         }
 
         [TestMethod]
+        public void GivenStringLiteral_ExpectedOutputNormalized_OutputMatches()
+        {
+            string view = @"Begin
+Middle
+End";
+            ConsoleAssert.Expect(view, () =>
+            {
+                System.Console.WriteLine("Begin");
+                System.Console.WriteLine("Middle");
+                System.Console.WriteLine("End");
+            }, true);
+
+        }
+
+        [TestMethod]
         public void ConsoleTester_HelloWorld_TrimCRLF()
         {
             string view = @"Hello World";
@@ -74,7 +89,6 @@ namespace IntelliTect.TestTools.Console.Tests
 
 
         [TestMethod]
-        [Ignore]
         public void ExecuteProcess_PingLocalhost_Success()
         {
             ConsoleAssert.ExecuteProcess(

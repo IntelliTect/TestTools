@@ -94,22 +94,22 @@ namespace IntelliTect.TestTools.Console
             Expect(expected, action, LikeOperator);
         }
 
-        static string ReplaceCRLF(string input)
+        static public string ReplaceCRLF(string input)
         {
             // first, replace any \r\n with environment.newline
-            input = input.Replace("\r\n", Environment.NewLine);
+            //input = input.Replace("\r\n", Environment.NewLine);
 
             // now, replace any \n, with Environment.NewLine
             //Regex regex = new Regex(".*[^\r](\n)");
-            var matches = Regex.Matches(input, ".*[^\r](\n)");
+            input = Regex.Replace(input, "\r?\n", Environment.NewLine);
 
-            if(matches != null)
-            {
-                foreach(Match match in matches)
-                {
-                    input = input.Replace(match.Groups[1].Value, Environment.NewLine);
-                }
-            }
+            //if(matches != null)
+            //{
+            //    foreach(Match match in matches)
+            //    {
+            //        input = input.Replace(match.Groups[1].Value, Environment.NewLine);
+            //    }
+            //}
 
             return input;
         }
@@ -179,8 +179,16 @@ namespace IntelliTect.TestTools.Console
 
         private static string GetMessageText(string expectedOutput, string output)
         {
-            string result = $"expected: {(int)expectedOutput[expectedOutput.Length - 2]}{(int)expectedOutput[expectedOutput.Length - 1]}{Environment.NewLine}";
-            result += $"actual: {(int)output[output.Length - 2]}{(int)output[output.Length - 1]}{Environment.NewLine}";
+            string result = "";
+            if (expectedOutput.Length <= 2 || output.Length <= 2)
+            {
+                // Don't display differing lengths.
+            }
+            else
+            {
+                result = $"expected: {(int)expectedOutput[expectedOutput.Length - 2]}{(int)expectedOutput[expectedOutput.Length - 1]}{Environment.NewLine}";
+                result += $"actual: {(int)output[output.Length - 2]}{(int)output[output.Length - 1]}{Environment.NewLine}";
+            }
             char[] wildCardChars = new char[] { '[', ']', '?', '*', '#' };
             if (wildCardChars.Any(c => expectedOutput.Contains(c)))
             {
@@ -309,6 +317,9 @@ namespace IntelliTect.TestTools.Console
             return new string[] { input, output };
         }
 
+        // TODO: Should not use LikeOperator by default.  Add a ConsoleTestsComparisonOptions enum 
+        //       with support for LikeOperator and AvoidNormalizedCRLF in addition to supporting
+        //       the comparison operator.
         public static Process ExecuteProcess(string expected, string fileName, string args, string directory = null)
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo(fileName, args);

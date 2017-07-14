@@ -14,75 +14,22 @@ namespace IntelliTect.TestTools.Console
         /// <summary>
         /// Implement's VB's Like operator logic.
         /// </summary>
-        public static bool IsLike(this string s, string pattern)
+        // Provided in addition to IsLike that takes an escape character 
+        // even though a default escapeCharacter is provided as it
+        // is hopefully simpler to use this one because no thinking 
+        // about escapeCharacter is required.  
+        public static bool IsLike(
+            this string text, string pattern) => IsLike(text, pattern, WildcardPattern.DefaultEscapeCharacter);
+
+        /// <summary>
+        /// Implement's VB's Like operator logic.
+        /// </summary>
+        public static bool IsLike(
+            this string text, string pattern, char escapeCharacter = WildcardPattern.DefaultEscapeCharacter)
         {
-            // Characters matched so far
-            int matched = 0;
-
-            // Loop through pattern string
-            for (int i = 0; i < pattern.Length;)
-            {
-                // Check for end of string
-                if (matched > s.Length)
-                    return false;
-
-                // Get next pattern character
-                char c = pattern[i++];
-                if (c == '[') // Character list
-                {
-                    // Test for exclude character
-                    bool exclude = (i < pattern.Length && pattern[i] == '!');
-                    if (exclude)
-                        i++;
-                    // Build character list
-                    int j = pattern.IndexOf(']', i);
-                    if (j < 0)
-                        j = s.Length;
-                    HashSet<char> charList = CharListToSet(pattern.Substring(i, j - i));
-                    i = j + 1;
-
-                    if (charList.Contains(s[matched]) == exclude)
-                        return false;
-                    matched++;
-                }
-                else if (c == '?') // Any single character
-                {
-                    matched++;
-                }
-                else if (c == '#') // Any single digit
-                {
-                    if (!Char.IsDigit(s[matched]))
-                        return false;
-                    matched++;
-                }
-                else if (c == '*') // Zero or more characters
-                {
-                    if (i < pattern.Length)
-                    {
-                        // Matches all characters until
-                        // next character in pattern
-                        char next = pattern[i];
-                        int j = s.IndexOf(next, matched);
-                        if (j < 0)
-                            return false;
-                        matched = j;
-                    }
-                    else
-                    {
-                        // Matches all remaining characters
-                        matched = s.Length;
-                        break;
-                    }
-                }
-                else // Exact character
-                {
-                    if (matched >= s.Length || c != s[matched])
-                        return false;
-                    matched++;
-                }
-            }
-            
-            return true;
+            WildcardPattern wildcardPattern = 
+                new WildcardPattern(pattern, escapeCharacter );
+            return wildcardPattern.IsMatch(text);
         }
 
         /// <summary>
