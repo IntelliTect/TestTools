@@ -1043,12 +1043,15 @@ namespace IntelliTect.TestTools.Console
 
         private class BracketExpressionElement : QuestionMarkElement
         {
-            private readonly Regex _regex;
+            private readonly Regex _Regex;
 
             public BracketExpressionElement(Regex regex)
             {
-                throw new ArgumentNullException(nameof(regex));
-                _regex = regex;
+                if (regex == null)
+                {
+                    throw new ArgumentNullException(nameof(regex));
+                }
+                _Regex = regex;
             }
 
             public override void ProcessStringCharacter(
@@ -1057,7 +1060,7 @@ namespace IntelliTect.TestTools.Console
                             PatternPositionsVisitor patternPositionsForCurrentStringPosition,
                             PatternPositionsVisitor patternPositionsForNextStringPosition)
             {
-                if (_regex.IsMatch(new string(currentStringCharacter, 1)))
+                if (_Regex.IsMatch(new string(currentStringCharacter, 1)))
                 {
                     base.ProcessStringCharacter(currentStringCharacter, currentPatternPosition,
                                                 patternPositionsForCurrentStringPosition,
