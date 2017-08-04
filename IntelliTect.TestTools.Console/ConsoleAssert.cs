@@ -18,14 +18,14 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static public void Expect(string expected, Action action, bool replaceCRLF = true)
+        static public string Expect(string expected, Action action, bool replaceCRLF = true)
         {
-            Expect(expected, action, (left, right) => left == right, replaceCRLF);
+            return Expect(expected, action, (left, right) => left == right, replaceCRLF);
         }
 
-        static public void ExpectNoTrimOutput(string expected, Action action)
+        static public string ExpectNoTrimOutput(string expected, Action action)
         {
-            Expect(expected, action, (left, right) => left == right, false);
+            return Expect(expected, action, (left, right) => left == right, false);
         }
 
         static public void Expect(string expected, Func<string[], int> func, int expectedReturn = default(int), params string[] args)
@@ -66,15 +66,15 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static private void Expect(string expected, Action action, Func<string, string, bool> comparisonOperator, bool replaceCRLF = true)
+        static private string Expect(string expected, Action action, Func<string, string, bool> comparisonOperator, bool replaceCRLF = true)
         {
 
             string[] data = Parse(expected);
 
             string input = data[0];
-            string output = data[1];
+            string expectedOutput = data[1];
 
-            Execute(input, output, action, comparisonOperator, replaceCRLF);
+            return Execute(input, expectedOutput, action, comparisonOperator, replaceCRLF);
         }
 
         static private Func<string, string, bool> LikeOperator =
@@ -89,9 +89,9 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static public void ExpectLike(string expected, Action action)
+        static public string ExpectLike(string expected, Action action)
         {
-            Expect(expected, action, LikeOperator);
+            return Expect(expected, action, LikeOperator);
         }
 
         /// <summary>
@@ -103,9 +103,9 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-        static public void ExpectLike(string expected, char escapeCharacter, Action action)
+        static public string ExpectLike(string expected, char escapeCharacter, Action action)
         {
-            Expect(expected, action, (expectedPattern, output) => output.IsLike(expected, escapeCharacter));
+            return Expect(expected, action, (expectedPattern, output) => output.IsLike(expected, escapeCharacter));
         }
 
         static public string ReplaceCRLF(string input)
@@ -134,7 +134,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expectedOutput">The expected output</param>
         /// <param name="action">Action to be tested</param>
         /// <param name="areEquivalentOperator">delegate for comparing the expected from actual output.</param>
-        static private void Execute(string givenInput, string expectedOutput, Action action,
+        static private string Execute(string givenInput, string expectedOutput, Action action,
             Func<string, string, bool> areEquivalentOperator, bool replaceCRLF = true)
         {
             string output = Execute(givenInput, action, replaceCRLF);
@@ -146,6 +146,7 @@ namespace IntelliTect.TestTools.Console
                 //expectedOutput = expectedOutput.Replace("\r\n", Environment.NewLine);
             }
             AssertExpectation(expectedOutput, output, areEquivalentOperator);
+            return output;
 
         }
         private static void AssertExpectation(string expectedOutput, string output)
@@ -166,34 +167,45 @@ namespace IntelliTect.TestTools.Console
 
         public static string Execute(string givenInput, Action action, bool replaceCRLF = true)
         {
-            lock (ExecuteLock)
+            TextWriter savedOutputStream = System.Console.Out;
+            TextReader savedInputStream = System.Console.In;
+            try
             {
-                string output;
-                using (TextWriter writer = new StringWriter())
-                using (TextReader reader = new StringReader(string.IsNullOrWhiteSpace(givenInput) ? "" : givenInput))
+                lock (ExecuteLock)
                 {
-                    System.Console.SetOut(writer);
-
-                    System.Console.SetIn(reader);
-                    action();
-
-                    output = writer.ToString();
-                    if (replaceCRLF)
+                    string output;
+                    using (TextWriter writer = new StringWriter())
+                    using (TextReader reader = new StringReader(string.IsNullOrWhiteSpace(givenInput) ? "" : givenInput))
                     {
-                        output = ReplaceCRLF(output);
-                        //output = output.Replace("\r\n", Environment.NewLine);
-                    }
-                   
-                    if (replaceCRLF && output.EndsWith(Environment.NewLine)) output = output.Substring(0, output.Length - Environment.NewLine.Length);
-                }
+                        System.Console.SetOut(writer);
 
-                return output;
+                        System.Console.SetIn(reader);
+                        action();
+
+                        output = writer.ToString();
+                        if (replaceCRLF)
+                        {
+                            output = ReplaceCRLF(output);
+                            //output = output.Replace("\r\n", Environment.NewLine);
+                        }
+
+                        if (replaceCRLF && output.EndsWith(Environment.NewLine)) output = output.Substring(0, output.Length - Environment.NewLine.Length);
+                    }
+
+                    return output;
+                }
+            }
+            finally
+            {
+                System.Console.SetOut(savedOutputStream);
+                System.Console.SetIn(savedInputStream);
             }
         }
 
         private static string GetMessageText(string expectedOutput, string output)
         {
             string result = "";
+
             if (expectedOutput.Length <= 2 || output.Length <= 2)
             {
                 // Don't display differing lengths.
@@ -203,11 +215,12 @@ namespace IntelliTect.TestTools.Console
                 result = $"expected: {(int)expectedOutput[expectedOutput.Length - 2]}{(int)expectedOutput[expectedOutput.Length - 1]}{Environment.NewLine}";
                 result += $"actual: {(int)output[output.Length - 2]}{(int)output[output.Length - 1]}{Environment.NewLine}";
             }
-            char[] wildCardChars = new char[] { '[', ']', '?', '*', '#' };
-            if (wildCardChars.Any(c => expectedOutput.Contains(c)))
+
+            if (WildcardPattern.WildCardCharacters.Any(c => expectedOutput.Contains(c)))
             {
                 result += "NOTE: The expected string contains wildcard charaters: [,],?,*,#" + Environment.NewLine;
             }
+
             if (expectedOutput.Contains(Environment.NewLine))
             {
                 result += string.Join(Environment.NewLine, "AreEqual failed:", "",
@@ -249,7 +262,6 @@ namespace IntelliTect.TestTools.Console
                     }
                 }
             }
-
             return result;
         }
 
@@ -293,7 +305,7 @@ namespace IntelliTect.TestTools.Console
         /// What a user would see in the console, but with input/output tokens.
         /// </param>
         /// <returns>[0] Input, and [1] Output</returns>
-        static private string[] Parse(string view)
+        static private string[] Parse(string view)  // TODO: Return Tuple instead.
         {
             // Note: This could definitely be optimized, wanted to try it for experience. RegEx perhaps?
             bool isInput = false;
