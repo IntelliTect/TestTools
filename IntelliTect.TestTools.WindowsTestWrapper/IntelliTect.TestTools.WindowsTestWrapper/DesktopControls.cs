@@ -145,6 +145,17 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
             return found;
         }
 
+        protected T FindControlBySibling<T>(Func<UITestControl, T> controlType, UITestControl siblingControl ) where T : UITestControl
+        {
+            if (controlType == null)
+                throw new ArgumentNullException(nameof(controlType));
+            if (siblingControl == null)
+                throw new ArgumentNullException(nameof(siblingControl));
+            T found = controlType(siblingControl);
+            found.SearchConfigurations.Add(SearchConfiguration.NextSibling);
+            return found;
+        }
+
         /// <summary>
         /// Gets an enumerable of all of a specific type of control given a known parent (window under test if null)
         /// </summary>

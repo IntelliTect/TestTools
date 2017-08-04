@@ -9,11 +9,6 @@ namespace Calculator.AutomatedTests.Windows
         public override string AutWindowTitle => Aut?.Title;
         public override string WindowClassName => Aut?.ClassName;
 
-        //public void LaunchApplicationUnderTest()
-        //{
-        //    LaunchApplication(Environment.SystemDirectory + @"\calc.exe");
-        //}
-
         public WinButton CalculatorButton( string buttonName )
         {
             return FindControlByName( buttonName, c => new WinButton( c ) );
