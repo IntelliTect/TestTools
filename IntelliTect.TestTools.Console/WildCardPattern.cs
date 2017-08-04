@@ -84,8 +84,8 @@ namespace IntelliTect.TestTools.Console
         /// <param name="pattern">The wildcard pattern to match</param>
         /// <returns>The constructed WildcardPattern object</returns>
         /// <remarks> if wildCardType == None, the pattern does not have wild cards</remarks>
-        public WildcardPattern(string pattern) : 
-            this(pattern, WildcardOptions.None ) { }
+        public WildcardPattern(string pattern) :
+            this(pattern, WildcardOptions.None) { }
 
         /// <summary>
         /// Initializes an instance of the WildcardPattern class for
@@ -146,14 +146,14 @@ namespace IntelliTect.TestTools.Console
                 {
                     if (previousCharacterWasEscape)
                     {
-                        if(!IsWildcardChar(character))
+                        if (!IsWildcardChar(character))
                         {
                             throw new ArgumentException(
                                 $"{nameof(pattern)} contains escape characters, '{EscapeCharacter}', with non-wildcard characters.");
                         }
                     }
                     previousCharacterWasEscape = false;
-                    
+
                 }
             }
         }
@@ -222,7 +222,7 @@ namespace IntelliTect.TestTools.Console
         /// <returns>
         /// A string of characters with any metacharacters, except for those specified in <paramref name="charsNotToEscape"/>, converted to their escaped form.
         /// </returns>
-        internal static string Escape(string pattern, 
+        internal static string Escape(string pattern,
             char[] charsNotToEscape, char escapeCharacter)
         {
 #pragma warning disable 56506
@@ -298,7 +298,7 @@ namespace IntelliTect.TestTools.Console
         /// <see cref="DefaultEscapeCharacter"/> is the default escape character.
         /// To override the default escape character, specify the <paramref name="escapeCharacter"/> value.
         /// </remarks>
-        public static bool ContainsWildcardCharacters(string pattern, 
+        public static bool ContainsWildcardCharacters(string pattern,
             char escapeCharacter)
         {
             if (string.IsNullOrEmpty(pattern))
@@ -406,10 +406,12 @@ namespace IntelliTect.TestTools.Console
             return s;
         } // Unescape
 
-        private static bool IsWildcardChar(char ch)
+        public static bool IsWildcardChar(char ch)
         {
-            return (ch == '*') || (ch == '?') || (ch == '[') || (ch == ']');
+            return WildCardCharacters.Contains(ch);
         }
+
+        public const string WildCardCharacters = "*?[]";
     }
 
     
