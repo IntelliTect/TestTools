@@ -145,6 +145,12 @@ namespace IntelliTect.TestTools.WindowsTestWrapper
             return found;
         }
 
+        /// <summary>
+        /// Finds a sibling of a given control based on control type
+        /// </summary>
+        /// <param name="controlType">Control type of UITestControl or one of its derived classes. Declare like: c => new UiTestControl(c)</param>
+        /// <param name="siblingControl">The control that is the first sibling of the control being found in the hierarchy</param>
+        /// <returns></returns>
         protected T FindControlBySibling<T>(Func<UITestControl, T> controlType, UITestControl siblingControl ) where T : UITestControl
         {
             if (controlType == null)
