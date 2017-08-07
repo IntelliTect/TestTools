@@ -27,6 +27,11 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
             get { return BuildControlHierarchy( SearchType.AutomationId, "autoButtonSave" ); }
         }
 
+        public UITestControl SaveButtonAlternateFind
+        {
+            get { return FindControlBySibling( c => new WpfButton( c ), ListEntry ); }
+        }
+
         public UITestControl ExpandListItem
         {
             get { return BuildControlHierarchy( SearchType.AutomationId, "autoExpanderList", "HeaderSite" ); }

@@ -40,5 +40,14 @@ namespace SimpleWpfApp.AutomatedUiTests.Tests
             Mouse.Click(SimpleAppWindow.ExpandListItem);
             Assert.IsTrue(SimpleAppWindow.CheckAllListItems(), "An unexpected list item was found");
         }
+
+        [TestMethod]
+        public void SaveByFindSibling()
+        {
+            SimpleAppWindow.ListEntry.Text = "Test";
+            Mouse.Click(SimpleAppWindow.SaveButtonAlternateFind);
+            Mouse.Click(SimpleAppWindow.ExpandListItem);
+            Assert.IsTrue( SimpleAppWindow.CheckAllListItems( "Test" ), "The text was not saved when finding the Save button by sibling" );
+        }
     }
 }
