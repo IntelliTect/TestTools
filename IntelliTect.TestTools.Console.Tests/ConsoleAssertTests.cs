@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using IntelliTect.TestTools.Console;
 
 namespace IntelliTect.TestTools.Console.Tests
 {
@@ -108,11 +109,13 @@ End";
             }
             else
             {
-                ConsoleAssert.ExecuteProcess(
+                string standardOutput, standardInput;
+                System.Diagnostics.Process process = ConsoleAssert.ExecuteProcess(
 $@"
-Pinging { Environment.MachineName } ?::1? with 32 bytes of data:
+Pinging * ?::1? with 32 bytes of data:
 Reply from ::1: time*",
-                "ping.exe", "-n 4 localhost");
+                "ping.exe", "-n 4 localhost", out standardOutput, out standardInput);
+                Assert.IsTrue(standardOutput.ToLower().IsLike($"*{ Environment.MachineName.ToLower()}*"));
             }
         }
     }

@@ -347,16 +347,28 @@ namespace IntelliTect.TestTools.Console
         //       with support for LikeOperator and AvoidNormalizedCRLF in addition to supporting
         //       the comparison operator.
         public static Process ExecuteProcess(string expected, string fileName, string args, string directory = null)
+
+        {
+            string standardOutput, standardError;
+            return ExecuteProcess(expected, fileName, args, out standardOutput, out standardError, directory);
+        }
+
+        public static Process ExecuteProcess(string expected, string fileName, string args,
+            out string standardOutput, out string standardError, string directory = null)
+
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo(fileName, args);
             //processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             processStartInfo.CreateNoWindow = true;
             processStartInfo.WorkingDirectory = directory ?? Directory.GetCurrentDirectory();
             processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.RedirectStandardError = true;
             processStartInfo.UseShellExecute = false;
             Process process = Process.Start(processStartInfo);
             process.WaitForExit();
-            AssertExpectation(expected, process.StandardOutput.ReadToEnd(), (left, right) => LikeOperator(left, right));
+            standardOutput = process.StandardOutput.ReadToEnd();
+            standardError = process.StandardError.ReadToEnd();
+            AssertExpectation(expected, standardOutput, (left, right) => LikeOperator(left, right));
             return process;
         }
     }
