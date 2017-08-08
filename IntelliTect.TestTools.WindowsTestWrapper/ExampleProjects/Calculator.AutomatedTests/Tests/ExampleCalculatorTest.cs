@@ -6,7 +6,7 @@ namespace Calculator.AutomatedTests.Tests
     [CodedUITest]
     public class ExampleCalculatorTest : BaseTest
     {
-        //TODO: Change these to data drive tests
+        //TODO: Change these to data driven tests
         [TestMethod]
         public void SimpleAddition()
         {

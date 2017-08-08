@@ -17,11 +17,6 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
         //More application support MSAA and so is a safer bet at this time.
         public override string WindowClassName => "HwndWrapper";
 
-        //public static void LaunchApplicationUnderTest()
-        //{
-        //    LaunchApplication( Path.GetFullPath(@"..\..\..\ExampleProjects\SimpleWpfApp\bin\Debug\SimpleWpfApp.exe") );
-        //}
-
         public WpfEdit ListEntry
         {
             get { return FindWpfControlByAutomationId( "autoTextInput", c => new WpfEdit( c ) ); }
@@ -30,6 +25,11 @@ namespace SimpleWpfApp.AutomatedUiTests.Windows
         public UITestControl SaveButton
         {
             get { return BuildControlHierarchy( SearchType.AutomationId, "autoButtonSave" ); }
+        }
+
+        public UITestControl SaveButtonAlternateFind
+        {
+            get { return FindControlBySibling( c => new WpfButton( c ), ListEntry ); }
         }
 
         public UITestControl ExpandListItem
