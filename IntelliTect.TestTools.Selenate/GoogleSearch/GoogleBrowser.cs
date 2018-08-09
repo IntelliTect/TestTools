@@ -3,7 +3,7 @@ using IntelliTect.TestTools.Selenate;
 
 namespace GoogleSearch
 {
-    class GoogleBrowser : Browser
+    public class GoogleBrowser : Browser
     {
         public GoogleBrowser(BrowserType browser) : base(browser)
         {

@@ -58,7 +58,7 @@ namespace IntelliTect.TestTools.Selenate
                     Driver = new InternetExplorerDriver(ieCaps);
                     break;
                 default:
-                    throw new Exception($"Unknown browser: {browser}");
+                    throw new ArgumentException($"Unknown browser: {browser}");
             }
 
             Driver.Manage().Window.Maximize();
@@ -137,8 +137,6 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public bool WaitFor(Func<bool> func, int secondsToWait = 15)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
             DateTime end = DateTime.Now.AddSeconds(secondsToWait);
             do
             {
@@ -175,14 +173,14 @@ namespace IntelliTect.TestTools.Selenate
             IReadOnlyCollection<IWebElement> elements = Driver.FindElements(by);
             if (elements.Count > 0)
             {
-                return elements.ElementAt(0).Displayed;
+                return elements.First().Displayed;
             }
             return false;
         }
 
         public void FrameSwitchAttempt(params By[] bys)
         {
-            Exception ex = new Exception();
+            Exception ex = null;
             for (int i = 0; i < 50; i++)
             {
                 try
@@ -222,7 +220,7 @@ namespace IntelliTect.TestTools.Selenate
             Task.Delay(500).Wait();
         }
 
-        public Boolean SwitchWindow(string title)
+        public bool SwitchWindow(string title)
         {
             Exception ex = new Exception();
             for (int i = 0; i < 50; i++)

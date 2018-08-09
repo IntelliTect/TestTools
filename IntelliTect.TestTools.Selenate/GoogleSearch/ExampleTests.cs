@@ -45,9 +45,6 @@ namespace GoogleSearch
         {
             Browser.TakeScreenshot();
             Browser.Driver.Quit();
-            Browser = null;
-            Google = null;
-            Harness = null;
         }
 
         private GoogleBrowser Browser { get; set; }

@@ -4,7 +4,7 @@ using IntelliTect.TestTools.SelenateExtensions;
 
 namespace GoogleSearch
 {
-    class GoogleFunctions
+    public class GoogleFunctions
     {
         public GoogleFunctions(GoogleBrowser browser)
         {
