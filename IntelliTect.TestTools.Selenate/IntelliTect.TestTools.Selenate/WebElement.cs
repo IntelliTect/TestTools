@@ -38,7 +38,7 @@ namespace IntelliTect.TestTools.Selenate
 
         public WebElement FindElement(By by)
         {
-            if(!Initialized)
+            if (!Initialized)
             {
                 WrappedElement = _Driver.FindElement(by);
             }
@@ -68,7 +68,7 @@ namespace IntelliTect.TestTools.Selenate
             {
                 wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
             }
-            catch(WebDriverTimeoutException)
+            catch (WebDriverTimeoutException)
             {
                 return new ReadOnlyCollection<WebElement>(new List<WebElement>());
             }
@@ -76,7 +76,7 @@ namespace IntelliTect.TestTools.Selenate
             return
                 new ReadOnlyCollection<WebElement>(
                     WrappedElement.FindElements(by)
-                        .Select(webElement => 
+                        .Select(webElement =>
                         new WebElement(WrappedElement.FindElement(by), by, _Driver))
                         .ToList());
         }
@@ -130,17 +130,18 @@ namespace IntelliTect.TestTools.Selenate
 
         private string RetryAction(string action, string text = null)
         {
-            Exception ex = new Exception();
             DateTime end = DateTime.Now.AddSeconds(TimeToRetry);
+            bool reFindElement = WrappedElement == null;
+            List<Exception> retryExceptions = new List<Exception>();
             while (DateTime.Now <= end)
             {
                 Task.Delay(250).Wait();
-                ex = null;
                 try
                 {
-                    if(WrappedElement == null)
+                    if (reFindElement)
                     {
                         WrappedElement = _Driver.FindElement(By);
+                        reFindElement = false;
                     }
                     string result = null;
                     switch (action)
@@ -184,50 +185,28 @@ namespace IntelliTect.TestTools.Selenate
                 }
                 catch (ElementNotVisibleException e)
                 {
-                    ex = e;
+                    retryExceptions.Add(e);
+                    reFindElement = true;
                 }
                 catch (StaleElementReferenceException e)
                 {
-                    ex = e;
+                    retryExceptions.Add(e);
+                    reFindElement = true;
                 }
                 catch (InvalidElementStateException e)
                 {
-                    ex = e;
-                }
-                catch (InvalidOperationException e)
-                {
-                    ex = e;
+                    retryExceptions.Add(e);
+                    reFindElement = true;
                 }
                 catch (NoSuchElementException e)
                 {
-                    ex = e;
-                }
-                catch (InvalidCastException e)
-                {
-                    ex = e;
-                }
-                catch (WebDriverException e)
-                {
-                    ex = e;
-                }
-
-                // Re-find the element to make sure it's valid.
-                try
-                {
-                    WrappedElement = _Driver.FindElement(By);
-                }
-                catch (NoSuchElementException e)
-                {
-                    ex = e;
-                }
-                catch (StaleElementReferenceException e)
-                {
-                    ex = e;
+                    retryExceptions.Add(e);
+                    reFindElement = true;
                 }
             }
-            if (ex != null)
+            if (retryExceptions.Any())
             {
-                throw ex;
+                throw new AggregateException(retryExceptions);
             }
             throw new Exception("Action could not complete");
         }

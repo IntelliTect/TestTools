@@ -67,12 +67,12 @@ namespace IntelliTect.TestTools.Selenate
 
         public void TakeScreenshot()
         {
-            string fullPath = $"{Directory.GetCurrentDirectory()} + \\{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now}";
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", ((RemoteWebDriver)this.Driver).Capabilities.BrowserName, "_", DateTime.Now.ToString());
 
             Screenshot screenshot;
 
             Console.WriteLine($"Saving screenshot to location: {fullPath}");
-            Directory.CreateDirectory(fullPath.Substring(0, fullPath.LastIndexOf("\\") + 1));
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
             try
             {
                 screenshot = ((ITakesScreenshot)Driver).GetScreenshot();
@@ -182,7 +182,7 @@ namespace IntelliTect.TestTools.Selenate
 
         public void FrameSwitchAttempt(params By[] bys)
         {
-            Exception ex = new Exception();
+            Exception ex = null;
             for (int i = 0; i < 50; i++)
             {
                 try

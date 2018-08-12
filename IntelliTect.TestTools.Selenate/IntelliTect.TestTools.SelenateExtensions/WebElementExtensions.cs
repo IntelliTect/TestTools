@@ -29,6 +29,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
             {
                 element.Clear();
                 element.SendKeys(value);
+                count++;
             }
         }
     }
