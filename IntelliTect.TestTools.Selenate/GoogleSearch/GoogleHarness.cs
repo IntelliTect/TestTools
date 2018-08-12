@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace GoogleSearch
 {
-    class GoogleHarness
+    public class GoogleHarness
     {
         public GoogleHarness(GoogleBrowser browser)
         {
