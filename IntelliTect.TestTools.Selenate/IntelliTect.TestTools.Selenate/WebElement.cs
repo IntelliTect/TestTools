@@ -101,11 +101,13 @@ namespace IntelliTect.TestTools.Selenate
             RetryAction("click");
         }
 
+        // Can this easily be abstracted out to an extension method?
+        // Seems to make more sense as an extension
         public void Click(int timeToRetry)
         {
             TimeToRetry = timeToRetry;
             Click();
-            TimeToRetry = DefaultRetryTime;
+            TimeToRetry = DefaultRetrySeconds;
         }
 
         public string GetAttribute(string attributeName)
@@ -123,8 +125,8 @@ namespace IntelliTect.TestTools.Selenate
             return RetryAction("getcss", propertyName);
         }
 
-        private const int DefaultRetryTime = 30;
-        private int TimeToRetry { get; set; } = DefaultRetryTime;
+        private const int DefaultRetrySeconds = 30;
+        private int TimeToRetry { get; set; } = DefaultRetrySeconds;
         private IWebElement WrappedElement { get; set; }
         private readonly IWebDriver _Driver;
 
