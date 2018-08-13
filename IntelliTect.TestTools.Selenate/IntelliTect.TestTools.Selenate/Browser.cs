@@ -67,7 +67,7 @@ namespace IntelliTect.TestTools.Selenate
 
         public void TakeScreenshot()
         {
-            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", ((RemoteWebDriver)this.Driver).Capabilities.BrowserName, "_", DateTime.Now.ToString());
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now.ToString()}");
 
             Screenshot screenshot;
 
@@ -180,13 +180,13 @@ namespace IntelliTect.TestTools.Selenate
 
         public void FrameSwitchAttempt(params By[] bys)
         {
-            Exception ex = null;
+            var exceptions = new List<Exception>();
             for (int i = 0; i < 50; i++)
             {
                 try
                 {
+                    Task.Delay(250).Wait();
                     Driver.SwitchTo().DefaultContent();
-                    ex = null;
                     foreach (By by in bys)
                     {
                         // Don't use our WebElement extension for this as it has trouble being casted to IWebElementReference
@@ -194,30 +194,26 @@ namespace IntelliTect.TestTools.Selenate
                         Console.WriteLine("Switching to frame " + by);
                         Driver.SwitchTo().Frame(element);
                     }
-                    break;
+                    return;
                 }
-                // Try again.
                 catch (NoSuchFrameException e)
                 {
-                    ex = e;
+                    exceptions.Add(e);
                 }
                 catch (InvalidOperationException e)
                 {
-                    ex = e;
+                    exceptions.Add(e);
                 }
                 catch (StaleElementReferenceException e)
                 {
-                    ex = e;
+                    exceptions.Add(e);
                 }
                 catch (NotFoundException e)
                 {
-                    ex = e;
-                }
-                Task.Delay(500).Wait();
+                    exceptions.Add(e);
+                };
             }
-            if (ex != null)
-                throw ex;
-            Task.Delay(500).Wait();
+            throw new AggregateException(exceptions);
         }
 
         public bool SwitchWindow(string title)

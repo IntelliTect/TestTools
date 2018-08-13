@@ -19,7 +19,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
             element.FillInWith(value);
             element.SendKeys(Keys.Tab);
             // Wait afterward to let websites register the tab
-            Task.Delay(500).Wait();
+            Task.Delay(250).Wait();
         }
 
         public static void FillInWith(this IWebElement element, string value)
