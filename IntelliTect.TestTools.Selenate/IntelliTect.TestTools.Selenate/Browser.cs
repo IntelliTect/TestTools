@@ -35,7 +35,7 @@ namespace IntelliTect.TestTools.Selenate
 
             switch (browser)
             {
-                case (BrowserType.Chrome):
+                case BrowserType.Chrome:
                     ChromeOptions chromeOptions = new ChromeOptions();
                     chromeOptions.AddArgument("--disable-extension");
                     chromeOptions.AddArgument("no-sandbox");
@@ -45,7 +45,7 @@ namespace IntelliTect.TestTools.Selenate
                     Driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
 
                     break;
-                case (BrowserType.InternetExplorer):
+                case BrowserType.InternetExplorer:
                     InternetExplorerOptions ieCaps = new InternetExplorerOptions
                     {
                         EnablePersistentHover = true,
@@ -67,7 +67,7 @@ namespace IntelliTect.TestTools.Selenate
 
         public void TakeScreenshot()
         {
-            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now.ToString()}");
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now}");
 
             Screenshot screenshot;
 
@@ -218,7 +218,6 @@ namespace IntelliTect.TestTools.Selenate
 
         public bool SwitchWindow(string title)
         {
-            Exception ex = new Exception();
             for (int i = 0; i < 50; i++)
             {
                 string currentWindow = null;
@@ -241,7 +240,9 @@ namespace IntelliTect.TestTools.Selenate
                         {
                             Driver.SwitchTo().Window(w);
                             if (Driver.Title == title)
+                            {
                                 return true;
+                            }
                             else
                             {
                                 Driver.SwitchTo().Window(currentWindow);
@@ -258,7 +259,6 @@ namespace IntelliTect.TestTools.Selenate
 
         public IAlert Alert(int numberOfRetries = 50)
         {
-            Exception ex = new Exception();
             for (int i = 0; i < numberOfRetries; i++)
             {
                 try

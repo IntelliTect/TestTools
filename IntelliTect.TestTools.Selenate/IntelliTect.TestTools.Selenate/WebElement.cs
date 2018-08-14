@@ -28,6 +28,7 @@ namespace IntelliTect.TestTools.Selenate
         public By By { get; }
         public bool Initialized => WrappedElement != null;
 
+        // Finish wrapping these in RetryAction
         public string TagName => WrappedElement.TagName;
         public string Text => RetryAction("text");
         public bool Enabled => Convert.ToBoolean(RetryAction("enabled"));
@@ -133,7 +134,7 @@ namespace IntelliTect.TestTools.Selenate
         private string RetryAction(string action, string text = null)
         {
             DateTime end = DateTime.Now.AddSeconds(TimeToRetry);
-            bool reFindElement = WrappedElement == null;
+            bool reFindElement = !Initialized;
             List<Exception> retryExceptions = new List<Exception>();
             while (DateTime.Now <= end)
             {
