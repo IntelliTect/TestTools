@@ -260,17 +260,17 @@ namespace IntelliTect.TestTools.Selenate
 
         public IAlert Alert(int numberOfRetries = 50)
         {
-            for (int i = 0; i < numberOfRetries; i++)
+            ConditionalWait wait = new ConditionalWait();
+            if(wait.WaitForSeconds<NoAlertPresentException, UnhandledAlertException>(CheckForAlert, 30))
             {
-                try
-                {
-                    return Driver.SwitchTo().Alert();
-                }
-                catch (NoAlertPresentException) { }
-                catch (UnhandledAlertException) { }
-                Task.Delay(500).Wait();
+                return Driver.SwitchTo().Alert();
             }
-            return null;
+            else { return null; }
+        }
+
+        private void CheckForAlert()
+        {
+            Driver.SwitchTo().Alert();
         }
     }
 }
