@@ -30,10 +30,10 @@ namespace IntelliTect.TestTools.Selenate
 
         // Finish wrapping these in RetryAction
         public string TagName => WrappedElement.TagName;
-        public string Text => RetryAction("text");
-        public bool Enabled => Convert.ToBoolean(RetryAction("enabled"));
-        public bool Displayed => Convert.ToBoolean(RetryAction("displayed"));
-        public bool Selected => Convert.ToBoolean(RetryAction("selected"));
+        public string Text => RetryAction("text").GetAwaiter().GetResult();
+        public bool Enabled => Convert.ToBoolean(RetryAction("enabled").GetAwaiter().GetResult());
+        public bool Displayed => Convert.ToBoolean(RetryAction("displayed").GetAwaiter().GetResult());
+        public bool Selected => Convert.ToBoolean(RetryAction("selected").GetAwaiter().GetResult());
         public Point Location => WrappedElement.Location;
         public Size Size => WrappedElement.Size;
 
@@ -84,22 +84,22 @@ namespace IntelliTect.TestTools.Selenate
 
         public void Clear()
         {
-            RetryAction("clear");
+            RetryAction("clear").GetAwaiter().GetResult();
         }
 
         public void SendKeys(string text)
         {
-            RetryAction("sendkeys", text);
+            RetryAction("sendkeys", text).GetAwaiter().GetResult();
         }
 
         public void Submit()
         {
-            RetryAction("submit");
+            RetryAction("submit").GetAwaiter().GetResult();
         }
 
         public void Click()
         {
-            RetryAction("click");
+            RetryAction("click").GetAwaiter().GetResult();
         }
 
         // Can this easily be abstracted out to an extension method?
@@ -113,17 +113,17 @@ namespace IntelliTect.TestTools.Selenate
 
         public string GetAttribute(string attributeName)
         {
-            return RetryAction("getattribute", attributeName);
+            return RetryAction("getattribute", attributeName).GetAwaiter().GetResult();
         }
 
         public string GetProperty(string propertyName)
         {
-            return RetryAction("getproperty", propertyName);
+            return RetryAction("getproperty", propertyName).GetAwaiter().GetResult();
         }
 
         public string GetCssValue(string propertyName)
         {
-            return RetryAction("getcss", propertyName);
+            return RetryAction("getcss", propertyName).GetAwaiter().GetResult();
         }
 
         private const int DefaultRetrySeconds = 30;
@@ -131,14 +131,14 @@ namespace IntelliTect.TestTools.Selenate
         private IWebElement WrappedElement { get; set; }
         private readonly IWebDriver _Driver;
 
-        private string RetryAction(string action, string text = null)
+        private async Task<string> RetryAction(string action, string text = null)
         {
             DateTime end = DateTime.Now.AddSeconds(TimeToRetry);
             bool reFindElement = !Initialized;
             List<Exception> retryExceptions = new List<Exception>();
             while (DateTime.Now <= end)
             {
-                Task.Delay(250).Wait();
+                await Task.Delay(250);
                 try
                 {
                     if (reFindElement)

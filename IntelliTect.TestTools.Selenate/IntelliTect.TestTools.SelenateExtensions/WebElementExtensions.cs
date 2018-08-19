@@ -5,21 +5,23 @@ namespace IntelliTect.TestTools.SelenateExtensions
 {
     public static class WebElementExtensions
     {
-        public static void ScrollIntoView(this IWebElement element, IWebDriver driver)
+        public static async void ScrollIntoView(this IWebElement element, IWebDriver driver)
         {
             int position = element.Location.Y - 200;
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
             string title = (string)js.ExecuteScript($"window.scrollTo(0,{position})");
             // Give the browser and javascript a chance to execute.
-            Task.Delay(50).Wait();
+            // In the middle of a refactor. Eventually change this out for a centralized wait
+            await Task.Delay(50);
         }
 
-        public static void FillInWithAndTab(this IWebElement element, string value)
+        public static async void FillInWithAndTab(this IWebElement element, string value)
         {
             element.FillInWith(value);
             element.SendKeys(Keys.Tab);
             // Wait afterward to let websites register the tab
-            Task.Delay(250).Wait();
+            // In the middle of a refactor. Eventually change this out for a centralized wait
+            await Task.Delay(250);
         }
 
         public static void FillInWith(this IWebElement element, string value)

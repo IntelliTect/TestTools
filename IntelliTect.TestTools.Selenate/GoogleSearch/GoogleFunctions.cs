@@ -17,19 +17,19 @@ namespace GoogleSearch
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
             Harness.SearchInput.FillInWith(searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
-            return Browser.WaitFor(() => Harness.SearchResultsDiv.Displayed);
+            return Browser.WaitFor(() => Harness.SearchResultsDiv.Displayed).Result;
         }
 
         public bool FindSearchResultItem(string result)
         {
             var headers = Harness.SearchResultsHeadersList;
-            return Browser.WaitFor(() => headers.Any(h => h.Text == result));
+            return Browser.WaitFor(() => headers.Any(h => h.Text == result)).Result;
         }
 
         public bool GoToHomePage()
         {
             Harness.GoHomeButton.Click();
-            return Browser.WaitFor(() => Harness.GoogleSearchButton.Displayed);
+            return Browser.WaitFor(() => Harness.GoogleSearchButton.Displayed).Result;
         }
 
         private GoogleBrowser Browser { get; }

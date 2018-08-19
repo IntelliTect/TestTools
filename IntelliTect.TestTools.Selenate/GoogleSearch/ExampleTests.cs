@@ -36,8 +36,11 @@ namespace GoogleSearch
         {
             Google.SearchForItem("selenium automation");
             Google.GoToHomePage();
-            Assert.IsFalse(Browser.IsElementDisplayedAndExisting(Harness.SearchResultsDiv.By),
+            // Different examples for how to verify an element is not displayed or present in the DOM
+            // Note: Invoking this like: Browser.WaitFor(() => !Harness.SearchResultsDiv.Displayed)) produces incosistent results due to how elements not being present are handled
+            Assert.IsFalse(Browser.WaitFor(() => Harness.SearchResultsDiv.Displayed).GetAwaiter().GetResult(),
                 "Search results displayed when they were not expected");
+            Assert.IsTrue(!Browser.WaitFor(() => Harness.SearchResultsDiv.Displayed).GetAwaiter().GetResult());
         }
 
         [TestCleanup]
