@@ -238,7 +238,6 @@ namespace IntelliTect.TestTools.Selenate
 
         public void TakeScreenshot()
         {
-            // Finishing making DateTime.Now changes
             string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}");
             Console.WriteLine($"Saving screenshot to location: {fullPath}");
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
