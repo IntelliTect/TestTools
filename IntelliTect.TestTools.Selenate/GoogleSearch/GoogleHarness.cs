@@ -19,6 +19,8 @@ namespace GoogleSearch
 
         public IReadOnlyCollection<WebElement> SearchResultsHeadersList => Browser.FindElements(By.CssSelector("div[id='rso']>div div[class='g'] div[class='rc']>h3>a"));
 
+        // When a holiday-specific logo is displayed, the button ID is NOT "logo", but the class still is
+        public WebElement GoHomeHolidayButton => Browser.FindElement(By.CssSelector("div[class='logo']"));
         public WebElement GoHomeButton => Browser.FindElement(By.Id("logo"));
 
         private GoogleBrowser Browser { get; }

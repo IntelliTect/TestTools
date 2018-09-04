@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IntelliTect.TestTools.Selenate;
 
@@ -15,32 +17,29 @@ namespace GoogleSearch
         }
 
         [TestMethod]
-        public void SearchForSeleniumOnGoogle()
+        public async Task SearchForSeleniumOnGoogle()
         {
-            Assert.IsTrue(Google.SearchForItem("selenium automation"), 
+            Assert.IsTrue(await Google.SearchForItem("selenium automation"), 
                 "No search results displayed when they were expected");
-            Assert.IsTrue(Google.FindSearchResultItem("Selenium - Web Browser Automation"),
+            Assert.IsTrue(await Google.FindSearchResultItem("Selenium - Web Browser Automation"),
                 "Did not find a specific search result for Selenium - Web Browser Automation");
         }
 
         [TestMethod]
-        public void VerifySeleniumDoesNotExistForElement()
+        public async Task VerifySeleniumDoesNotExistForElement()
         {
-            Google.SearchForItem("selenium element");
-            Assert.IsFalse(Google.FindSearchResultItem("Selenium - Web Browser Automation"),
+            await Google.SearchForItem("selenium element");
+            Assert.IsFalse(await Google.FindSearchResultItem("Selenium - Web Browser Automation"),
                 "Found a specific search result for Selenium - Web Browser Automation when none was expected");
         }
 
         [TestMethod]
-        public void ReturnToHomepage()
+        public async Task ReturnToHomepage()
         {
-            Google.SearchForItem("selenium automation");
-            Google.GoToHomePage();
-            // Different examples for how to verify an element is not displayed or present in the DOM
-            // Note: Invoking this like: Browser.WaitFor(() => !Harness.SearchResultsDiv.Displayed)) produces incosistent results due to how elements not being present are handled
-            Assert.IsFalse(Browser.WaitFor(() => Harness.SearchResultsDiv.Displayed).GetAwaiter().GetResult(),
+            await Google.SearchForItem("selenium automation");
+            await Google.GoToHomePage();
+            Assert.IsFalse(await Browser.WaitFor(() => Convert.ToBoolean(Harness.SearchResultsDiv.Displayed)),
                 "Search results displayed when they were not expected");
-            Assert.IsTrue(!Browser.WaitFor(() => Harness.SearchResultsDiv.Displayed).GetAwaiter().GetResult());
         }
 
         [TestCleanup]

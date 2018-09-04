@@ -76,16 +76,9 @@ namespace IntelliTect.TestTools.Selenate
         {
             Console.WriteLine($"Attempting to find element using selector: {by}");
 
+            // Eventually swap this out for our own wait
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            try
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-            }
-            catch (WebDriverTimeoutException)
-            {
-                return new WebElement(by, Driver);
-            }
-            
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
 
             return new WebElement(Driver.FindElement(by), by, Driver);
         }
@@ -101,12 +94,13 @@ namespace IntelliTect.TestTools.Selenate
         {
             Console.WriteLine($"Attempting to find all elements using selector: {by}");
 
+            // Eventually swap this out for our own wait
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
 
             return new ReadOnlyCollection<WebElement>(
                             Driver.FindElements(by)
-                                    .Select(webElement => new WebElement(by, Driver))
+                                    .Select(webElement => new WebElement(webElement, by, Driver))
                                     .ToList());
         }
 
@@ -142,7 +136,12 @@ namespace IntelliTect.TestTools.Selenate
             return false;
         }
 
-        public async void FrameSwitchAttempt(params By[] bys)
+        /// <summary>
+        /// Switches to each frame in succession to avoid having to explicitely call SwitchTo() multipled times for nested frames
+        /// </summary>
+        /// <param name="bys"></param>
+        /// <returns></returns>
+        public async Task FrameSwitchAttempt(params By[] bys)
         {
             var exceptions = new List<Exception>();
             for (int i = 0; i < 50; i++)
@@ -154,6 +153,7 @@ namespace IntelliTect.TestTools.Selenate
                     foreach (By by in bys)
                     {
                         // Don't use our WebElement extension for this as it has trouble being casted to IWebElementReference
+                        // And perhaps swap this out for the expected condition WaitForAndSwitchToFrame?
                         IWebElement element = Driver.FindElement(by);
                         Console.WriteLine("Switching to frame " + by);
                         Driver.SwitchTo().Frame(element);

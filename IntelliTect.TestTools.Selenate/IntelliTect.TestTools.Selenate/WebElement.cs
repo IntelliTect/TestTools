@@ -12,12 +12,6 @@ namespace IntelliTect.TestTools.Selenate
 {
     public class WebElement : IWebElement
     {
-        public WebElement(By by, IWebDriver driver)
-        {
-            By = by;
-            _Driver = driver;
-        }
-
         public WebElement(IWebElement wrappedElement, By by, IWebDriver driver)
         {
             WrappedElement = wrappedElement;
@@ -28,14 +22,28 @@ namespace IntelliTect.TestTools.Selenate
         public By By { get; }
         public bool Initialized => WrappedElement != null;
 
-        // Finish wrapping these in RetryAction
-        public string TagName => WrappedElement.TagName;
-        public string Text => RetryAction("text").GetAwaiter().GetResult();
-        public bool Enabled => Convert.ToBoolean(RetryAction("enabled").GetAwaiter().GetResult());
-        public bool Displayed => Convert.ToBoolean(RetryAction("displayed").GetAwaiter().GetResult());
-        public bool Selected => Convert.ToBoolean(RetryAction("selected").GetAwaiter().GetResult());
-        public Point Location => WrappedElement.Location;
-        public Size Size => WrappedElement.Size;
+        // Probably wap out the Task<> properties in favor of Get methods for consistency.
+        // Or scrap this class entirely once retry logic is abstracted out into a single callable method
+        string IWebElement.TagName => TagName.GetAwaiter().GetResult();
+        public Task<string> TagName => RetryAction("tagname");
+
+        string IWebElement.Text => Text.GetAwaiter().GetResult();
+        public Task<string> Text => RetryAction("text");
+
+        bool IWebElement.Enabled => Convert.ToBoolean(Enabled.GetAwaiter().GetResult());
+        public Task<string> Enabled => RetryAction("enabled");
+
+        bool IWebElement.Displayed => Convert.ToBoolean(Displayed.GetAwaiter().GetResult());
+        public Task<string> Displayed => RetryAction("displayed");
+
+        bool IWebElement.Selected => Convert.ToBoolean(Selected.GetAwaiter().GetResult());
+        public Task<string> Selected => RetryAction("selected");
+
+        Point IWebElement.Location => new Point();
+        public Task<string> Location => RetryAction("location");
+
+        Size IWebElement.Size => new Size();
+        public Task<string> Size => RetryAction("size");
 
         public WebElement FindElement(By by)
         {
@@ -44,15 +52,9 @@ namespace IntelliTect.TestTools.Selenate
                 WrappedElement = _Driver.FindElement(by);
             }
 
+            // Eventually swap this out for our own wait
             WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(5));
-            try
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-            }
-            catch (WebDriverTimeoutException)
-            {
-                return new WebElement(by, _Driver);
-            }
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
 
             return new WebElement(WrappedElement.FindElement(by), by, _Driver);
         }
@@ -64,6 +66,7 @@ namespace IntelliTect.TestTools.Selenate
                 WrappedElement = _Driver.FindElement(by);
             }
 
+            // Eventually swap this out for our own wait
             WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(5));
             try
             {
@@ -82,24 +85,43 @@ namespace IntelliTect.TestTools.Selenate
                         .ToList());
         }
 
-        public void Clear()
+        void IWebElement.Clear()
         {
-            RetryAction("clear").GetAwaiter().GetResult();
+            Clear().GetAwaiter().GetResult();
+        }
+        public Task Clear()
+        {
+            return RetryAction("clear");
         }
 
-        public void SendKeys(string text)
+        void IWebElement.SendKeys(string text)
         {
-            RetryAction("sendkeys", text).GetAwaiter().GetResult();
+            SendKeys(text).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        public void Submit()
+        public Task SendKeys(string text)
         {
-            RetryAction("submit").GetAwaiter().GetResult();
+            return RetryAction("sendkeys", text);
         }
 
-        public void Click()
+        void IWebElement.Submit()
         {
-            RetryAction("click").GetAwaiter().GetResult();
+            Submit().GetAwaiter().GetResult();
+        }
+
+        public Task Submit()
+        {
+            return RetryAction("submit");
+        }
+
+        void IWebElement.Click()
+        {
+            Click().GetAwaiter().GetResult();
+        }
+
+        public Task Click()
+        {
+            return RetryAction("click");
         }
 
         // Can this easily be abstracted out to an extension method?
@@ -111,19 +133,34 @@ namespace IntelliTect.TestTools.Selenate
             TimeToRetry = DefaultRetrySeconds;
         }
 
-        public string GetAttribute(string attributeName)
+        string IWebElement.GetAttribute(string attributeName)
         {
-            return RetryAction("getattribute", attributeName).GetAwaiter().GetResult();
+            return GetAttribute(attributeName).GetAwaiter().GetResult();
         }
 
-        public string GetProperty(string propertyName)
+        public Task<string> GetAttribute(string attributeName)
         {
-            return RetryAction("getproperty", propertyName).GetAwaiter().GetResult();
+            return RetryAction("getattribute", attributeName);
         }
 
-        public string GetCssValue(string propertyName)
+        string IWebElement.GetProperty(string propertyName)
         {
-            return RetryAction("getcss", propertyName).GetAwaiter().GetResult();
+            return GetProperty(propertyName).GetAwaiter().GetResult();
+        }
+
+        public Task<string> GetProperty(string propertyName)
+        {
+            return RetryAction("getproperty", propertyName);
+        }
+
+        string IWebElement.GetCssValue(string propertyName)
+        {
+            return GetCssValue(propertyName).GetAwaiter().GetResult();
+        }
+
+        public Task<string> GetCssValue(string propertyName)
+        {
+            return RetryAction("getcss", propertyName);
         }
 
         private const int DefaultRetrySeconds = 30;
@@ -144,7 +181,6 @@ namespace IntelliTect.TestTools.Selenate
                     if (reFindElement)
                     {
                         WrappedElement = _Driver.FindElement(By);
-                        reFindElement = false;
                     }
                     string result = null;
                     switch (action)
@@ -181,6 +217,12 @@ namespace IntelliTect.TestTools.Selenate
                         case "selected":
                             result = WrappedElement.Selected.ToString();
                             return result;
+                        case "tagname":
+                            return WrappedElement.TagName;
+                        case "location":
+                            return WrappedElement.Location.ToString();
+                        case "size":
+                            return WrappedElement.Size.ToString();
                         default:
                             throw new InvalidOperationException(
                                 "Unknown type of Selenium action passed to WebElement.RetryAction");
@@ -189,29 +231,26 @@ namespace IntelliTect.TestTools.Selenate
                 catch (ElementNotVisibleException e)
                 {
                     retryExceptions.Add(e);
-                    reFindElement = true;
                 }
                 catch (StaleElementReferenceException e)
                 {
                     retryExceptions.Add(e);
-                    reFindElement = true;
                 }
                 catch (InvalidElementStateException e)
                 {
                     retryExceptions.Add(e);
-                    reFindElement = true;
                 }
                 catch (NoSuchElementException e)
                 {
                     retryExceptions.Add(e);
-                    reFindElement = true;
                 }
+                reFindElement = true;
             }
             if (retryExceptions.Any())
             {
                 throw new AggregateException(retryExceptions);
             }
-            throw new Exception("Action could not complete");
+            throw new Exception("Action could not complete for an unknown reason");
         }
 
         IWebElement ISearchContext.FindElement(By by)
