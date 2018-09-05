@@ -5,9 +5,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
 {
     public static class WebElementExtensions
     {
-        public static void ScrollIntoView(this IWebElement element, IWebDriver driver)
+        public static void ScrollIntoView(this IWebElement element, IWebDriver driver, int pixelsFromTopOfScreen = 200)
         {
-            int position = element.Location.Y - 200;
+            int position = element.Location.Y - pixelsFromTopOfScreen;
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
             js.ExecuteScript($"window.scrollTo(0,{position})");
         }

@@ -22,16 +22,18 @@ namespace IntelliTect.TestTools.Selenate
     {
         public Browser(BrowserType browser)
         {
-            InitDriver(browser);
+            Driver = InitDriver(browser);
         }
 
-        public IWebDriver Driver { get; set; }
+        public IWebDriver Driver { get; }
 
         // Mike C: Find a good way to abstract this out. Different projects will have different requirements here.
         // Good candidate for an extension? Or maybe an abstract class?
-        public void InitDriver(BrowserType browser)
+        public IWebDriver InitDriver(BrowserType browser)
         {
             Driver?.Quit();
+
+            IWebDriver driver = null;
 
             switch (browser)
             {
@@ -42,7 +44,7 @@ namespace IntelliTect.TestTools.Selenate
                     chromeOptions.AddArgument("disable-infobars");
                     chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
-                    Driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
+                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
 
                     break;
                 case BrowserType.InternetExplorer:
@@ -55,14 +57,15 @@ namespace IntelliTect.TestTools.Selenate
                         IntroduceInstabilityByIgnoringProtectedModeSettings = true,
                         RequireWindowFocus = false
                     };
-                    Driver = new InternetExplorerDriver(ieCaps);
+                    driver = new InternetExplorerDriver(ieCaps);
                     break;
                 default:
                     throw new ArgumentException($"Unknown browser: {browser}");
             }
 
-            Driver.Manage().Window.Maximize();
-            Driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(2);
+            driver.Manage().Window.Maximize();
+            driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(2);
+            return driver;
         }
 
         /// <summary>
@@ -90,7 +93,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-        public ReadOnlyCollection<WebElement> FindElements(By by, int secondsToWait = 5)
+        public IReadOnlyCollection<WebElement> FindElements(By by, int secondsToWait = 5)
         {
             Console.WriteLine($"Attempting to find all elements using selector: {by}");
 
@@ -127,7 +130,7 @@ namespace IntelliTect.TestTools.Selenate
                 {
                     return false;
                 }
-                catch(AggregateException)
+                catch (AggregateException)
                 {
                     return false;
                 }

@@ -24,19 +24,19 @@ namespace IntelliTect.TestTools.Selenate
 
         // Probably wap out the Task<> properties in favor of Get methods for consistency.
         // Or scrap this class entirely once retry logic is abstracted out into a single callable method
-        string IWebElement.TagName => TagName.GetAwaiter().GetResult();
+        string IWebElement.TagName => TagName.ConfigureAwait(false).GetAwaiter().GetResult();
         public Task<string> TagName => RetryAction("tagname");
 
         string IWebElement.Text => Text.GetAwaiter().GetResult();
         public Task<string> Text => RetryAction("text");
 
-        bool IWebElement.Enabled => Convert.ToBoolean(Enabled.GetAwaiter().GetResult());
+        bool IWebElement.Enabled => Convert.ToBoolean(Enabled.ConfigureAwait(false).GetAwaiter().GetResult());
         public Task<string> Enabled => RetryAction("enabled");
 
-        bool IWebElement.Displayed => Convert.ToBoolean(Displayed.GetAwaiter().GetResult());
+        bool IWebElement.Displayed => Convert.ToBoolean(Displayed.ConfigureAwait(false).GetAwaiter().GetResult());
         public Task<string> Displayed => RetryAction("displayed");
 
-        bool IWebElement.Selected => Convert.ToBoolean(Selected.GetAwaiter().GetResult());
+        bool IWebElement.Selected => Convert.ToBoolean(Selected.ConfigureAwait(false).GetAwaiter().GetResult());
         public Task<string> Selected => RetryAction("selected");
 
         Point IWebElement.Location => new Point();
@@ -87,7 +87,7 @@ namespace IntelliTect.TestTools.Selenate
 
         void IWebElement.Clear()
         {
-            Clear().GetAwaiter().GetResult();
+            Clear().ConfigureAwait(false).GetAwaiter().GetResult();
         }
         public Task Clear()
         {
@@ -106,7 +106,7 @@ namespace IntelliTect.TestTools.Selenate
 
         void IWebElement.Submit()
         {
-            Submit().GetAwaiter().GetResult();
+            Submit().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public Task Submit()
@@ -116,7 +116,7 @@ namespace IntelliTect.TestTools.Selenate
 
         void IWebElement.Click()
         {
-            Click().GetAwaiter().GetResult();
+            Click().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public Task Click()
@@ -126,16 +126,14 @@ namespace IntelliTect.TestTools.Selenate
 
         // Can this easily be abstracted out to an extension method?
         // Seems to make more sense as an extension
-        public void Click(int timeToRetry)
+        public Task Click(int secondsToRetry)
         {
-            TimeToRetry = timeToRetry;
-            Click();
-            TimeToRetry = DefaultRetrySeconds;
+            return RetryAction( "click", secondsToRetry: secondsToRetry );
         }
 
         string IWebElement.GetAttribute(string attributeName)
         {
-            return GetAttribute(attributeName).GetAwaiter().GetResult();
+            return GetAttribute(attributeName).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public Task<string> GetAttribute(string attributeName)
@@ -145,7 +143,7 @@ namespace IntelliTect.TestTools.Selenate
 
         string IWebElement.GetProperty(string propertyName)
         {
-            return GetProperty(propertyName).GetAwaiter().GetResult();
+            return GetProperty(propertyName).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public Task<string> GetProperty(string propertyName)
@@ -155,7 +153,7 @@ namespace IntelliTect.TestTools.Selenate
 
         string IWebElement.GetCssValue(string propertyName)
         {
-            return GetCssValue(propertyName).GetAwaiter().GetResult();
+            return GetCssValue(propertyName).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public Task<string> GetCssValue(string propertyName)
@@ -163,14 +161,12 @@ namespace IntelliTect.TestTools.Selenate
             return RetryAction("getcss", propertyName);
         }
 
-        private const int DefaultRetrySeconds = 30;
-        private int TimeToRetry { get; set; } = DefaultRetrySeconds;
         private IWebElement WrappedElement { get; set; }
         private readonly IWebDriver _Driver;
 
-        private async Task<string> RetryAction(string action, string text = null)
+        private async Task<string> RetryAction(string action, string text = null, int secondsToRetry = 30)
         {
-            DateTime end = DateTime.Now.AddSeconds(TimeToRetry);
+            DateTime end = DateTime.Now.AddSeconds(secondsToRetry);
             bool reFindElement = !Initialized;
             List<Exception> retryExceptions = new List<Exception>();
             while (DateTime.Now <= end)
