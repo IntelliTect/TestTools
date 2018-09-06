@@ -22,16 +22,18 @@ namespace IntelliTect.TestTools.Selenate
     {
         public Browser(BrowserType browser)
         {
-            InitDriver(browser);
+            Driver = InitDriver(browser);
         }
 
-        public IWebDriver Driver { get; set; }
+        public IWebDriver Driver { get; }
 
         // Mike C: Find a good way to abstract this out. Different projects will have different requirements here.
         // Good candidate for an extension? Or maybe an abstract class?
-        public void InitDriver(BrowserType browser)
+        public IWebDriver InitDriver(BrowserType browser)
         {
             Driver?.Quit();
+
+            IWebDriver driver = null;
 
             switch (browser)
             {
@@ -42,7 +44,7 @@ namespace IntelliTect.TestTools.Selenate
                     chromeOptions.AddArgument("disable-infobars");
                     chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
-                    Driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
+                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
 
                     break;
                 case BrowserType.InternetExplorer:
@@ -55,34 +57,15 @@ namespace IntelliTect.TestTools.Selenate
                         IntroduceInstabilityByIgnoringProtectedModeSettings = true,
                         RequireWindowFocus = false
                     };
-                    Driver = new InternetExplorerDriver(ieCaps);
+                    driver = new InternetExplorerDriver(ieCaps);
                     break;
                 default:
                     throw new ArgumentException($"Unknown browser: {browser}");
             }
 
-            Driver.Manage().Window.Maximize();
-            Driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(2);
-        }
-
-        public void TakeScreenshot()
-        {
-            // Finishing making DateTime.Now changes
-            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now}");
-
-            Screenshot screenshot;
-
-            Console.WriteLine($"Saving screenshot to location: {fullPath}");
-            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
-            try
-            {
-                screenshot = ((ITakesScreenshot)Driver).GetScreenshot();
-                screenshot.SaveAsFile(fullPath, ScreenshotImageFormat.Jpeg);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Screenshot was not saved due to {ex.Message}");
-            }
+            driver.Manage().Window.Maximize();
+            driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(2);
+            return driver;
         }
 
         /// <summary>
@@ -96,16 +79,9 @@ namespace IntelliTect.TestTools.Selenate
         {
             Console.WriteLine($"Attempting to find element using selector: {by}");
 
+            // Eventually swap this out for our own wait
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            try
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-            }
-            catch (WebDriverTimeoutException)
-            {
-                return new WebElement(by, Driver);
-            }
-            
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
 
             return new WebElement(Driver.FindElement(by), by, Driver);
         }
@@ -117,16 +93,17 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-        public ReadOnlyCollection<WebElement> FindElements(By by, int secondsToWait = 5)
+        public IReadOnlyCollection<WebElement> FindElements(By by, int secondsToWait = 5)
         {
             Console.WriteLine($"Attempting to find all elements using selector: {by}");
 
+            // Eventually swap this out for our own wait
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
 
             return new ReadOnlyCollection<WebElement>(
                             Driver.FindElements(by)
-                                    .Select(webElement => new WebElement(by, Driver))
+                                    .Select(webElement => new WebElement(webElement, by, Driver))
                                     .ToList());
         }
 
@@ -136,14 +113,12 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Secondes to wait until timeout / return false</param>
         /// <returns></returns>
-        public bool WaitFor(Func<bool> func, int secondsToWait = 15)
+        public async Task<bool> WaitFor(Func<bool> func, int secondsToWait = 15)
         {
             DateTime end = DateTime.Now.AddSeconds(secondsToWait);
             do
             {
-                // Do a brief wait first, on the assumption that C# hasn't evaluated the delegate yet
-                // This is to test to see if Selenium is tying up processes on the webpage under test
-                Task.Delay(500).Wait();
+                await Task.Delay(500);
                 try
                 {
                     if (func())
@@ -155,42 +130,33 @@ namespace IntelliTect.TestTools.Selenate
                 {
                     return false;
                 }
+                catch (AggregateException)
+                {
+                    return false;
+                }
 
             } while (DateTime.Now <= end);
             return false;
         }
 
-        public bool IsElementDisplayedAndExisting(By by, int secondsToWait = 15)
-        {
-            // Now that we have a WebElement.Initialized property, see if it makes sense to refactor this logic to look at that instead?
-            // Or is it worth still re-trying, just in case the site was in a bad state prior to calling this?
-            // If the latter, the default secondsToWait can be kicked down to maybe 5.
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            try
-            {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-            }
-            catch (WebDriverTimeoutException) { }
-            IReadOnlyCollection<IWebElement> elements = Driver.FindElements(by);
-            if (elements.Count > 0)
-            {
-                return elements.First().Displayed;
-            }
-            return false;
-        }
-
-        public void FrameSwitchAttempt(params By[] bys)
+        /// <summary>
+        /// Switches to each frame in succession to avoid having to explicitely call SwitchTo() multipled times for nested frames
+        /// </summary>
+        /// <param name="bys"></param>
+        /// <returns></returns>
+        public async Task FrameSwitchAttempt(params By[] bys)
         {
             var exceptions = new List<Exception>();
             for (int i = 0; i < 50; i++)
             {
                 try
                 {
-                    Task.Delay(250).Wait();
+                    await Task.Delay(250);
                     Driver.SwitchTo().DefaultContent();
                     foreach (By by in bys)
                     {
                         // Don't use our WebElement extension for this as it has trouble being casted to IWebElementReference
+                        // And perhaps swap this out for the expected condition WaitForAndSwitchToFrame?
                         IWebElement element = Driver.FindElement(by);
                         Console.WriteLine("Switching to frame " + by);
                         Driver.SwitchTo().Frame(element);
@@ -217,7 +183,7 @@ namespace IntelliTect.TestTools.Selenate
             throw new AggregateException(exceptions);
         }
 
-        public bool SwitchWindow(string title)
+        public async Task<bool> SwitchWindow(string title)
         {
             for (int i = 0; i < 50; i++)
             {
@@ -253,12 +219,12 @@ namespace IntelliTect.TestTools.Selenate
                     }
                 }
 
-                Task.Delay(500).Wait();
+                await Task.Delay(500);
             }
             return false;
         }
 
-        public IAlert Alert(int numberOfRetries = 50)
+        public async Task<IAlert> Alert(int numberOfRetries = 50)
         {
             ConditionalWait wait = new ConditionalWait();
             if(wait.WaitForSeconds<NoAlertPresentException, UnhandledAlertException>(CheckForAlert, 30))
@@ -271,6 +237,18 @@ namespace IntelliTect.TestTools.Selenate
         private void CheckForAlert()
         {
             Driver.SwitchTo().Alert();
+        }
+
+        public void TakeScreenshot()
+        {
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}");
+            Console.WriteLine($"Saving screenshot to location: {fullPath}");
+            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
+            if (Driver is ITakesScreenshot takeScreenshot)
+            {
+                Screenshot screenshot = takeScreenshot.GetScreenshot();
+                screenshot?.SaveAsFile(fullPath, ScreenshotImageFormat.Png);
+            }
         }
     }
 }

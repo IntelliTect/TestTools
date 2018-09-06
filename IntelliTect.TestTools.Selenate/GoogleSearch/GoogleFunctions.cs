@@ -1,5 +1,7 @@
-﻿using OpenQA.Selenium;
+﻿using System;
+using OpenQA.Selenium;
 using System.Linq;
+using System.Threading.Tasks;
 using IntelliTect.TestTools.SelenateExtensions;
 
 namespace GoogleSearch
@@ -12,24 +14,25 @@ namespace GoogleSearch
             Harness = new GoogleHarness(Browser);
         }
 
-        public bool SearchForItem(string searchItem)
+        public async Task<bool> SearchForItem(string searchItem)
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
             Harness.SearchInput.FillInWith(searchItem);
-            Harness.SearchInput.SendKeys(Keys.Return);
-            return Browser.WaitFor(() => Harness.SearchResultsDiv.Displayed);
+            await Harness.SearchInput.SendKeys(Keys.Return);
+            return await Browser.WaitFor(() => Convert.ToBoolean(Harness.SearchResultsDiv.Displayed.Result));
         }
 
-        public bool FindSearchResultItem(string result)
+        public Task<bool> FindSearchResultItem(string result)
         {
+            // Don't need to await this since it would just be on one line
             var headers = Harness.SearchResultsHeadersList;
-            return Browser.WaitFor(() => headers.Any(h => h.Text == result));
+            return Browser.WaitFor(() => headers.Any(h => h.Text.Result == result));
         }
 
-        public bool GoToHomePage()
+        public async Task<bool> GoToHomePage()
         {
-            Harness.GoHomeButton.Click();
-            return Browser.WaitFor(() => Harness.GoogleSearchButton.Displayed);
+            await Harness.GoHomeButton.Click();
+            return await Browser.WaitFor(() => Convert.ToBoolean(Harness.GoogleSearchButton.Displayed.Result));
         }
 
         private GoogleBrowser Browser { get; }
