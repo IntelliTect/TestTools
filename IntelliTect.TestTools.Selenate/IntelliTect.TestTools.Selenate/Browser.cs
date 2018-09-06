@@ -227,16 +227,16 @@ namespace IntelliTect.TestTools.Selenate
         public async Task<IAlert> Alert(int numberOfRetries = 50)
         {
             ConditionalWait wait = new ConditionalWait();
-            if(wait.WaitForSeconds<NoAlertPresentException, UnhandledAlertException>(CheckForAlert, 30))
+            if (await wait.WaitForSeconds<NoAlertPresentException, UnhandledAlertException>(CheckForAlert, 30))
             {
                 return Driver.SwitchTo().Alert();
             }
             else { return null; }
-        }
 
-        private void CheckForAlert()
-        {
-            Driver.SwitchTo().Alert();
+            void CheckForAlert()
+            {
+                Driver.SwitchTo().Alert();
+            }
         }
 
         public void TakeScreenshot()

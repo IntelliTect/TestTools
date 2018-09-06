@@ -8,20 +8,20 @@ namespace IntelliTect.TestTools.Selenate
 {
     public class ConditionalWait
     {
-        public bool WaitForSeconds<T>(Action action, int seconds)
+        public Task<bool> WaitForSeconds<T>(Action action, int seconds)
             where T : Exception
         {
             return ExecuteWait(action, seconds, typeof(T));
         }
 
-        public bool WaitForSeconds<T1, T2>(Action action, int seconds)
+        public Task<bool> WaitForSeconds<T1, T2>(Action action, int seconds)
             where T1 : Exception
             where T2 : Exception
         {
             return ExecuteWait(action, seconds, typeof(T1), typeof(T2));
         }
 
-        public bool WaitForSeconds<T1, T2, T3>(Action action, int seconds)
+        public Task<bool> WaitForSeconds<T1, T2, T3>(Action action, int seconds)
             where T1 : Exception
             where T2 : Exception
             where T3 : Exception
@@ -29,7 +29,7 @@ namespace IntelliTect.TestTools.Selenate
             return ExecuteWait(action, seconds, typeof(T1), typeof(T2), typeof(T3));
         }
 
-        public bool WaitForSeconds<T1, T2, T3, T4>(Action action, int seconds)
+        public Task<bool> WaitForSeconds<T1, T2, T3, T4>(Action action, int seconds)
             where T1 : Exception
             where T2 : Exception
             where T3 : Exception
@@ -38,7 +38,7 @@ namespace IntelliTect.TestTools.Selenate
             return ExecuteWait(action, seconds, typeof(T1), typeof(T2), typeof(T3), typeof(T4));
         }
 
-        private bool ExecuteWait(Action actionToWaitForComplete, int seconds, params Type[] types)
+        private async Task<bool> ExecuteWait(Action actionToWaitForComplete, int seconds, params Type[] types)
         {
             DateTime endTime = new DateTime();
             List<Type> typesToCheck = types.ToList();
@@ -55,7 +55,7 @@ namespace IntelliTect.TestTools.Selenate
                 {
                     exceptions.Add(ex);
                 }
-                Task.Delay(250).Wait();
+                await Task.Delay(250);
             } while (DateTime.Now < endTime);
             
             return false;
