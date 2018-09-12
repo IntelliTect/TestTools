@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using IntelliTect.TestTools.Selenate;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GoogleSearch
 {
@@ -13,7 +14,7 @@ namespace GoogleSearch
 
         public string URL => "https://www.google.com";
         public WebElement GoogleSearchButton => Browser.FindElement(By.Name("btnK"));
-        public WebElement SearchInput => Browser.FindElement(By.CssSelector("input[title='Search']"));
+        public Task<WebElement> SearchInput => Browser.FindElement(By.CssSelector("input[title='Search111']"));
         public WebElement SearchResultsDiv =>
                 Browser.FindElement(By.CssSelector("div[data-async-context^='query:']"));
 

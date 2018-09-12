@@ -17,7 +17,7 @@ namespace GoogleSearch
         public async Task<bool> SearchForItem(string searchItem)
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
-            Harness.SearchInput.FillInWith(searchItem);
+            await Harness.SearchInput.FillInWith(searchItem);
             await Harness.SearchInput.SendKeys(Keys.Return);
             return await Browser.WaitFor(() => Convert.ToBoolean(Harness.SearchResultsDiv.Displayed.Result));
         }

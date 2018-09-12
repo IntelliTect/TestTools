@@ -75,15 +75,19 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-		public WebElement FindElement(By by, int secondsToWait = 5)
+		public Task<IWebElement> FindElement(By by, int secondsToWait = 5)
         {
             Console.WriteLine($"Attempting to find element using selector: {by}");
 
             // Eventually swap this out for our own wait
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
+            //WebDriverWait wait1 = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
+            //wait1.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
 
-            return new WebElement(Driver.FindElement(by), by, Driver);
+            ConditionalWait wait = new ConditionalWait();
+            //return (driver) => { return driver.FindElement(locator); };
+            return wait.WaitForSeconds<IWebElement, NoSuchElementException>(() => Driver.FindElement(by));
+
+            //return new WebElement(Driver.FindElement(by), by, Driver);
         }
 
         /// <summary>
