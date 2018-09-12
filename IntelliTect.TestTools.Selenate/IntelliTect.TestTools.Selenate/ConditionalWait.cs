@@ -9,10 +9,10 @@ namespace IntelliTect.TestTools.Selenate
 {
     public class ConditionalWait
     {
-        public Task<T1> WaitForSeconds<T1, T2>(Func<T1> action, int seconds = 15)
-            where T2 : Exception
+        public Task<TResult> WaitForSeconds<TResult, T1>(Func<TResult> action, int seconds = 15)
+            where T1 : Exception
         {
-            return Test(action, seconds, typeof(T2));
+            return Test(action, seconds, typeof(T1));
         }
 
         public Task<bool> WaitForSeconds<T>(Action action, int seconds = 15)
@@ -67,7 +67,7 @@ namespace IntelliTect.TestTools.Selenate
             throw new AggregateException(exceptions);
         }
 
-        private async Task<T> Test<T>(Func<T> actionToWaitForComplete, int seconds, params Type[] types)
+        private async Task<TResult> Test<TResult>(Func<TResult> actionToWaitForComplete, int seconds, params Type[] types)
         {
             DateTime endTime = new DateTime();
             List<Type> typesToCheck = types.ToList();

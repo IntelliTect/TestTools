@@ -90,6 +90,11 @@ namespace IntelliTect.TestTools.Selenate
             //return new WebElement(Driver.FindElement(by), by, Driver);
         }
 
+        public static Func<IWebDriver, bool> TitleContains(string title)
+        {
+            return driver => driver.Title.Contains(title);
+        }
+
         /// <summary>
         /// Wraps the Selenium Driver's native web element to wait until at least one element exists before returning.
         /// If you need to verify an element DOESN'T exist, then call Browser.Driver.FindElements directly.
