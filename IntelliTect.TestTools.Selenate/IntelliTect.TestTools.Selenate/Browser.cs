@@ -78,21 +78,8 @@ namespace IntelliTect.TestTools.Selenate
 		public Task<IWebElement> FindElement(By by, int secondsToWait = 5)
         {
             Console.WriteLine($"Attempting to find element using selector: {by}");
-
-            // Eventually swap this out for our own wait
-            //WebDriverWait wait1 = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            //wait1.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-
             ConditionalWait wait = new ConditionalWait();
-            //return (driver) => { return driver.FindElement(locator); };
-            return wait.WaitForSeconds<IWebElement, NoSuchElementException>(() => Driver.FindElement(by));
-
-            //return new WebElement(Driver.FindElement(by), by, Driver);
-        }
-
-        public static Func<IWebDriver, bool> TitleContains(string title)
-        {
-            return driver => driver.Title.Contains(title);
+            return wait.WaitForSeconds<NoSuchElementException, IWebElement>(() => Driver.FindElement(by));
         }
 
         /// <summary>
@@ -122,30 +109,15 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Secondes to wait until timeout / return false</param>
         /// <returns></returns>
-        public async Task<bool> WaitFor(Func<bool> func, int secondsToWait = 15)
+        public Task<bool> WaitFor(Func<bool> func, int secondsToWait = 15)
         {
-            DateTime end = DateTime.Now.AddSeconds(secondsToWait);
-            do
-            {
-                await Task.Delay(500);
-                try
-                {
-                    if (func())
-                    {
-                        return true;
-                    }
-                }
-                catch (WebDriverTimeoutException)
-                {
-                    return false;
-                }
-                catch (AggregateException)
-                {
-                    return false;
-                }
-
-            } while (DateTime.Now <= end);
-            return false;
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitForSeconds<
+                NoSuchElementException,
+                StaleElementReferenceException,
+                ElementNotVisibleException,
+                InvalidElementStateException,
+                bool>(func);
         }
 
         /// <summary>
@@ -155,20 +127,32 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public async Task FrameSwitchAttempt(params By[] bys)
         {
+            // Finish converting this over to a central wait
+            ConditionalWait wait = new ConditionalWait();
+
             var exceptions = new List<Exception>();
             for (int i = 0; i < 50; i++)
             {
                 try
                 {
-                    await Task.Delay(250);
-                    Driver.SwitchTo().DefaultContent();
+                    //await Task.Delay(250);
+                    //Driver.SwitchTo().DefaultContent();
+                    //foreach (By by in bys)
+                    //{
+                    //    // Don't use our WebElement extension for this as it has trouble being casted to IWebElementReference
+                    //    // And perhaps swap this out for the expected condition WaitForAndSwitchToFrame?
+                    //    IWebElement element = Driver.FindElement(by);
+                    //    Console.WriteLine("Switching to frame " + by);
+                    //    Driver.SwitchTo().Frame(element);
+                    //}
                     foreach (By by in bys)
                     {
-                        // Don't use our WebElement extension for this as it has trouble being casted to IWebElementReference
-                        // And perhaps swap this out for the expected condition WaitForAndSwitchToFrame?
                         IWebElement element = Driver.FindElement(by);
-                        Console.WriteLine("Switching to frame " + by);
-                        Driver.SwitchTo().Frame(element);
+                        wait.WaitForSeconds<
+                            NoSuchFrameException,
+                            InvalidOperationException,
+                            StaleElementReferenceException,
+                            NotFoundException>(() => Driver.SwitchTo().Frame(element));
                     }
                     return;
                 }
@@ -233,19 +217,14 @@ namespace IntelliTect.TestTools.Selenate
             return false;
         }
 
-        public async Task<IAlert> Alert(int numberOfRetries = 50)
+        public Task<IAlert> Alert(int numberOfRetries = 50)
         {
             ConditionalWait wait = new ConditionalWait();
-            if (await wait.WaitForSeconds<IAlert, NoAlertPresentException, UnhandledAlertException>(CheckForAlert, 30). == null)
-            {
-                return CheckForAlert();
-            }
-            else { return null; }
-
-            IAlert CheckForAlert()
-            {
-                return Driver.SwitchTo().Alert();
-            }
+            return wait.WaitForSeconds<
+                NoAlertPresentException, 
+                UnhandledAlertException, 
+                IAlert>
+                (() => Driver.SwitchTo().Alert());
         }
 
         public void TakeScreenshot()
