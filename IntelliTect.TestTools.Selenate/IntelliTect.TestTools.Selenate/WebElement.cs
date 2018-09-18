@@ -22,7 +22,7 @@ namespace IntelliTect.TestTools.Selenate
         public By By { get; }
         public bool Initialized => WrappedElement != null;
 
-        // Probably wap out the Task<> properties in favor of Get methods for consistency.
+        // Probably swap out the Task<> properties in favor of Get methods for consistency.
         // Or scrap this class entirely once retry logic is abstracted out into a single callable method
         string IWebElement.TagName => TagName.ConfigureAwait(false).GetAwaiter().GetResult();
         public Task<string> TagName => RetryAction("tagname");

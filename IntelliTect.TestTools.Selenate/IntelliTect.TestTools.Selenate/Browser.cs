@@ -127,92 +127,43 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public async Task FrameSwitchAttempt(params By[] bys)
         {
-            // Finish converting this over to a central wait
+            // Note, some applications (i.e. CCB) will break out of switching to a frame if it's still loading.
+            // See if restarting the whole search like we currently do on PTT is necessary, or if we can just wait for something to finish loading
             ConditionalWait wait = new ConditionalWait();
-
-            var exceptions = new List<Exception>();
-            for (int i = 0; i < 50; i++)
+            foreach (By by in bys)
             {
-                try
-                {
-                    //await Task.Delay(250);
-                    //Driver.SwitchTo().DefaultContent();
-                    //foreach (By by in bys)
-                    //{
-                    //    // Don't use our WebElement extension for this as it has trouble being casted to IWebElementReference
-                    //    // And perhaps swap this out for the expected condition WaitForAndSwitchToFrame?
-                    //    IWebElement element = Driver.FindElement(by);
-                    //    Console.WriteLine("Switching to frame " + by);
-                    //    Driver.SwitchTo().Frame(element);
-                    //}
-                    foreach (By by in bys)
-                    {
-                        IWebElement element = Driver.FindElement(by);
-                        wait.WaitForSeconds<
+                IWebElement element = Driver.FindElement(by);
+                await wait.WaitForSeconds<
                             NoSuchFrameException,
                             InvalidOperationException,
                             StaleElementReferenceException,
-                            NotFoundException>(() => Driver.SwitchTo().Frame(element));
-                    }
-                    return;
-                }
-                catch (NoSuchFrameException e)
-                {
-                    exceptions.Add(e);
-                }
-                catch (InvalidOperationException e)
-                {
-                    exceptions.Add(e);
-                }
-                catch (StaleElementReferenceException e)
-                {
-                    exceptions.Add(e);
-                }
-                catch (NotFoundException e)
-                {
-                    exceptions.Add(e);
-                };
+                            NotFoundException>
+                        (() => Driver.SwitchTo().Frame(element));
             }
-            throw new AggregateException(exceptions);
         }
 
         public async Task<bool> SwitchWindow(string title)
         {
-            for (int i = 0; i < 50; i++)
+            ConditionalWait wait = new ConditionalWait();
+            string currentWindow =
+                    wait.WaitForSeconds<NoSuchWindowException, string>(() => Driver.CurrentWindowHandle).GetAwaiter().GetResult();
+
+            var availableWindows = new List<string>(Driver.WindowHandles);
+
+            foreach (string w in availableWindows)
             {
-                string currentWindow = null;
-                try
+                if (w != currentWindow)
                 {
-                    currentWindow = Driver.CurrentWindowHandle;
-                }
-                catch (NoSuchWindowException)
-                {
-                    currentWindow = "";
-                }
-
-                var availableWindows = new List<string>(Driver.WindowHandles);
-
-                foreach (string w in availableWindows)
-                {
-                    if (w != currentWindow)
+                    await wait.WaitForSeconds<NoSuchWindowException>(() => Driver.SwitchTo().Window(w));
+                    if ( Driver.Title == title )
                     {
-                        try
-                        {
-                            Driver.SwitchTo().Window(w);
-                            if (Driver.Title == title)
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                Driver.SwitchTo().Window(currentWindow);
-                            }
-                        }
-                        catch (NoSuchWindowException) { }
+                        return true;
+                    }
+                    else
+                    {
+                        Driver.SwitchTo().Window( currentWindow );
                     }
                 }
-
-                await Task.Delay(500);
             }
             return false;
         }
@@ -221,8 +172,8 @@ namespace IntelliTect.TestTools.Selenate
         {
             ConditionalWait wait = new ConditionalWait();
             return wait.WaitForSeconds<
-                NoAlertPresentException, 
-                UnhandledAlertException, 
+                NoAlertPresentException,
+                UnhandledAlertException,
                 IAlert>
                 (() => Driver.SwitchTo().Alert());
         }
