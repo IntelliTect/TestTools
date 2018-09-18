@@ -31,7 +31,7 @@ namespace GoogleSearch
 
         public async Task<bool> GoToHomePage()
         {
-            await Harness.GoHomeButton.Click();
+            await Harness.GoHomeButton.WaitAndClick();
             return await Browser.WaitFor(() => Convert.ToBoolean(Harness.GoogleSearchButton.Displayed.Result));
         }
 
