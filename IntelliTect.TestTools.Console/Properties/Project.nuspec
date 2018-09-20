@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>IntelliTect.TestTools.Console</id>
-    <version>0.5.0-beta-180813-1</version>
+    <version>0.5.1-beta-180920-1</version>
     <title>IntelliTect.TestTools.Console</title>
     <authors>Mark Michaelis</authors>
     <owners>IntelliTect</owners>
@@ -13,8 +13,5 @@ Redirects the console to enable unit testing of console output and the injecting
     </description>
     <copyright>Copyright 2018</copyright>
     <tags>IntelliTect.TestTools.Console</tags>
-    <dependencies>
-      <dependency id="Microsoft.SourceLink.GitHub" version="[2.0.0,3.0.0)" />
-    </dependencies>
   </metadata>
 </package>
