@@ -16,13 +16,29 @@ namespace IntelliTect.TestTools.Selenate
     public enum BrowserType
     {
         Chrome,
-        InternetExplorer
+        InternetExplorer,
+        Firefox,
+        Edge
+            // What else is worth supporting? If we support IE, there might be a few others worth supporting
     }
     public class Browser
     {
+        /// <summary>
+        /// Initializes a Selenium webdriver with some basic settings that work for many websites
+        /// </summary>
+        /// <param name="browser"></param>
         public Browser(BrowserType browser)
         {
             Driver = InitDriver(browser);
+        }
+
+        /// <summary>
+        /// Uses an 
+        /// </summary>
+        /// <param name="driver"></param>
+        public Browser(IWebDriver driver)
+        {
+            Driver = driver;
         }
 
         public IWebDriver Driver { get; }
@@ -59,6 +75,10 @@ namespace IntelliTect.TestTools.Selenate
                     };
                     driver = new InternetExplorerDriver(ieCaps);
                     break;
+                case BrowserType.Firefox:
+                    throw new NotImplementedException();
+                case BrowserType.Edge:
+                    throw new NotImplementedException();
                 default:
                     throw new ArgumentException($"Unknown browser: {browser}");
             }
@@ -77,9 +97,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
 		public Task<IWebElement> FindElement(By by, int secondsToWait = 5)
         {
-            Console.WriteLine($"Attempting to find element using selector: {by}");
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<NoSuchElementException, IWebElement>(() => Driver.FindElement(by));
+            return wait.WaitForSeconds<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by));
         }
 
         /// <summary>
@@ -89,18 +108,10 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-        public IReadOnlyCollection<WebElement> FindElements(By by, int secondsToWait = 5)
+        public Task<IReadOnlyCollection<IWebElement>> FindElements(By by, int secondsToWait = 5)
         {
-            Console.WriteLine($"Attempting to find all elements using selector: {by}");
-
-            // Eventually swap this out for our own wait
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-
-            return new ReadOnlyCollection<WebElement>(
-                            Driver.FindElements(by)
-                                    .Select(webElement => new WebElement(webElement, by, Driver))
-                                    .ToList());
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitForSeconds<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by));
         }
 
         /// <summary>
@@ -142,30 +153,10 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
-        public async Task<bool> SwitchWindow(string title)
+        public async Task SwitchWindow(string title)
         {
             ConditionalWait wait = new ConditionalWait();
-            string currentWindow =
-                    wait.WaitForSeconds<NoSuchWindowException, string>(() => Driver.CurrentWindowHandle).GetAwaiter().GetResult();
-
-            var availableWindows = new List<string>(Driver.WindowHandles);
-
-            foreach (string w in availableWindows)
-            {
-                if (w != currentWindow)
-                {
-                    await wait.WaitForSeconds<NoSuchWindowException>(() => Driver.SwitchTo().Window(w));
-                    if ( Driver.Title == title )
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        Driver.SwitchTo().Window( currentWindow );
-                    }
-                }
-            }
-            return false;
+            await wait.WaitForSeconds<NoSuchWindowException>(() => Driver.SwitchTo().Window(title));
         }
 
         public Task<IAlert> Alert(int numberOfRetries = 50)

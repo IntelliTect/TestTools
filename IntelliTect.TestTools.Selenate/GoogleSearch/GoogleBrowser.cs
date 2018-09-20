@@ -1,5 +1,7 @@
 ﻿using OpenQA.Selenium;
 using IntelliTect.TestTools.Selenate;
+using System;
+using System.Threading.Tasks;
 
 namespace GoogleSearch
 {
@@ -11,14 +13,25 @@ namespace GoogleSearch
 
         // When running tests in succession, Google sometimes refuses the connection.
         // Refresh to kick it into gear.
-        public WebElement FindElement(By by)
+        public IWebElement FindElement(By by)
         {
-            WebElement result = base.FindElement(by);
-            if(!result.Initialized)
+            IWebElement result = null;
+            try
+            {
+                result = base.FindElement(by).GetAwaiter().GetResult();
+            }
+            catch(AggregateException)
             {
                 Driver.Navigate().Refresh();
+                result = base.FindElement(by).GetAwaiter().GetResult();
             }
             return result;
+            //result = base.FindElement(by);
+            //if(!result.Initialized)
+            //{
+            //    Driver.Navigate().Refresh();
+            //}
+            //return result;
         }
     }
 }

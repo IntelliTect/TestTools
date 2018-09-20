@@ -17,22 +17,22 @@ namespace GoogleSearch
         public async Task<bool> SearchForItem(string searchItem)
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
-            await Harness.SearchInput.FillInWith(searchItem);
-            await Harness.SearchInput.SendKeys(Keys.Return);
-            return await Browser.WaitFor(() => Convert.ToBoolean(Harness.SearchResultsDiv.Displayed.Result));
+            Harness.SearchInput.FillInWith(searchItem);
+            Harness.SearchInput.SendKeys(Keys.Return);
+            return await Browser.WaitFor(() => Convert.ToBoolean(Harness.SearchResultsDiv.Displayed));
         }
 
         public Task<bool> FindSearchResultItem(string result)
         {
             // Don't need to await this since it would just be on one line
             var headers = Harness.SearchResultsHeadersList;
-            return Browser.WaitFor(() => headers.Any(h => h.Text.Result == result));
+            return Browser.WaitFor(() => headers.Any(h => h.Text == result));
         }
 
         public async Task<bool> GoToHomePage()
         {
             await Harness.GoHomeButton.WaitAndClick();
-            return await Browser.WaitFor(() => Convert.ToBoolean(Harness.GoogleSearchButton.Displayed.Result));
+            return await Browser.WaitFor(() => Convert.ToBoolean(Harness.GoogleSearchButton.Displayed));
         }
 
         private GoogleBrowser Browser { get; }
