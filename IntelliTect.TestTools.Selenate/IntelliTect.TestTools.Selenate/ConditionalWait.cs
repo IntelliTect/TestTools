@@ -71,8 +71,8 @@ namespace IntelliTect.TestTools.Selenate
 
         private async Task<TResult> ExecuteWait<TResult>(Func<TResult> actionToWaitForComplete, int seconds, params Type[] types)
         {
-            DateTime endTime = new DateTime();
-            List<Exception> exceptions = null;
+            DateTime endTime = DateTime.Now.AddSeconds(seconds);
+            List<Exception> exceptions = new List<Exception>();
             endTime.AddSeconds(seconds);
             do
             {

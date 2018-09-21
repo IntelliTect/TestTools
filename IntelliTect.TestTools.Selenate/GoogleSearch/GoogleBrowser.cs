@@ -10,28 +10,32 @@ namespace GoogleSearch
         public GoogleBrowser(BrowserType browser) : base(browser)
         {
         }
+        
+        public IWebElement FindElement(By by)
+        {
+            return new WebElement(Find(by).ConfigureAwait(false).GetAwaiter().GetResult(), Driver);
+        }
+
+        public Task<IWebElement> FindElementAsync(By by)
+        {
+            return Find(by);
+        }
 
         // When running tests in succession, Google sometimes refuses the connection.
         // Refresh to kick it into gear.
-        public IWebElement FindElement(By by)
+        private Task<IWebElement> Find(By by)
         {
-            IWebElement result = null;
+            Task<IWebElement> result = null;
             try
             {
-                result = base.FindElement(by).GetAwaiter().GetResult();
+                result = base.FindElement(by);
             }
-            catch(AggregateException)
+            catch (AggregateException)
             {
                 Driver.Navigate().Refresh();
-                result = base.FindElement(by).GetAwaiter().GetResult();
+                result = base.FindElement(by);
             }
             return result;
-            //result = base.FindElement(by);
-            //if(!result.Initialized)
-            //{
-            //    Driver.Navigate().Refresh();
-            //}
-            //return result;
         }
     }
 }
