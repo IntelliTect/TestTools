@@ -99,6 +99,7 @@ namespace IntelliTect.TestTools.Selenate
                 try
                 {
                     actionToWaitForComplete();
+                    return;
                 }
                 catch (Exception ex) when (types.ToList().Contains(ex.GetType()))
                 {

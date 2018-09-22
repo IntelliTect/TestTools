@@ -19,7 +19,7 @@ namespace GoogleSearch
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
             Harness.SearchInput.FillInWith(searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
-            return await Browser.WaitFor(() => Convert.ToBoolean(Harness.SearchResultsDiv.Displayed));
+            return await Browser.WaitFor(() => Harness.SearchResultsDiv.Displayed);
         }
 
         public Task<bool> FindSearchResultItem(string result)
@@ -31,8 +31,8 @@ namespace GoogleSearch
 
         public async Task<bool> GoToHomePage()
         {
-            await Harness.GoHomeButton.WaitAndClick();
-            return await Browser.WaitFor(() => Convert.ToBoolean(Harness.GoogleSearchButton.Displayed));
+            await Harness.GoHomeButton.Result.Click();
+            return await Browser.WaitFor(() => Harness.GoogleSearchButton.Displayed);
         }
 
         private GoogleBrowser Browser { get; }

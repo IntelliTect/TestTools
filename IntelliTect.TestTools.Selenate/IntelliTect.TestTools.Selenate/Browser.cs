@@ -19,7 +19,7 @@ namespace IntelliTect.TestTools.Selenate
         InternetExplorer,
         Firefox,
         Edge
-            // What else is worth supporting? If we support IE, there might be a few others worth supporting
+        // What else is worth supporting? If we support IE, there might be a few others worth supporting
     }
     public class Browser
     {
@@ -114,21 +114,41 @@ namespace IntelliTect.TestTools.Selenate
             return wait.WaitForSeconds<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by));
         }
 
+
+        // Does this method name make sense?
+        // It's primary use is waiting for an element to be in a certain state (displayed, enabled, etc.) before continuining with test execution.
+        // The best possible way for this to work would be to return the funcs result, and if it fails return the inverse. However, in the case where an exception is thrown, how do we know what the inverse would be?
+        // Maybe rename to StateCheck since that's what we use on PTT. Or something like CheckIfConditionEvaluates?
         /// <summary>
         ///Waits until a function evaluates to true OR times out after a specified period of time
         /// </summary>
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Secondes to wait until timeout / return false</param>
         /// <returns></returns>
-        public Task<bool> WaitFor(Func<bool> func, int secondsToWait = 15)
+        public async Task<bool> WaitFor(Func<bool> func, int secondsToWait = 15)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<
+            try
+            {
+                if (await wait.WaitForSeconds<
                 NoSuchElementException,
                 StaleElementReferenceException,
                 ElementNotVisibleException,
                 InvalidElementStateException,
-                bool>(func);
+                bool>(func))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (AggregateException) // Worth checking for specific inner exceptions?
+            {
+                return false;
+            }
+
         }
 
         /// <summary>
@@ -171,7 +191,7 @@ namespace IntelliTect.TestTools.Selenate
 
         public void TakeScreenshot()
         {
-            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}");
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
             Console.WriteLine($"Saving screenshot to location: {fullPath}");
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
             if (Driver is ITakesScreenshot takeScreenshot)

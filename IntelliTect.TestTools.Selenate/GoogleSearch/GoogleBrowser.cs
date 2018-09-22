@@ -11,31 +11,31 @@ namespace GoogleSearch
         {
         }
         
-        public IWebElement FindElement(By by)
+        public WebElement FindElement(By by)
         {
             return new WebElement(Find(by).ConfigureAwait(false).GetAwaiter().GetResult(), Driver);
         }
 
-        public Task<IWebElement> FindElementAsync(By by)
+        // Instead of doing this, I should just do a separate project demonstrating async usage on something more complex than a Google search
+        public async Task<WebElement> FindElementAsync(By by)
         {
-            return Find(by);
+            return new WebElement(await Find(by), Driver);
         }
 
         // When running tests in succession, Google sometimes refuses the connection.
         // Refresh to kick it into gear.
-        private Task<IWebElement> Find(By by)
+        private async Task<IWebElement> Find(By by)
         {
-            Task<IWebElement> result = null;
             try
             {
-                result = base.FindElement(by);
+                return await base.FindElement(by);
             }
-            catch (AggregateException)
+            catch (AggregateException ae)
             {
+                var test = ae;
                 Driver.Navigate().Refresh();
-                result = base.FindElement(by);
+                return await base.FindElement(by);
             }
-            return result;
         }
     }
 }
