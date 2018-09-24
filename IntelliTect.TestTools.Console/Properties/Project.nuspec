@@ -6,12 +6,16 @@
     <title>IntelliTect.TestTools.Console</title>
     <authors>Mark Michaelis</authors>
     <owners>IntelliTect</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <licenseUrl>https://github.com/IntelliTect/TestTools/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/IntelliTect/TestTools</projectUrl>
     <description>
 Redirects the console to enable unit testing of console output and the injecting of console input.
     </description>
     <copyright>Copyright 2018</copyright>
-    <tags>IntelliTect.TestTools.Console</tags>
+    <tags>IntelliTect, TestTools, Console, TestAPI</tags>
+    <dependencies>
+      <group targetFramework=".NETCoreApp2.0" />
+    </dependencies>
   </metadata>
 </package>
