@@ -15,17 +15,18 @@
     <Authors>Mark Michaelis</Authors>
     <Version>0.5.1-beta-180920-1</Version>
     <Company>IntelliTect</Company>
-     <!--Moved to Nuspec File Instead
+    <Title>IntelliTect.TestTools.Console</Title>
     <Description>Redirects the console to enable unit testing of console output and the injecting of console input.</Description>
-    <owners>IntelliTect</owners>
+    <!--Not a valid element for csproj to Nuspec (see https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target)-->
+    <!-- <Owners>IntelliTect</Owners> -->
     <PackageLicenseUrl>https://github.com/IntelliTect/TestTools/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/IntelliTect/TestTools</PackageProjectUrl>
     <Copyright>Copyright 2018</Copyright>
     <PackageTags>IntelliTect, TestTools, Console, TestAPI</PackageTags>
-    -->
     <!--<NuspecBasePath></NuspecBasePath>-->
-    <NuspecFile>Properties/Project.nuspec</NuspecFile>
-
+    <!-- Explicitly referencing the NuspecFile causes the project assembly not
+         to be included in the nupkg file so using csproj elements instead. -->
+    <!-- <NuspecFile>Properties/Project.nuspec</NuspecFile> -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Linux|AnyCPU'" />
