@@ -1,0 +1,14 @@
+<Project>
+  <Target Name="TestPackage" AfterTargets="Pack">
+    <Exec Command="powershell.exe -noprofile -file $(ProjectDirectory)..\Test-NuGetPackage.ps1 $(ProjectDirectory)..\bin\$(PackageId).$(PackageVersion).nupkg $(AssemblyName)" />
+  </Target>
+  <Target Name="CopyPackage" AfterTargets="TestPackage">
+    <Copy
+      SourceFiles="@(NuGetPackOutput)"
+      DestinationFolder="$(ProjectDirectory)..\bin\"
+      Condition="'%(Extension)'=='.nupkg'">
+      <Output TaskParameter="CopiedFiles" PropertyName="CopiedFiles" />
+    </Copy>
+     <Exec Command="git add -N $(CopiedFiles.Replace(';', ' ')) -f" />
+  </Target>
+</Project>
