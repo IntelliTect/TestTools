@@ -33,7 +33,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// Uses an 
+        /// Uses an existing driver to facilitate applications that need specific driver capabilities not specified in InitDriver
         /// </summary>
         /// <param name="driver"></param>
         public Browser(IWebDriver driver)
@@ -95,10 +95,10 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-		public Task<IWebElement> FindElement(By by, int secondsToWait = 5)
+        public Task<IWebElement> FindElement(By by, int secondsToWait = 5)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by));
+            return wait.WaitForSeconds<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by), secondsToWait);
         }
 
         /// <summary>
@@ -110,8 +110,10 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public Task<IReadOnlyCollection<IWebElement>> FindElements(By by, int secondsToWait = 5)
         {
+            // NOTE: Per conversation with Yuriy on Thursday, this should return an empty collection if nothing is found.
+            // Often times the use case is to assert on the collection, even if nothing is there.
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by));
+            return wait.WaitForSeconds<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by), secondsToWait);
         }
 
 
@@ -135,7 +137,7 @@ namespace IntelliTect.TestTools.Selenate
                 StaleElementReferenceException,
                 ElementNotVisibleException,
                 InvalidElementStateException,
-                bool>(func))
+                bool>(func, secondsToWait))
                 {
                     return true;
                 }
@@ -179,7 +181,7 @@ namespace IntelliTect.TestTools.Selenate
             await wait.WaitForSeconds<NoSuchWindowException>(() => Driver.SwitchTo().Window(title));
         }
 
-        public Task<IAlert> Alert(int numberOfRetries = 50)
+        public Task<IAlert> Alert()
         {
             ConditionalWait wait = new ConditionalWait();
             return wait.WaitForSeconds<

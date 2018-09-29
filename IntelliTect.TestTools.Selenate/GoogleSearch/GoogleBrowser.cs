@@ -30,9 +30,8 @@ namespace GoogleSearch
             {
                 return await base.FindElement(by);
             }
-            catch (AggregateException ae)
+            catch (AggregateException)
             {
-                var test = ae;
                 Driver.Navigate().Refresh();
                 return await base.FindElement(by);
             }
