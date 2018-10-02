@@ -10,70 +10,87 @@ namespace IntelliTect.TestTools.Selenate
 {
     public class ConditionalWait
     {
-        public Task<TResult> WaitForSeconds<TException, TResult>(Func<TResult> func, int seconds = 15)
-            where TException : Exception
+        public Task<TResult> WaitFor<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
-            return ExecuteWait(func, seconds, typeof(TException));
-        }
-        public Task WaitForSeconds<TException>(Action action, int seconds = 15)
-            where TException : Exception
-        {
-            return ExecuteWait(action, seconds, typeof(TException));
+            if(exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
+            {
+                throw new ArgumentException("Invalid type passed into exceptionsToIgnore paramter. Must be of type Exception.");
+            }
+            return ExecuteWait(func, timeToWait, exceptionsToIgnore);
         }
 
-        public Task<TResult> WaitForSeconds<TException1, TException2, TResult>(Func<TResult> func, int seconds = 15)
+        public Task WaitFor(Action action, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
+        {
+            if (exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
+            {
+                throw new ArgumentException("Invalid type passed into exceptionsToIgnore paramter. Must be of type Exception");
+            }
+            return ExecuteWait(action, timeToWait, exceptionsToIgnore);
+        }
+
+        public Task<TResult> WaitFor<TException, TResult>(Func<TResult> func, TimeSpan timeToWait)
+            where TException : Exception
+        {
+            return ExecuteWait(func, timeToWait, typeof(TException));
+        }
+        public Task WaitFor<TException>(Action action, TimeSpan timeToWait)
+            where TException : Exception
+        {
+            return ExecuteWait(action, timeToWait, typeof(TException));
+        }
+
+        public Task<TResult> WaitFor<TException1, TException2, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
         {
-            return ExecuteWait(func, seconds, typeof(TException1), typeof(TException2));
+            return ExecuteWait(func, timeToWait, typeof(TException1), typeof(TException2));
         }
 
-        public Task WaitForSeconds<TException1, TException2>(Action action, int seconds = 15)
+        public Task WaitFor<TException1, TException2>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
         {
-            return ExecuteWait(action, seconds, typeof(TException1), typeof(TException2));
+            return ExecuteWait(action, timeToWait, typeof(TException1), typeof(TException2));
         }
 
-        public Task<TResult> WaitForSeconds<TException1, TException2, TException3, TResult>(Func<TResult> func, int seconds = 15)
+        public Task<TResult> WaitFor<TException1, TException2, TException3, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
         {
-            return ExecuteWait(func, seconds, typeof(TException1), typeof(TException2), typeof(TException3));
+            return ExecuteWait(func, timeToWait, typeof(TException1), typeof(TException2), typeof(TException3));
         }
 
-        public Task WaitForSeconds<TException1, TException2, TException3>(Action action, int seconds = 15)
+        public Task WaitFor<TException1, TException2, TException3>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
         {
-            return ExecuteWait(action, seconds, typeof(TException1), typeof(TException2), typeof(TException3));
+            return ExecuteWait(action, timeToWait, typeof(TException1), typeof(TException2), typeof(TException3));
         }
 
-        public Task<TResult> WaitForSeconds<TException1, TException2, TException3, TException4, TResult>(Func<TResult> func, int seconds = 15)
+        public Task<TResult> WaitFor<TException1, TException2, TException3, TException4, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
             where TException4 : Exception
         {
-            return ExecuteWait(func, seconds, typeof(TException1), typeof(TException2), typeof(TException3), typeof(TException4));
+            return ExecuteWait(func, timeToWait, typeof(TException1), typeof(TException2), typeof(TException3), typeof(TException4));
         }
 
-        public Task WaitForSeconds<TException1, TException2, TException3, TException4>(Action action, int seconds = 15)
+        public Task WaitFor<TException1, TException2, TException3, TException4>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
             where TException4 : Exception
         {
-            return ExecuteWait(action, seconds, typeof(TException1), typeof(TException2), typeof(TException3), typeof(TException4));
+            return ExecuteWait(action, timeToWait, typeof(TException1), typeof(TException2), typeof(TException3), typeof(TException4));
         }
 
-        private async Task<TResult> ExecuteWait<TResult>(Func<TResult> actionToWaitForComplete, int seconds, params Type[] types)
+        private async Task<TResult> ExecuteWait<TResult>(Func<TResult> actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
         {
-            DateTime endTime = DateTime.Now.AddSeconds(seconds);
+            DateTime endTime = DateTime.Now.Add(timeToWait);
             List<Exception> exceptions = new List<Exception>();
-            endTime.AddSeconds(seconds);
             TResult task = default(TResult);
             do
             {
@@ -87,15 +104,13 @@ namespace IntelliTect.TestTools.Selenate
                 }
                 await Task.Delay(250);
             } while (DateTime.Now < endTime);
-            return task;
-            //throw new AggregateException(exceptions);
+            throw new AggregateException(exceptions);
         }
 
-        private async Task ExecuteWait(Action actionToWaitForComplete, int seconds, params Type[] types)
+        private async Task ExecuteWait(Action actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
         {
-            DateTime endTime = DateTime.Now.AddSeconds(seconds);
+            DateTime endTime = DateTime.Now.Add(timeToWait);
             List<Exception> exceptions = new List<Exception>();
-            endTime.AddSeconds(seconds);
             do
             {
                 try
@@ -109,8 +124,7 @@ namespace IntelliTect.TestTools.Selenate
                 }
                 await Task.Delay(250);
             } while (DateTime.Now < endTime);
-            return;
-            //throw new AggregateException(exceptions);
+            throw new AggregateException(exceptions);
         }
     }
 }

@@ -33,7 +33,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         public static Task WaitAndClick( this IWebElement element )
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<
+            return wait.WaitFor<
                 NoSuchElementException,
                 ElementNotVisibleException,
                 ElementClickInterceptedException>( () => element.Click() );

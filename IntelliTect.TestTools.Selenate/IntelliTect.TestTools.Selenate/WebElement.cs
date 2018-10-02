@@ -3,6 +3,7 @@ using System.Linq;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
+using System;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -26,7 +27,7 @@ namespace IntelliTect.TestTools.Selenate
             get
             {
                 ConditionalWait wait = new ConditionalWait();
-                return wait.WaitForSeconds<StaleElementReferenceException, string>(() => WrappedElement.TagName);
+                return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.TagName, TimeSpan.FromSeconds(15));
             }
         }
 
@@ -36,7 +37,7 @@ namespace IntelliTect.TestTools.Selenate
             get
             {
                 ConditionalWait wait = new ConditionalWait();
-                return wait.WaitForSeconds<StaleElementReferenceException, string>(() => WrappedElement.Text);
+                return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.Text, TimeSpan.FromSeconds(15));
             }
         }
 
@@ -46,7 +47,7 @@ namespace IntelliTect.TestTools.Selenate
             get
             {
                 ConditionalWait wait = new ConditionalWait();
-                return wait.WaitForSeconds<StaleElementReferenceException, bool>(() => WrappedElement.Enabled);
+                return wait.WaitFor<StaleElementReferenceException, bool>(() => WrappedElement.Enabled, TimeSpan.FromSeconds(15));
             }
         }
 
@@ -56,7 +57,7 @@ namespace IntelliTect.TestTools.Selenate
             get
             {
                 ConditionalWait wait = new ConditionalWait();
-                return wait.WaitForSeconds<StaleElementReferenceException, bool>(() => WrappedElement.Displayed);
+                return wait.WaitFor<StaleElementReferenceException, bool>(() => WrappedElement.Displayed, TimeSpan.FromSeconds(15));
             }
         }
 
@@ -66,7 +67,7 @@ namespace IntelliTect.TestTools.Selenate
             get
             {
                 ConditionalWait wait = new ConditionalWait();
-                return wait.WaitForSeconds<StaleElementReferenceException, bool>(() => WrappedElement.Selected);
+                return wait.WaitFor<StaleElementReferenceException, bool>(() => WrappedElement.Selected, TimeSpan.FromSeconds(15));
             }
         }
 
@@ -76,7 +77,7 @@ namespace IntelliTect.TestTools.Selenate
             get
             {
                 ConditionalWait wait = new ConditionalWait();
-                return wait.WaitForSeconds<StaleElementReferenceException, Point>(() => WrappedElement.Location);
+                return wait.WaitFor<StaleElementReferenceException, Point>(() => WrappedElement.Location, TimeSpan.FromSeconds(15));
             }
         }
 
@@ -86,7 +87,7 @@ namespace IntelliTect.TestTools.Selenate
             get
             {
                 ConditionalWait wait = new ConditionalWait();
-                return wait.WaitForSeconds<StaleElementReferenceException, Size>(() => WrappedElement.Size);
+                return wait.WaitFor<StaleElementReferenceException, Size>(() => WrappedElement.Size, TimeSpan.FromSeconds(15));
             }
         }
 
@@ -98,7 +99,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task<WebElement> FindElement(By by)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException, WebElement>(() => new WebElement(WrappedElement.FindElement(by), _Driver));
+            return wait.WaitFor<StaleElementReferenceException, WebElement>(() => new WebElement(WrappedElement.FindElement(by), _Driver), TimeSpan.FromSeconds(15));
         }
 
         ReadOnlyCollection<IWebElement> ISearchContext.FindElements(By by)
@@ -109,10 +110,10 @@ namespace IntelliTect.TestTools.Selenate
         public Task<ReadOnlyCollection<WebElement>> FindElements(By by)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException, ReadOnlyCollection<WebElement>>(() => new ReadOnlyCollection<WebElement>(
+            return wait.WaitFor<StaleElementReferenceException, ReadOnlyCollection<WebElement>>(() => new ReadOnlyCollection<WebElement>(
                     WrappedElement.FindElements(by)
                         .Select(webElement =>
-                        new WebElement(WrappedElement.FindElement(by), _Driver)).ToList()));
+                        new WebElement(WrappedElement.FindElement(by), _Driver)).ToList()), TimeSpan.FromSeconds(15));
         }
 
         void IWebElement.Clear()
@@ -122,7 +123,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task Clear()
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException>(() => WrappedElement.Clear());
+            return wait.WaitFor<StaleElementReferenceException>(() => WrappedElement.Clear(), TimeSpan.FromSeconds(15));
         }
 
         void IWebElement.SendKeys(string text)
@@ -133,7 +134,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task SendKeys(string text)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException>(() => WrappedElement.SendKeys(text));
+            return wait.WaitFor<StaleElementReferenceException>(() => WrappedElement.SendKeys(text), TimeSpan.FromSeconds(15));
         }
 
         void IWebElement.Submit()
@@ -144,7 +145,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task Submit()
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException>(() => WrappedElement.Submit());
+            return wait.WaitFor<StaleElementReferenceException>(() => WrappedElement.Submit(), TimeSpan.FromSeconds(15));
         }
 
         void IWebElement.Click()
@@ -155,7 +156,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task Click()
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException, ElementNotVisibleException>(() => WrappedElement.Click());
+            return wait.WaitFor<StaleElementReferenceException, ElementNotVisibleException>(() => WrappedElement.Click(), TimeSpan.FromSeconds(15));
         }
 
         // Can this easily be abstracted out to an extension method?
@@ -163,7 +164,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task Click(int secondsToRetry)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException, ElementNotVisibleException>(() => WrappedElement.Click(), secondsToRetry);
+            return wait.WaitFor<StaleElementReferenceException, ElementNotVisibleException>(() => WrappedElement.Click(), TimeSpan.FromSeconds(secondsToRetry));
         }
 
         string IWebElement.GetAttribute(string attributeName)
@@ -174,7 +175,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task<string> GetAttribute(string attributeName)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException, string>(() => WrappedElement.GetAttribute(attributeName));
+            return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.GetAttribute(attributeName), TimeSpan.FromSeconds(15));
         }
 
         string IWebElement.GetProperty(string propertyName)
@@ -185,7 +186,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task<string> GetProperty(string propertyName)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException, string>(() => WrappedElement.GetProperty(propertyName));
+            return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.GetProperty(propertyName), TimeSpan.FromSeconds(15));
         }
 
         string IWebElement.GetCssValue(string propertyName)
@@ -196,7 +197,7 @@ namespace IntelliTect.TestTools.Selenate
         public Task<string> GetCssValue(string propertyName)
         {
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitForSeconds<StaleElementReferenceException, string>(() => WrappedElement.GetCssValue(propertyName));
+            return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.GetCssValue(propertyName), TimeSpan.FromSeconds(15));
         }
 
         private IWebElement WrappedElement { get; set; }
