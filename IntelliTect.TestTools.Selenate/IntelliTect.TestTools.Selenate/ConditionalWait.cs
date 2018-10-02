@@ -23,7 +23,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             if (exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
             {
-                throw new ArgumentException("Invalid type passed into exceptionsToIgnore paramter. Must be of type Exception");
+                throw new ArgumentException("Invalid type passed into exceptionsToIgnore paramter. Must be of type Exception.");
             }
             return ExecuteWait(action, timeToWait, exceptionsToIgnore);
         }
