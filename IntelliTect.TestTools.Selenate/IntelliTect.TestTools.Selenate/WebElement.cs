@@ -1,88 +1,119 @@
 ﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Drawing;
 using System.Linq;
-using System.Text;
+using System.Drawing;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System;
 
 namespace IntelliTect.TestTools.Selenate
 {
     public class WebElement : IWebElement
     {
-        public WebElement(IWebElement wrappedElement, By by, IWebDriver driver)
+        // Move this class to Extensions at some point. This is really no longer needed with how easy it is to call waits now. This would just be for people that want an "out of the box" implementation
+        // Also: do we ever need to re-find the element if an operation throws a stale element reference?
+        //We were doing that in the prior impelmentation, but I'm not sure actually sure it's needed since we're making sure the element is found before doing anything with it.
+        public WebElement(IWebElement wrappedElement, /*By by,*/ IWebDriver driver)
         {
             WrappedElement = wrappedElement;
-            By = by;
+            //By = by;
             _Driver = driver;
         }
 
         public By By { get; }
-        public bool Initialized => WrappedElement != null;
 
-        // Probably wap out the Task<> properties in favor of Get methods for consistency.
-        // Or scrap this class entirely once retry logic is abstracted out into a single callable method
         string IWebElement.TagName => TagName.ConfigureAwait(false).GetAwaiter().GetResult();
-        public Task<string> TagName => RetryAction("tagname");
-
-        string IWebElement.Text => Text.GetAwaiter().GetResult();
-        public Task<string> Text => RetryAction("text");
-
-        bool IWebElement.Enabled => Convert.ToBoolean(Enabled.ConfigureAwait(false).GetAwaiter().GetResult());
-        public Task<string> Enabled => RetryAction("enabled");
-
-        bool IWebElement.Displayed => Convert.ToBoolean(Displayed.ConfigureAwait(false).GetAwaiter().GetResult());
-        public Task<string> Displayed => RetryAction("displayed");
-
-        bool IWebElement.Selected => Convert.ToBoolean(Selected.ConfigureAwait(false).GetAwaiter().GetResult());
-        public Task<string> Selected => RetryAction("selected");
-
-        Point IWebElement.Location => new Point();
-        public Task<string> Location => RetryAction("location");
-
-        Size IWebElement.Size => new Size();
-        public Task<string> Size => RetryAction("size");
-
-        public WebElement FindElement(By by)
+        public Task<string> TagName
         {
-            if (!Initialized)
+            get
             {
-                WrappedElement = _Driver.FindElement(by);
+                ConditionalWait wait = new ConditionalWait();
+                return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.TagName, TimeSpan.FromSeconds(15));
             }
-
-            // Eventually swap this out for our own wait
-            WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(5));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-
-            return new WebElement(WrappedElement.FindElement(by), by, _Driver);
         }
 
-        public ReadOnlyCollection<WebElement> FindElements(By by)
+        string IWebElement.Text => Text.GetAwaiter().GetResult();
+        public Task<string> Text
         {
-            if (!Initialized)
+            get
             {
-                WrappedElement = _Driver.FindElement(by);
+                ConditionalWait wait = new ConditionalWait();
+                return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.Text, TimeSpan.FromSeconds(15));
             }
+        }
 
-            // Eventually swap this out for our own wait
-            WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(5));
-            try
+        bool IWebElement.Enabled => Enabled.ConfigureAwait(false).GetAwaiter().GetResult();
+        public Task<bool> Enabled
+        {
+            get
             {
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
+                ConditionalWait wait = new ConditionalWait();
+                return wait.WaitFor<StaleElementReferenceException, bool>(() => WrappedElement.Enabled, TimeSpan.FromSeconds(15));
             }
-            catch (WebDriverTimeoutException)
-            {
-                return new ReadOnlyCollection<WebElement>(new List<WebElement>());
-            }
+        }
 
-            return
-                new ReadOnlyCollection<WebElement>(
+        bool IWebElement.Displayed => Displayed.ConfigureAwait(false).GetAwaiter().GetResult();
+        public Task<bool> Displayed
+        {
+            get
+            {
+                ConditionalWait wait = new ConditionalWait();
+                return wait.WaitFor<StaleElementReferenceException, bool>(() => WrappedElement.Displayed, TimeSpan.FromSeconds(15));
+            }
+        }
+
+        bool IWebElement.Selected => Selected.ConfigureAwait(false).GetAwaiter().GetResult();
+        public Task<bool> Selected
+        {
+            get
+            {
+                ConditionalWait wait = new ConditionalWait();
+                return wait.WaitFor<StaleElementReferenceException, bool>(() => WrappedElement.Selected, TimeSpan.FromSeconds(15));
+            }
+        }
+
+        Point IWebElement.Location => Location.ConfigureAwait(false).GetAwaiter().GetResult();
+        public Task<Point> Location
+        {
+            get
+            {
+                ConditionalWait wait = new ConditionalWait();
+                return wait.WaitFor<StaleElementReferenceException, Point>(() => WrappedElement.Location, TimeSpan.FromSeconds(15));
+            }
+        }
+
+        Size IWebElement.Size => Size.ConfigureAwait(false).GetAwaiter().GetResult();
+        public Task<Size> Size
+        {
+            get
+            {
+                ConditionalWait wait = new ConditionalWait();
+                return wait.WaitFor<StaleElementReferenceException, Size>(() => WrappedElement.Size, TimeSpan.FromSeconds(15));
+            }
+        }
+
+        IWebElement ISearchContext.FindElement(By by)
+        {
+            return FindElement(by).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        public Task<WebElement> FindElement(By by)
+        {
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException, WebElement>(() => new WebElement(WrappedElement.FindElement(by), _Driver), TimeSpan.FromSeconds(15));
+        }
+
+        ReadOnlyCollection<IWebElement> ISearchContext.FindElements(By by)
+        {
+            return WrappedElement.FindElements(by);
+        }
+
+        public Task<ReadOnlyCollection<WebElement>> FindElements(By by)
+        {
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException, ReadOnlyCollection<WebElement>>(() => new ReadOnlyCollection<WebElement>(
                     WrappedElement.FindElements(by)
                         .Select(webElement =>
-                        new WebElement(WrappedElement.FindElement(by), by, _Driver))
-                        .ToList());
+                        new WebElement(WrappedElement.FindElement(by), _Driver)).ToList()), TimeSpan.FromSeconds(15));
         }
 
         void IWebElement.Clear()
@@ -91,7 +122,8 @@ namespace IntelliTect.TestTools.Selenate
         }
         public Task Clear()
         {
-            return RetryAction("clear");
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException>(() => WrappedElement.Clear(), TimeSpan.FromSeconds(15));
         }
 
         void IWebElement.SendKeys(string text)
@@ -101,7 +133,8 @@ namespace IntelliTect.TestTools.Selenate
 
         public Task SendKeys(string text)
         {
-            return RetryAction("sendkeys", text);
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException>(() => WrappedElement.SendKeys(text), TimeSpan.FromSeconds(15));
         }
 
         void IWebElement.Submit()
@@ -111,7 +144,8 @@ namespace IntelliTect.TestTools.Selenate
 
         public Task Submit()
         {
-            return RetryAction("submit");
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException>(() => WrappedElement.Submit(), TimeSpan.FromSeconds(15));
         }
 
         void IWebElement.Click()
@@ -121,14 +155,16 @@ namespace IntelliTect.TestTools.Selenate
 
         public Task Click()
         {
-            return RetryAction("click");
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException, ElementNotVisibleException>(() => WrappedElement.Click(), TimeSpan.FromSeconds(15));
         }
 
         // Can this easily be abstracted out to an extension method?
         // Seems to make more sense as an extension
         public Task Click(int secondsToRetry)
         {
-            return RetryAction( "click", secondsToRetry: secondsToRetry );
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException, ElementNotVisibleException>(() => WrappedElement.Click(), TimeSpan.FromSeconds(secondsToRetry));
         }
 
         string IWebElement.GetAttribute(string attributeName)
@@ -138,7 +174,8 @@ namespace IntelliTect.TestTools.Selenate
 
         public Task<string> GetAttribute(string attributeName)
         {
-            return RetryAction("getattribute", attributeName);
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.GetAttribute(attributeName), TimeSpan.FromSeconds(15));
         }
 
         string IWebElement.GetProperty(string propertyName)
@@ -148,7 +185,8 @@ namespace IntelliTect.TestTools.Selenate
 
         public Task<string> GetProperty(string propertyName)
         {
-            return RetryAction("getproperty", propertyName);
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.GetProperty(propertyName), TimeSpan.FromSeconds(15));
         }
 
         string IWebElement.GetCssValue(string propertyName)
@@ -158,113 +196,11 @@ namespace IntelliTect.TestTools.Selenate
 
         public Task<string> GetCssValue(string propertyName)
         {
-            return RetryAction("getcss", propertyName);
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<StaleElementReferenceException, string>(() => WrappedElement.GetCssValue(propertyName), TimeSpan.FromSeconds(15));
         }
 
         private IWebElement WrappedElement { get; set; }
         private readonly IWebDriver _Driver;
-
-        private async Task<string> RetryAction(string action, string text = null, int secondsToRetry = 30)
-        {
-            DateTime end = DateTime.Now.AddSeconds(secondsToRetry);
-            bool reFindElement = !Initialized;
-            List<Exception> retryExceptions = new List<Exception>();
-            while (DateTime.Now <= end)
-            {
-                await Task.Delay(250);
-                try
-                {
-                    if (reFindElement)
-                    {
-                        WrappedElement = _Driver.FindElement(By);
-                    }
-                    string result = null;
-                    switch (action)
-                    {
-                        case "click":
-                            WrappedElement.Click();
-                            return null;
-                        case "submit":
-                            WrappedElement.Submit();
-                            return null;
-                        case "sendkeys":
-                            WrappedElement.SendKeys(text);
-                            return null;
-                        case "getattribute":
-                            result = WrappedElement.GetAttribute(text);
-                            return result;
-                        case "clear":
-                            WrappedElement.Clear();
-                            return null;
-                        case "getcss":
-                            result = WrappedElement.GetCssValue(text);
-                            return result;
-                        case "getproperty":
-                            return WrappedElement.GetProperty(text);
-                        case "text":
-                            result = WrappedElement.Text;
-                            return result;
-                        case "enabled":
-                            result = WrappedElement.Enabled.ToString();
-                            return result;
-                        case "displayed":
-                            result = WrappedElement.Displayed.ToString();
-                            return result;
-                        case "selected":
-                            result = WrappedElement.Selected.ToString();
-                            return result;
-                        case "tagname":
-                            return WrappedElement.TagName;
-                        case "location":
-                            return WrappedElement.Location.ToString();
-                        case "size":
-                            return WrappedElement.Size.ToString();
-                        default:
-                            throw new InvalidOperationException(
-                                "Unknown type of Selenium action passed to WebElement.RetryAction");
-                    }
-                }
-                catch (ElementNotVisibleException e)
-                {
-                    retryExceptions.Add(e);
-                }
-                catch (StaleElementReferenceException e)
-                {
-                    retryExceptions.Add(e);
-                }
-                catch (InvalidElementStateException e)
-                {
-                    retryExceptions.Add(e);
-                }
-                catch (NoSuchElementException e)
-                {
-                    retryExceptions.Add(e);
-                }
-                reFindElement = true;
-            }
-            if (retryExceptions.Any())
-            {
-                throw new AggregateException(retryExceptions);
-            }
-            throw new Exception("Action could not complete for an unknown reason");
-        }
-
-        IWebElement ISearchContext.FindElement(By by)
-        {
-            if (!Initialized)
-            {
-                WrappedElement = _Driver.FindElement(by);
-            }
-            return WrappedElement.FindElement(by);
-        }
-
-        ReadOnlyCollection<IWebElement> ISearchContext.FindElements(By by)
-        {
-            if (!Initialized)
-            {
-                WrappedElement = _Driver.FindElement(by);
-            }
-            return WrappedElement.FindElements(by);
-        }
     }
 }

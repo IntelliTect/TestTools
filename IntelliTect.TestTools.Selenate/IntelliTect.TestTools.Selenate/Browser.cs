@@ -16,13 +16,29 @@ namespace IntelliTect.TestTools.Selenate
     public enum BrowserType
     {
         Chrome,
-        InternetExplorer
+        InternetExplorer,
+        Firefox,
+        Edge
+        // What else is worth supporting? If we support IE, there might be a few others worth supporting
     }
     public class Browser
     {
+        /// <summary>
+        /// Initializes a Selenium webdriver with some basic settings that work for many websites
+        /// </summary>
+        /// <param name="browser"></param>
         public Browser(BrowserType browser)
         {
             Driver = InitDriver(browser);
+        }
+
+        /// <summary>
+        /// Uses an existing driver to facilitate applications that need specific driver capabilities not specified in InitDriver
+        /// </summary>
+        /// <param name="driver"></param>
+        public Browser(IWebDriver driver)
+        {
+            Driver = driver;
         }
 
         public IWebDriver Driver { get; }
@@ -59,6 +75,10 @@ namespace IntelliTect.TestTools.Selenate
                     };
                     driver = new InternetExplorerDriver(ieCaps);
                     break;
+                case BrowserType.Firefox:
+                    throw new NotImplementedException();
+                case BrowserType.Edge:
+                    throw new NotImplementedException();
                 default:
                     throw new ArgumentException($"Unknown browser: {browser}");
             }
@@ -68,6 +88,8 @@ namespace IntelliTect.TestTools.Selenate
             return driver;
         }
 
+        // Figure out a good way to allow a global override on the wait timeout.
+
         /// <summary>
         /// Wraps the Selenium Driver's native web element to wait until the element exists before returning.
         /// If you need to verify an element DOESN'T exist, then call Browser.Driver.FindElement directly.
@@ -75,15 +97,10 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-		public WebElement FindElement(By by, int secondsToWait = 5)
+        public Task<IWebElement> FindElement(By by, int secondsToWait = 15)
         {
-            Console.WriteLine($"Attempting to find element using selector: {by}");
-
-            // Eventually swap this out for our own wait
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-
-            return new WebElement(Driver.FindElement(by), by, Driver);
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by), TimeSpan.FromSeconds(secondsToWait));
         }
 
         /// <summary>
@@ -93,50 +110,56 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-        public IReadOnlyCollection<WebElement> FindElements(By by, int secondsToWait = 5)
+        public Task<IReadOnlyCollection<IWebElement>> FindElements(By by, int secondsToWait = 15)
         {
-            Console.WriteLine($"Attempting to find all elements using selector: {by}");
-
-            // Eventually swap this out for our own wait
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-
-            return new ReadOnlyCollection<WebElement>(
-                            Driver.FindElements(by)
-                                    .Select(webElement => new WebElement(webElement, by, Driver))
-                                    .ToList());
+            // NOTE: Per conversation with Yuriy on Thursday, this should return an empty collection if nothing is found.
+            // Often times the use case is to assert on the collection, even if nothing is there.
+            ConditionalWait wait = new ConditionalWait();
+            try
+            {
+                return wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by), TimeSpan.FromSeconds(secondsToWait));
+            }
+            catch(AggregateException)
+            {
+                return null;
+            }
         }
 
+
+        // Does this method name make sense?
+        // It's primary use is waiting for an element to be in a certain state (displayed, enabled, etc.) before continuining with test execution.
+        // The best possible way for this to work would be to return the funcs result, and if it fails return the inverse. However, in the case where an exception is thrown, how do we know what the inverse would be?
+        // Maybe rename to StateCheck since that's what we use on PTT. Or something like CheckIfConditionEvaluates?
         /// <summary>
         ///Waits until a function evaluates to true OR times out after a specified period of time
         /// </summary>
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Secondes to wait until timeout / return false</param>
         /// <returns></returns>
-        public async Task<bool> WaitFor(Func<bool> func, int secondsToWait = 15)
+        public async Task<bool> WaitUntil(Func<bool> func, int secondsToWait = 15)
         {
-            DateTime end = DateTime.Now.AddSeconds(secondsToWait);
-            do
+            ConditionalWait wait = new ConditionalWait();
+            try
             {
-                await Task.Delay(500);
-                try
+                if (await wait.WaitFor<
+                NoSuchElementException,
+                StaleElementReferenceException,
+                ElementNotVisibleException,
+                InvalidElementStateException,
+                bool>(func, TimeSpan.FromSeconds(secondsToWait)))
                 {
-                    if (func())
-                    {
-                        return true;
-                    }
+                    return true;
                 }
-                catch (WebDriverTimeoutException)
-                {
-                    return false;
-                }
-                catch (AggregateException)
+                else
                 {
                     return false;
                 }
+            }
+            catch (AggregateException) // Worth checking for specific inner exceptions?
+            {
+                return false;
+            }
 
-            } while (DateTime.Now <= end);
-            return false;
         }
 
         /// <summary>
@@ -144,104 +167,43 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="bys"></param>
         /// <returns></returns>
-        public async Task FrameSwitchAttempt(params By[] bys)
+        public async Task FrameSwitchAttempt(int secondsToWait = 15, params By[] bys)
         {
-            var exceptions = new List<Exception>();
-            for (int i = 0; i < 50; i++)
+            // Note, some applications will break out of switching to a frame if something on page is still loading.
+            // See if restarting the whole search like we currently do on PTT is necessary, or if we can just wait for something to finish loading
+            ConditionalWait wait = new ConditionalWait();
+            foreach (By by in bys)
             {
-                try
-                {
-                    await Task.Delay(250);
-                    Driver.SwitchTo().DefaultContent();
-                    foreach (By by in bys)
-                    {
-                        // Don't use our WebElement extension for this as it has trouble being casted to IWebElementReference
-                        // And perhaps swap this out for the expected condition WaitForAndSwitchToFrame?
-                        IWebElement element = Driver.FindElement(by);
-                        Console.WriteLine("Switching to frame " + by);
-                        Driver.SwitchTo().Frame(element);
-                    }
-                    return;
-                }
-                catch (NoSuchFrameException e)
-                {
-                    exceptions.Add(e);
-                }
-                catch (InvalidOperationException e)
-                {
-                    exceptions.Add(e);
-                }
-                catch (StaleElementReferenceException e)
-                {
-                    exceptions.Add(e);
-                }
-                catch (NotFoundException e)
-                {
-                    exceptions.Add(e);
-                };
+                IWebElement element = Driver.FindElement(by);
+                await wait.WaitFor<
+                            NoSuchFrameException,
+                            InvalidOperationException,
+                            StaleElementReferenceException,
+                            NotFoundException,
+                            IWebDriver>
+                        (() => Driver.SwitchTo().Frame(element), TimeSpan.FromSeconds(secondsToWait));
             }
-            throw new AggregateException(exceptions);
         }
 
-        public async Task<bool> SwitchWindow(string title)
+        public async Task SwitchWindow(string title, int secondsToWait = 15)
         {
-            for (int i = 0; i < 50; i++)
-            {
-                string currentWindow = null;
-                try
-                {
-                    currentWindow = Driver.CurrentWindowHandle;
-                }
-                catch (NoSuchWindowException)
-                {
-                    currentWindow = "";
-                }
-
-                var availableWindows = new List<string>(Driver.WindowHandles);
-
-                foreach (string w in availableWindows)
-                {
-                    if (w != currentWindow)
-                    {
-                        try
-                        {
-                            Driver.SwitchTo().Window(w);
-                            if (Driver.Title == title)
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                Driver.SwitchTo().Window(currentWindow);
-                            }
-                        }
-                        catch (NoSuchWindowException) { }
-                    }
-                }
-
-                await Task.Delay(500);
-            }
-            return false;
+            ConditionalWait wait = new ConditionalWait();
+            await wait.WaitFor<NoSuchWindowException>(() => Driver.SwitchTo().Window(title), TimeSpan.FromSeconds(secondsToWait));
         }
 
-        public async Task<IAlert> Alert(int numberOfRetries = 50)
+        public Task<IAlert> Alert(int secondsToWait = 15)
         {
-            for (int i = 0; i < numberOfRetries; i++)
-            {
-                try
-                {
-                    return Driver.SwitchTo().Alert();
-                }
-                catch (NoAlertPresentException) { }
-                catch (UnhandledAlertException) { }
-                await Task.Delay(500);
-            }
-            return null;
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<
+                NoAlertPresentException,
+                UnhandledAlertException,
+                IAlert>
+                (() => Driver.SwitchTo().Alert(), TimeSpan.FromSeconds(secondsToWait));
         }
 
         public void TakeScreenshot()
         {
-            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}");
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
             Console.WriteLine($"Saving screenshot to location: {fullPath}");
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
             if (Driver is ITakesScreenshot takeScreenshot)

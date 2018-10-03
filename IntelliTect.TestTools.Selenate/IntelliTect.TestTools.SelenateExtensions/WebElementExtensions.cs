@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using IntelliTect.TestTools.Selenate;
+using OpenQA.Selenium;
 using System.Threading.Tasks;
 
 namespace IntelliTect.TestTools.SelenateExtensions
@@ -27,6 +28,15 @@ namespace IntelliTect.TestTools.SelenateExtensions
                 element.SendKeys(value);
                 count++;
             }
+        }
+
+        public static Task WaitAndClick( this IWebElement element )
+        {
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<
+                NoSuchElementException,
+                ElementNotVisibleException,
+                ElementClickInterceptedException>( () => element.Click() );
         }
     }
 }

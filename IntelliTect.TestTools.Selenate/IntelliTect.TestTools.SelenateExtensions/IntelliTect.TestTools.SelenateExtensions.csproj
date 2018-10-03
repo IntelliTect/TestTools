@@ -12,4 +12,8 @@
     <PackageReference Include="Selenium.WebDriver" Version="3.13.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate.csproj" />
+  </ItemGroup>
+
 </Project>
