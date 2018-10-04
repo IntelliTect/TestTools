@@ -10,6 +10,14 @@ namespace IntelliTect.TestTools.Selenate
 {
     public class ConditionalWait
     {
+        /// <summary>
+        /// Repeatedly chekcs for a condition until it is satisifed or a timeout is reached
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="func"></param>
+        /// <param name="timeToWait"></param>
+        /// <param name="exceptionsToIgnore"></param>
+        /// <returns></returns>
         public Task<TResult> WaitFor<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
             if(exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
