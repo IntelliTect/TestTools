@@ -26,7 +26,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Initializes a Selenium webdriver with some basic settings that work for many websites
         /// </summary>
-        /// <param name="browser"></param>
+        /// <param name="browser">The type of browser to instantiate when initializing Selenium Webdriver</param>
         public Browser(BrowserType browser)
         {
             Driver = InitDriver(browser);
@@ -35,77 +35,30 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Uses an existing driver to facilitate applications that need specific driver capabilities not specified in InitDriver
         /// </summary>
-        /// <param name="driver"></param>
+        /// <param name="driver">An already initialized Selenium webdriver</param>
         public Browser(IWebDriver driver)
         {
             Driver = driver;
         }
 
+        // Might be worth making this protected
         public IWebDriver Driver { get; }
-
-        // Mike C: Find a good way to abstract this out. Different projects will have different requirements here.
-        // Good candidate for an extension? Or maybe an abstract class?
-        public IWebDriver InitDriver(BrowserType browser)
-        {
-            Driver?.Quit();
-
-            IWebDriver driver = null;
-
-            switch (browser)
-            {
-                case BrowserType.Chrome:
-                    ChromeOptions chromeOptions = new ChromeOptions();
-                    chromeOptions.AddArgument("--disable-extension");
-                    chromeOptions.AddArgument("no-sandbox");
-                    chromeOptions.AddArgument("disable-infobars");
-                    chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
-                    chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
-                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
-
-                    break;
-                case BrowserType.InternetExplorer:
-                    InternetExplorerOptions ieCaps = new InternetExplorerOptions
-                    {
-                        EnablePersistentHover = true,
-                        EnsureCleanSession = true,
-                        EnableNativeEvents = true,
-                        IgnoreZoomLevel = true,
-                        IntroduceInstabilityByIgnoringProtectedModeSettings = true,
-                        RequireWindowFocus = false
-                    };
-                    driver = new InternetExplorerDriver(ieCaps);
-                    break;
-                case BrowserType.Firefox:
-                    throw new NotImplementedException();
-                case BrowserType.Edge:
-                    throw new NotImplementedException();
-                default:
-                    throw new ArgumentException($"Unknown browser: {browser}");
-            }
-
-            driver.Manage().Window.Maximize();
-            driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(2);
-            return driver;
-        }
-
-        // Figure out a good way to allow a global override on the wait timeout.
 
         /// <summary>
         /// Wraps the Selenium Driver's native web element to wait until the element exists before returning.
-        /// If you need to verify an element DOESN'T exist, then call Browser.Driver.FindElement directly.
         /// </summary>
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
         public Task<IWebElement> FindElement(By by, int secondsToWait = 15)
         {
+            // Figure out a good way to allow a global override on the wait timeout.
             ConditionalWait wait = new ConditionalWait();
             return wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by), TimeSpan.FromSeconds(secondsToWait));
         }
 
         /// <summary>
         /// Wraps the Selenium Driver's native web element to wait until at least one element exists before returning.
-        /// If you need to verify an element DOESN'T exist, then call Browser.Driver.FindElements directly.
         /// </summary>
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
@@ -125,11 +78,6 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
-
-        // Does this method name make sense?
-        // It's primary use is waiting for an element to be in a certain state (displayed, enabled, etc.) before continuining with test execution.
-        // The best possible way for this to work would be to return the funcs result, and if it fails return the inverse. However, in the case where an exception is thrown, how do we know what the inverse would be?
-        // Maybe rename to StateCheck since that's what we use on PTT. Or something like CheckIfConditionEvaluates?
         /// <summary>
         ///Waits until a function evaluates to true OR times out after a specified period of time
         /// </summary>
@@ -185,12 +133,23 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
+        /// <summary>
+        /// Attempts to switch to the window by title for a certain number of seconds before failing if the switch is unsuccessful
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="secondsToWait"></param>
+        /// <returns></returns>
         public async Task SwitchWindow(string title, int secondsToWait = 15)
         {
             ConditionalWait wait = new ConditionalWait();
             await wait.WaitFor<NoSuchWindowException>(() => Driver.SwitchTo().Window(title), TimeSpan.FromSeconds(secondsToWait));
         }
 
+        /// <summary>
+        /// Checks for a present alert for a certain number of seconds before continuing
+        /// </summary>
+        /// <param name="secondsToWait"></param>
+        /// <returns></returns>
         public Task<IAlert> Alert(int secondsToWait = 15)
         {
             ConditionalWait wait = new ConditionalWait();
@@ -211,6 +170,49 @@ namespace IntelliTect.TestTools.Selenate
                 Screenshot screenshot = takeScreenshot.GetScreenshot();
                 screenshot?.SaveAsFile(fullPath, ScreenshotImageFormat.Png);
             }
+        }
+
+        protected IWebDriver InitDriver(BrowserType browser)
+        {
+            Driver?.Quit();
+
+            IWebDriver driver = null;
+
+            switch (browser)
+            {
+                case BrowserType.Chrome:
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    chromeOptions.AddArgument("--disable-extension");
+                    chromeOptions.AddArgument("no-sandbox");
+                    chromeOptions.AddArgument("disable-infobars");
+                    chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
+                    chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
+                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
+
+                    break;
+                case BrowserType.InternetExplorer:
+                    InternetExplorerOptions ieCaps = new InternetExplorerOptions
+                    {
+                        EnablePersistentHover = true,
+                        EnsureCleanSession = true,
+                        EnableNativeEvents = true,
+                        IgnoreZoomLevel = true,
+                        IntroduceInstabilityByIgnoringProtectedModeSettings = true,
+                        RequireWindowFocus = false
+                    };
+                    driver = new InternetExplorerDriver(ieCaps);
+                    break;
+                case BrowserType.Firefox:
+                    throw new NotImplementedException();
+                case BrowserType.Edge:
+                    throw new NotImplementedException();
+                default:
+                    throw new ArgumentException($"Unknown browser: {browser}");
+            }
+
+            driver.Manage().Window.Maximize();
+            driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(2);
+            return driver;
         }
     }
 }

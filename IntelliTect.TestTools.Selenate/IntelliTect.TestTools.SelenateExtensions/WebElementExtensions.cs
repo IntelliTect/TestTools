@@ -1,4 +1,5 @@
-﻿using IntelliTect.TestTools.Selenate;
+﻿using System;
+using IntelliTect.TestTools.Selenate;
 using OpenQA.Selenium;
 using System.Threading.Tasks;
 
@@ -13,30 +14,33 @@ namespace IntelliTect.TestTools.SelenateExtensions
             js.ExecuteScript($"window.scrollTo(0,{position})");
         }
 
-        public static void FillInWithAndTab(this IWebElement element, string value)
+        public static void FillInWithAndTabWhenReady(this IWebElement element, string value)
         {
-            element.FillInWith(value);
+            element.FillInWithWhenReady(value);
             element.SendKeys(Keys.Tab);
         }
 
-        public static void FillInWith(this IWebElement element, string value)
+        public static void FillInWithWhenReady(this IWebElement element, string value)
         {
             var count = 0;
+            ConditionalWait wait = new ConditionalWait();
             while (element.GetAttribute("value") != value && count < 5)
             {
+                //wait for Clear
                 element.Clear();
+                //wait for Sendkeys
                 element.SendKeys(value);
                 count++;
             }
         }
 
-        public static Task WaitAndClick( this IWebElement element )
+        public static Task ClickWhenReady( this IWebElement element, int secondsToTry = 5 )
         {
             ConditionalWait wait = new ConditionalWait();
             return wait.WaitFor<
                 NoSuchElementException,
                 ElementNotVisibleException,
-                ElementClickInterceptedException>( () => element.Click() );
+                ElementClickInterceptedException>( () => element.Click(), TimeSpan.FromSeconds( secondsToTry ) );
         }
     }
 }

@@ -176,12 +176,11 @@ namespace IntelliTect.TestTools.Selenate
         {
             DateTime endTime = DateTime.Now.Add(timeToWait);
             List<Exception> exceptions = new List<Exception>();
-            TResult task = default(TResult);
             do
             {
                 try
                 {
-                    task = actionToWaitForComplete();
+                    return actionToWaitForComplete();
                 }
                 catch (Exception ex) when (types.Contains(ex.GetType()))
                 {

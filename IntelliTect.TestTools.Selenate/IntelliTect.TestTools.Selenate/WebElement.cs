@@ -159,14 +159,6 @@ namespace IntelliTect.TestTools.Selenate
             return wait.WaitFor<StaleElementReferenceException, ElementNotVisibleException>(() => WrappedElement.Click(), TimeSpan.FromSeconds(15));
         }
 
-        // Can this easily be abstracted out to an extension method?
-        // Seems to make more sense as an extension
-        public Task Click(int secondsToRetry)
-        {
-            ConditionalWait wait = new ConditionalWait();
-            return wait.WaitFor<StaleElementReferenceException, ElementNotVisibleException>(() => WrappedElement.Click(), TimeSpan.FromSeconds(secondsToRetry));
-        }
-
         string IWebElement.GetAttribute(string attributeName)
         {
             return GetAttribute(attributeName).ConfigureAwait(false).GetAwaiter().GetResult();
