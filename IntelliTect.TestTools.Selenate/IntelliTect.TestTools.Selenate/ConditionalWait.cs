@@ -1,9 +1,6 @@
-﻿using OpenQA.Selenium;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IntelliTect.TestTools.Selenate
@@ -11,12 +8,12 @@ namespace IntelliTect.TestTools.Selenate
     public class ConditionalWait
     {
         /// <summary>
-        /// Repeatedly chekcs for a condition until it is satisifed or a timeout is reached
+        /// Repeatedly checks for a condition with void return type until it is satisifed or a timeout is reached
         /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="timeToWait"></param>
-        /// <param name="exceptionsToIgnore"></param>
+        /// <typeparam name="TResult">Return type of the function to evaluate</typeparam>
+        /// <param name="func">Function to check for valid evaluation</param>
+        /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
+        /// <param name="exceptionsToIgnore">A list of exceptions to ignore when attempting to evaluate the function</param>
         /// <returns></returns>
         public Task<TResult> WaitFor<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
@@ -27,6 +24,13 @@ namespace IntelliTect.TestTools.Selenate
             return ExecuteWait(func, timeToWait, exceptionsToIgnore);
         }
 
+        /// <summary>
+        /// Repeatedly checks for a condition with void return type until it is satisifed or a timeout is reached
+        /// </summary>
+        /// <param name="action">Function to check for valid evaluation</param>
+        /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
+        /// <param name="exceptionsToIgnore">A list of exceptions to ignore when attempting to evaluate the function</param>
+        /// <returns></returns>
         public Task WaitFor(Action action, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
             if (exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
