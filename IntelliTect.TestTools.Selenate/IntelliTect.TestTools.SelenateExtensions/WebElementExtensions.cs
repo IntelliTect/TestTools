@@ -7,6 +7,16 @@ namespace IntelliTect.TestTools.SelenateExtensions
 {
     public static class WebElementExtensions
     {
+        public static void FindElementWhenReady(this IWebElement element, By by)
+        {
+
+        }
+
+        public static void FindElementsWhenReady(this IWebElement element, By by)
+        {
+
+        }
+
         public static void ScrollIntoView(this IWebElement element, IWebDriver driver, int pixelsFromTopOfScreen = 200)
         {
             int position = element.Location.Y - pixelsFromTopOfScreen;
@@ -20,16 +30,19 @@ namespace IntelliTect.TestTools.SelenateExtensions
             element.SendKeys(Keys.Tab);
         }
 
-        public static void FillInWithWhenReady(this IWebElement element, string value)
+        public static void FillInWithWhenReady(this IWebElement element, string value, int secondstoTry = 5)
         {
             var count = 0;
             ConditionalWait wait = new ConditionalWait();
             while (element.GetAttribute("value") != value && count < 5)
             {
-                //wait for Clear
-                element.Clear();
-                //wait for Sendkeys
-                element.SendKeys(value);
+                wait.WaitFor<NoSuchElementException, 
+                    ElementNotVisibleException>(
+                    () => element.Clear(), TimeSpan.FromSeconds(secondstoTry));
+                wait.WaitFor<NoSuchElementException, 
+                    ElementNotVisibleException, 
+                    ElementNotInteractableException>(
+                    () => element.SendKeys(value), TimeSpan.FromSeconds(secondstoTry));
                 count++;
             }
         }

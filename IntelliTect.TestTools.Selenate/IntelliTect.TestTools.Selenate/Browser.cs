@@ -24,7 +24,15 @@ namespace IntelliTect.TestTools.Selenate
     public class Browser
     {
         /// <summary>
-        /// Initializes a Selenium webdriver with some basic settings that work for many websites
+        /// Initializes a Selenium webdriver in Chrome with some basic settings that work for many websites
+        /// </summary>
+        public Browser()
+        {
+            Driver = InitDriver(BrowserType.Chrome);
+        }
+
+        /// <summary>
+        /// Initializes a Selenium webdriver of the specified browser type with some basic settings that work for many websites
         /// </summary>
         /// <param name="browser">The type of browser to instantiate when initializing Selenium Webdriver</param>
         public Browser(BrowserType browser)
