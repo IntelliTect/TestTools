@@ -8,6 +8,33 @@ namespace IntelliTect.TestTools.SelenateExtensions
     public static class BrowserExtensions
     {
         /// <summary>
+        /// Attempts to switch to the window by title for a certain number of seconds before failing if the switch is unsuccessful
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="secondsToWait"></param>
+        /// <returns></returns>
+        public static Task SwitchWindow(this Browser browser, string title, int secondsToWait = 15)
+        {
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<NoSuchWindowException>(() => browser.Driver.SwitchTo().Window(title), TimeSpan.FromSeconds(secondsToWait));
+        }
+
+        /// <summary>
+        /// Checks for a present alert for a certain number of seconds before continuing
+        /// </summary>
+        /// <param name="secondsToWait"></param>
+        /// <returns></returns>
+        public static Task<IAlert> Alert(this Browser browser, int secondsToWait = 15)
+        {
+            ConditionalWait wait = new ConditionalWait();
+            return wait.WaitFor<
+                NoAlertPresentException,
+                UnhandledAlertException,
+                IAlert>
+                (() => browser.Driver.SwitchTo().Alert(), TimeSpan.FromSeconds(secondsToWait));
+        }
+
+        /// <summary>
         /// Switches to each frame in succession to avoid having to explicitely call SwitchTo() multipled times for nested frames
         /// </summary>
         /// <param name="bys"></param>

@@ -73,8 +73,6 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public async Task<IReadOnlyCollection<IWebElement>> FindElements(By by, int secondsToWait = 15)
         {
-            // NOTE: Per conversation with Yuriy on Thursday, this should return an empty collection if nothing is found.
-            // Often times the use case is to assert on the collection, even if nothing is there.
             ConditionalWait wait = new ConditionalWait();
             try
             {
@@ -82,13 +80,8 @@ namespace IntelliTect.TestTools.Selenate
             }
             catch(AggregateException)
             {
-                return await null;
+                return new ReadOnlyCollection<IWebElement>(new List<IWebElement>());
             }
-        }
-
-        public IReadOnlyCollection<IWebElement> Test()
-        {
-            return new ReadOnlyCollection<IWebElement>(new List<IWebElement>());
         }
 
         /// <summary>
@@ -121,33 +114,6 @@ namespace IntelliTect.TestTools.Selenate
                 return false;
             }
 
-        }
-
-        /// <summary>
-        /// Attempts to switch to the window by title for a certain number of seconds before failing if the switch is unsuccessful
-        /// </summary>
-        /// <param name="title"></param>
-        /// <param name="secondsToWait"></param>
-        /// <returns></returns>
-        public async Task SwitchWindow(string title, int secondsToWait = 15)
-        {
-            ConditionalWait wait = new ConditionalWait();
-            await wait.WaitFor<NoSuchWindowException>(() => Driver.SwitchTo().Window(title), TimeSpan.FromSeconds(secondsToWait));
-        }
-
-        /// <summary>
-        /// Checks for a present alert for a certain number of seconds before continuing
-        /// </summary>
-        /// <param name="secondsToWait"></param>
-        /// <returns></returns>
-        public Task<IAlert> Alert(int secondsToWait = 15)
-        {
-            ConditionalWait wait = new ConditionalWait();
-            return wait.WaitFor<
-                NoAlertPresentException,
-                UnhandledAlertException,
-                IAlert>
-                (() => Driver.SwitchTo().Alert(), TimeSpan.FromSeconds(secondsToWait));
         }
 
         public void TakeScreenshot()
