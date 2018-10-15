@@ -24,27 +24,28 @@ namespace IntelliTect.TestTools.SelenateExtensions
             js.ExecuteScript($"window.scrollTo(0,{position})");
         }
 
-        public static void FillInWithAndTabWhenReady(this IWebElement element, string value)
+        public static async Task FillInWithAndTabWhenReady(this IWebElement element, string value)
         {
-            element.FillInWithWhenReady(value);
-            element.SendKeys(Keys.Tab);
+            await element.FillInWithWhenReady(value);
+            return element.SendKeys(Keys.Tab);
         }
 
-        public static void FillInWithWhenReady(this IWebElement element, string value, int secondstoTry = 5)
+        public static async Task FillInWithWhenReady(this IWebElement element, string value, int secondstoTry = 5)
         {
             var count = 0;
             ConditionalWait wait = new ConditionalWait();
             while (element.GetAttribute("value") != value && count < 5)
             {
-                wait.WaitFor<NoSuchElementException, 
+                await wait.WaitFor<NoSuchElementException, 
                     ElementNotVisibleException>(
                     () => element.Clear(), TimeSpan.FromSeconds(secondstoTry));
-                wait.WaitFor<NoSuchElementException, 
+                await wait.WaitFor<NoSuchElementException, 
                     ElementNotVisibleException, 
                     ElementNotInteractableException>(
                     () => element.SendKeys(value), TimeSpan.FromSeconds(secondstoTry));
                 count++;
             }
+            return null;
         }
 
         public static Task ClickWhenReady( this IWebElement element, int secondsToTry = 5 )

@@ -58,11 +58,11 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-        public Task<IWebElement> FindElement(By by, int secondsToWait = 15)
+        public async Task<IWebElement> FindElement(By by, int secondsToWait = 15)
         {
             // Figure out a good way to allow a global override on the wait timeout.
             ConditionalWait wait = new ConditionalWait();
-            return wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by), TimeSpan.FromSeconds(secondsToWait));
+            return await wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by), TimeSpan.FromSeconds(secondsToWait));
         }
 
         /// <summary>
@@ -71,26 +71,31 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-        public Task<IReadOnlyCollection<IWebElement>> FindElements(By by, int secondsToWait = 15)
+        public async Task<IReadOnlyCollection<IWebElement>> FindElements(By by, int secondsToWait = 15)
         {
             // NOTE: Per conversation with Yuriy on Thursday, this should return an empty collection if nothing is found.
             // Often times the use case is to assert on the collection, even if nothing is there.
             ConditionalWait wait = new ConditionalWait();
             try
             {
-                return wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by), TimeSpan.FromSeconds(secondsToWait));
+                return await wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by), TimeSpan.FromSeconds(secondsToWait));
             }
             catch(AggregateException)
             {
-                return null;
+                return await null;
             }
+        }
+
+        public IReadOnlyCollection<IWebElement> Test()
+        {
+            return new ReadOnlyCollection<IWebElement>(new List<IWebElement>());
         }
 
         /// <summary>
         ///Waits until a function evaluates to true OR times out after a specified period of time
         /// </summary>
         /// <param name="func">Function to evaluate</param>
-        /// <param name="secondsToWait">Secondes to wait until timeout / return false</param>
+        /// <param name="secondsToWait">Seconds to wait until timeout / return false</param>
         /// <returns></returns>
         public async Task<bool> WaitUntil(Func<bool> func, int secondsToWait = 15)
         {
@@ -116,29 +121,6 @@ namespace IntelliTect.TestTools.Selenate
                 return false;
             }
 
-        }
-
-        /// <summary>
-        /// Switches to each frame in succession to avoid having to explicitely call SwitchTo() multipled times for nested frames
-        /// </summary>
-        /// <param name="bys"></param>
-        /// <returns></returns>
-        public async Task FrameSwitchAttempt(int secondsToWait = 15, params By[] bys)
-        {
-            // Note, some applications will break out of switching to a frame if something on page is still loading.
-            // See if restarting the whole search like we currently do on PTT is necessary, or if we can just wait for something to finish loading
-            ConditionalWait wait = new ConditionalWait();
-            foreach (By by in bys)
-            {
-                IWebElement element = Driver.FindElement(by);
-                await wait.WaitFor<
-                            NoSuchFrameException,
-                            InvalidOperationException,
-                            StaleElementReferenceException,
-                            NotFoundException,
-                            IWebDriver>
-                        (() => Driver.SwitchTo().Frame(element), TimeSpan.FromSeconds(secondsToWait));
-            }
         }
 
         /// <summary>
