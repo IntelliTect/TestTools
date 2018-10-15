@@ -61,8 +61,7 @@ namespace IntelliTect.TestTools.Selenate
         public async Task<IWebElement> FindElement(By by, int secondsToWait = 15)
         {
             // Figure out a good way to allow a global override on the wait timeout.
-            ConditionalWait wait = new ConditionalWait();
-            return await wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by), TimeSpan.FromSeconds(secondsToWait));
+            return await Wait.Until<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by), TimeSpan.FromSeconds(secondsToWait));
         }
 
         /// <summary>
@@ -73,10 +72,9 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public async Task<IReadOnlyCollection<IWebElement>> FindElements(By by, int secondsToWait = 15)
         {
-            ConditionalWait wait = new ConditionalWait();
             try
             {
-                return await wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by), TimeSpan.FromSeconds(secondsToWait));
+                return await Wait.Until<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by), TimeSpan.FromSeconds(secondsToWait));
             }
             catch(AggregateException)
             {
@@ -92,10 +90,9 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public async Task<bool> WaitUntil(Func<bool> func, int secondsToWait = 15)
         {
-            ConditionalWait wait = new ConditionalWait();
             try
             {
-                if (await wait.WaitFor<
+                if (await Wait.Until<
                 NoSuchElementException,
                 StaleElementReferenceException,
                 ElementNotVisibleException,

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.TestTools.Selenate
 {
-    public class ConditionalWait
+    public static class Wait
     {
         /// <summary>
         /// Repeatedly checks for a condition with void return type until it is satisifed or a timeout is reached
@@ -15,7 +15,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <param name="exceptionsToIgnore">A list of exceptions to ignore when attempting to evaluate the function</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
+        public static Task<TResult> Until<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
             if(exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
             {
@@ -31,7 +31,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <param name="exceptionsToIgnore">A list of exceptions to ignore when attempting to evaluate the function</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor(Action action, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
+        public static Task Until(Action action, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
             if (exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
             {
@@ -48,7 +48,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TException, TResult>(Func<TResult> func, TimeSpan timeToWait)
+        public static Task<TResult> Until<TException, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException : Exception
         {
             return ExecuteWait(func, timeToWait, typeof(TException));
@@ -61,7 +61,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="action">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor<TException>(Action action, TimeSpan timeToWait)
+        public static Task Until<TException>(Action action, TimeSpan timeToWait)
             where TException : Exception
         {
             return ExecuteWait(action, timeToWait, typeof(TException));
@@ -76,7 +76,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TException1, TException2, TResult>(Func<TResult> func, TimeSpan timeToWait)
+        public static Task<TResult> Until<TException1, TException2, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
         {
@@ -91,7 +91,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="action">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor<TException1, TException2>(Action action, TimeSpan timeToWait)
+        public static Task Until<TException1, TException2>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
         {
@@ -108,7 +108,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TException1, TException2, TException3, TResult>(Func<TResult> func, TimeSpan timeToWait)
+        public static Task<TResult> Until<TException1, TException2, TException3, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
@@ -125,7 +125,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="action">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor<TException1, TException2, TException3>(Action action, TimeSpan timeToWait)
+        public static Task Until<TException1, TException2, TException3>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
@@ -144,7 +144,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TException1, TException2, TException3, TException4, TResult>(Func<TResult> func, TimeSpan timeToWait)
+        public static Task<TResult> Until<TException1, TException2, TException3, TException4, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
@@ -163,7 +163,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="action">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor<TException1, TException2, TException3, TException4>(Action action, TimeSpan timeToWait)
+        public static Task Until<TException1, TException2, TException3, TException4>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
@@ -172,7 +172,7 @@ namespace IntelliTect.TestTools.Selenate
             return ExecuteWait(action, timeToWait, typeof(TException1), typeof(TException2), typeof(TException3), typeof(TException4));
         }
 
-        private async Task<TResult> ExecuteWait<TResult>(Func<TResult> actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
+        private static async Task<TResult> ExecuteWait<TResult>(Func<TResult> actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
         {
             DateTime endTime = DateTime.Now.Add(timeToWait);
             List<Exception> exceptions = new List<Exception>();
@@ -191,7 +191,7 @@ namespace IntelliTect.TestTools.Selenate
             throw new AggregateException(exceptions);
         }
 
-        private async Task ExecuteWait(Action actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
+        private static async Task ExecuteWait(Action actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
         {
             DateTime endTime = DateTime.Now.Add(timeToWait);
             List<Exception> exceptions = new List<Exception>();

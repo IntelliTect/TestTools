@@ -14,8 +14,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="by">The selenium By statement for the child element</param>
         public static Task<IWebElement> FindElementWhenReady(this IWebElement element, By by, int secondsToTry = 5)
         {
-            ConditionalWait wait = new ConditionalWait();
-            return wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IWebElement>(
+            return Wait.Until<NoSuchElementException, StaleElementReferenceException, IWebElement>(
                 () => element.FindElement(by), TimeSpan.FromSeconds(secondsToTry));
         }
 
@@ -25,8 +24,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="by">The selenium By statement for the child element</param>
         public static Task<IReadOnlyCollection<IWebElement>> FindElementsWhenReady(this IWebElement element, By by, int secondsToTry = 5)
         {
-            ConditionalWait wait = new ConditionalWait();
-            return wait.WaitFor<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(
+            return Wait.Until<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(
                 () => element.FindElements(by), TimeSpan.FromSeconds(secondsToTry));
         }
 
@@ -63,14 +61,13 @@ namespace IntelliTect.TestTools.SelenateExtensions
         public static async Task FillInWithWhenReady(this IWebElement element, string value, int secondstoTry = 5)
         {
             var count = 0;
-            ConditionalWait wait = new ConditionalWait();
             while (element.GetAttribute("value") != value && count < 5)
             {
-                await wait.WaitFor<NoSuchElementException, 
+                await Wait.Until<NoSuchElementException, 
                     ElementNotVisibleException,
                     StaleElementReferenceException>(
                     () => element.Clear(), TimeSpan.FromSeconds(secondstoTry));
-                await wait.WaitFor<NoSuchElementException, 
+                await Wait.Until<NoSuchElementException, 
                     ElementNotVisibleException, 
                     ElementNotInteractableException,
                     StaleElementReferenceException>(
@@ -84,8 +81,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// </summary>
         public static Task ClickWhenReady( this IWebElement element, int secondsToTry = 5 )
         {
-            ConditionalWait wait = new ConditionalWait();
-            return wait.WaitFor<
+            return Wait.Until<
                 NoSuchElementException,
                 ElementNotVisibleException,
                 ElementClickInterceptedException,
