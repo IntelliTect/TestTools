@@ -11,15 +11,15 @@ namespace GoogleSearch
         {
         }
         
-        public WebElement FindElement(By by)
+        public IWebElement FindElement(By by)
         {
-            return new WebElement(Find(by).ConfigureAwait(false).GetAwaiter().GetResult(), Driver);
+            return Find(by).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         // Instead of doing this, I should just do a separate project demonstrating async usage on something more complex than a Google search
-        public async Task<WebElement> FindElementAsync(By by)
+        public async Task<IWebElement> FindElementAsync(By by)
         {
-            return new WebElement(await Find(by), Driver);
+            return await Find(by);
         }
 
         // When running tests in succession, Google sometimes refuses the connection.
