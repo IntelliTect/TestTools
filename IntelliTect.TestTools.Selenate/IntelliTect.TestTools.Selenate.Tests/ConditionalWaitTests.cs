@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntelliTect.TestTools.Selenate.Tests
@@ -6,7 +7,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
     public class ConditionalWaitTests
     {
         [Fact]
-        public async void CheckActionParamsForTypeChecking()
+        public async Task CheckActionParamsForTypeChecking()
         {
             ConditionalWait wait = new ConditionalWait();
             Exception ex = await Assert.ThrowsAsync<ArgumentException>(() => wait.WaitFor(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(string)));
@@ -14,7 +15,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public async void CheckFuncParamsForTypeChecking()
+        public async Task CheckFuncParamsForTypeChecking()
         {
             ConditionalWait wait = new ConditionalWait();
             Exception ex = await Assert.ThrowsAsync<ArgumentException>(() => wait.WaitFor(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(string)));
@@ -22,7 +23,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public async void CheckForUnexpectedException()
+        public async Task CheckForUnexpectedException()
         {
             ConditionalWait wait = new ConditionalWait();
             await Assert.ThrowsAsync<NullReferenceException>(() => wait.WaitFor<ArgumentNullException>(() => TestNullRefException(), TimeSpan.FromSeconds(1)));

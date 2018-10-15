@@ -80,7 +80,7 @@ namespace IntelliTect.TestTools.Selenate
             }
             catch(AggregateException)
             {
-                return new ReadOnlyCollection<IWebElement>(new List<IWebElement>());
+                return Array.Empty<IWebElement>();
             }
         }
 
