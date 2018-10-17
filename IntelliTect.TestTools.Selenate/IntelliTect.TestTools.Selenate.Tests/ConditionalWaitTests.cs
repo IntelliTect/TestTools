@@ -26,6 +26,19 @@ namespace IntelliTect.TestTools.Selenate.Tests
             await Assert.ThrowsAsync<NullReferenceException>(() => Wait.Until<ArgumentNullException>(() => TestNullRefException(), TimeSpan.FromSeconds(1)));
         }
 
+        [Fact]
+        public async Task CheckForExpectedFailure()
+        {
+            await Assert.ThrowsAsync<AggregateException>(
+                () => Wait.Until<NullReferenceException>(() => EqualsFive(4), TimeSpan.FromSeconds(1)));
+        }
+
+        [Fact]
+        public async Task CheckForExcpectedSuccess()
+        {
+            Assert.True(await Wait.Until<NullReferenceException>(() => EqualsFive(5), TimeSpan.FromSeconds(1)));
+        }
+
         private void TestVoidDelegate()
         {
             throw new Exception();
@@ -39,6 +52,11 @@ namespace IntelliTect.TestTools.Selenate.Tests
         private void TestNullRefException()
         {
             throw new NullReferenceException();
+        }
+
+        private bool EqualsFive(int value)
+        {
+            return value == 5;
         }
     }
 }
