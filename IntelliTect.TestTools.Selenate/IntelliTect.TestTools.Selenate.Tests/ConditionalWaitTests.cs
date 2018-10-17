@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Sdk;
 
 namespace IntelliTect.TestTools.Selenate.Tests
 {
@@ -10,14 +11,14 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public async Task CheckActionParamsForTypeChecking()
         {
             Exception ex = await Assert.ThrowsAsync<ArgumentException>(() => Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(string)));
-            Assert.Equal("Invalid type passed into exceptionsToIgnore paramter. Must be of type Exception.", ex.Message);
+            Assert.Equal("Invalid type passed into exceptionsToIgnore parameter. Must be of type Exception.", ex.Message);
         }
 
         [Fact]
         public async Task CheckFuncParamsForTypeChecking()
         {
             Exception ex = await Assert.ThrowsAsync<ArgumentException>(() => Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(string)));
-            Assert.Equal("Invalid type passed into exceptionsToIgnore paramter. Must be of type Exception.", ex.Message);
+            Assert.Equal("Invalid type passed into exceptionsToIgnore parameter. Must be of type Exception.", ex.Message);
         }
 
         [Fact]
@@ -30,13 +31,25 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public async Task CheckForExpectedFailure()
         {
             await Assert.ThrowsAsync<AggregateException>(
-                () => Wait.Until<NullReferenceException>(() => EqualsFive(4), TimeSpan.FromSeconds(1)));
+                () => Wait.Until<EqualException>(() => Equals( 4, 5 ), TimeSpan.FromSeconds(1)));
         }
 
         [Fact]
-        public async Task CheckForExcpectedSuccess()
+        public async Task CheckForExpectedSuccess()
         {
-            Assert.True(await Wait.Until<NullReferenceException>(() => EqualsFive(5), TimeSpan.FromSeconds(1)));
+            // If this ever breaks, it should throw an exception
+            await Wait.Until<EqualException>(() => Equals(5, 5), TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public async Task CheckForSuccessAfterFailure()
+        {
+            // IN PROGRESS
+            //int comparisonValue = 4;
+            //Task result = new Task(() => Wait.Until<EqualException>(() => Equals(5, comparisonValue), TimeSpan.FromSeconds(1)));
+
+            //await Task.Delay(100);
+            // Change wait to valid arguments
         }
 
         private void TestVoidDelegate()
@@ -54,9 +67,13 @@ namespace IntelliTect.TestTools.Selenate.Tests
             throw new NullReferenceException();
         }
 
-        private bool EqualsFive(int value)
+        private void Equals(int expected, int value)
         {
-            return value == 5;
+            if (value == expected)
+            {
+                return;
+            }
+            throw new EqualException(expected, value);
         }
     }
 }
