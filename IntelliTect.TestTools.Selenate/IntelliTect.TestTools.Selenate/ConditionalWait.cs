@@ -17,7 +17,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>An async task that can return a value of type TResult</returns>
         public static Task<TResult> Until<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
-            if(exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
+            if (!exceptionsToIgnore.Any(e => e.IsSubclassOf(typeof(Exception))))
             {
                 throw new ArgumentException("Invalid type passed into exceptionsToIgnore parameter. Must be of type Exception.");
             }
@@ -33,7 +33,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>An async task for the operation</returns>
         public static Task Until(Action action, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
-            if (exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
+            if (!exceptionsToIgnore.Any(e => e.IsSubclassOf(typeof(Exception))))
             {
                 throw new ArgumentException("Invalid type passed into exceptionsToIgnore parameter. Must be of type Exception.");
             }
