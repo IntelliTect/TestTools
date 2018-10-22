@@ -27,6 +27,20 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
+        public void CheckActionParamsForMixedInvalidTypeChecking()
+        {
+            Assert.ThrowsAsync<ArgumentException>(
+                () => Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(object)));
+        }
+
+        [Fact]
+        public void CheckFuncParamsForMixedInvalidTypeChecking()
+        {
+            Assert.ThrowsAsync<ArgumentException>(
+                () => Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(object), typeof(Exception)));
+        }
+
+        [Fact]
         public void CheckActionParamsForValidTypeChecking()
         {
             Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(NullReferenceException));
@@ -39,9 +53,27 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
+        public void CheckActionsParamsForBaseTypeChecking()
+        {
+            Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(Exception));
+        }
+
+        [Fact]
         public void CheckFuncParamsForBaseTypeChecking()
         {
             Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(Exception));
+        }
+
+        [Fact]
+        public void CheckActionParamsForMixedTypeChecking()
+        {
+            Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException));
+        }
+
+        [Fact]
+        public void CheckFuncParamsForMixedTypeChecking()
+        {
+            Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException));
         }
 
         [Fact]
@@ -71,7 +103,6 @@ namespace IntelliTect.TestTools.Selenate.Tests
         [Fact]
         public void CheckForExpectedSuccess()
         {
-            // If this ever breaks, it should throw an exception
             Wait.Until<EqualException>(() => Equals(5, 5), TimeSpan.FromSeconds(1));
         }
 
