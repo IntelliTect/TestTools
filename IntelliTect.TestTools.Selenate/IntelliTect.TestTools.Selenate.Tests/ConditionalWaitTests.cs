@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -76,6 +75,10 @@ namespace IntelliTect.TestTools.Selenate.Tests
             Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException));
         }
 
+        // Might need explicit scenarios for both func and action scenarios in the below examples.
+        // Gauge based on how much Wait needs to change based on implementation.
+        // Might also need some additional testing around making sure Wait.Until actually times out when expected
+
         [Fact]
         public async Task CheckForUnexpectedExceptionType()
         {
@@ -97,7 +100,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         {
             await Assert.ThrowsAsync<AggregateException>(
                 () => Wait.Until<EqualException>(
-                    () => Equals( 4, 5 ), TimeSpan.FromSeconds(1)));
+                    () => Equals(4, 5), TimeSpan.FromSeconds(1)));
         }
 
         [Fact]
@@ -111,43 +114,64 @@ namespace IntelliTect.TestTools.Selenate.Tests
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            await Wait.Until<InvalidOperationException>(() => IterateResults(true), TimeSpan.FromSeconds(10));
+            await Wait.Until<InvalidOperationException>(() => IterateResults(2, 1), TimeSpan.FromSeconds(3));
             sw.Stop();
-            Assert.True(sw.Elapsed < TimeSpan.FromSeconds(10), "Timeout was reached when it wasn't expected to be");
+            Assert.True(sw.Elapsed < TimeSpan.FromSeconds(3), "Timeout was reached when it wasn't expected to be");
         }
 
         [Fact]
-        public async Task CheckForMultipleExpectedFailuresByGeneric()
+        public async Task CheckForTwoExpectedFailuresByParams()
         {
             AggregateException ex = await Assert.ThrowsAsync<AggregateException>(
-                () => Wait.Until<InvalidOperationException, InvalidProgramException>(() => IterateResults(false), TimeSpan.FromSeconds(5)));
+                () => Wait.Until(() => IterateResults(5, 2), TimeSpan.FromSeconds(2), typeof(InvalidOperationException), typeof(InvalidProgramException)));
             Assert.NotNull(ex.InnerExceptions.OfType<InvalidOperationException>());
             Assert.NotNull(ex.InnerExceptions.OfType<InvalidProgramException>());
         }
 
         [Fact]
-        public async Task CheckForMultipleExpectedFailuresByParams()
+        public async Task CheckForTwoExpectedFailuresByGeneric()
         {
             AggregateException ex = await Assert.ThrowsAsync<AggregateException>(
-                () => Wait.Until(() => IterateResults(false), TimeSpan.FromSeconds(5), typeof(InvalidOperationException), typeof(InvalidProgramException)));
+                () => Wait.Until<InvalidOperationException, InvalidProgramException>(() => IterateResults(5, 2), TimeSpan.FromSeconds(2)));
             Assert.NotNull(ex.InnerExceptions.OfType<InvalidOperationException>());
             Assert.NotNull(ex.InnerExceptions.OfType<InvalidProgramException>());
         }
 
-        // Make sure to also cover scenarios of three and four generic types
+        // Might need some more testing around the three and four exception scenarios
 
         [Fact]
+        public async Task CheckForThreeExpectedFailuresWithGeneric()
+        {
+            AggregateException ex = await Assert.ThrowsAsync<AggregateException>(
+                () => Wait.Until<InvalidOperationException, InvalidProgramException, IndexOutOfRangeException>(() => IterateResults(5, 3), TimeSpan.FromSeconds(2)));
+            Assert.NotNull(ex.InnerExceptions.OfType<InvalidOperationException>());
+            Assert.NotNull(ex.InnerExceptions.OfType<InvalidProgramException>());
+            Assert.NotNull(ex.InnerExceptions.OfType<IndexOutOfRangeException>());
+        }
+
+        [Fact]
+        public async Task CheckForFourExpectedFailuresWithGeneric()
+        {
+            AggregateException ex = await Assert.ThrowsAsync<AggregateException>(
+                () => Wait.Until<InvalidOperationException, InvalidProgramException, IndexOutOfRangeException, ArgumentNullException>(() => IterateResults(5, 4), TimeSpan.FromSeconds(2)));
+            Assert.NotNull(ex.InnerExceptions.OfType<InvalidOperationException>());
+            Assert.NotNull(ex.InnerExceptions.OfType<InvalidProgramException>());
+            Assert.NotNull(ex.InnerExceptions.OfType<IndexOutOfRangeException>());
+            Assert.NotNull(ex.InnerExceptions.OfType<ArgumentNullException>());
+        }
+
+        //[Fact]
         public void CheckForMultipleFailuresByGenericOneUnexpected()
         {
-            Assert.ThrowsAsync<InvalidOperationException>(
-                () => Wait.Until<InvalidProgramException>(() => IterateResults(false), TimeSpan.FromSeconds(5)));
+            //Assert.ThrowsAsync<InvalidOperationException>(
+            //    () => Wait.Until<InvalidProgramException>(() => IterateResults(false, 2, 2), TimeSpan.FromSeconds(5)));
         }
 
-        [Fact]
+        //[Fact]
         public void CheckForMultipleFailuresByParamsOneUnexpected()
         {
-            Assert.ThrowsAsync<InvalidOperationException>(
-                () => Wait.Until(() => IterateResults(false), TimeSpan.FromSeconds(5), typeof(InvalidProgramException)));
+            //Assert.ThrowsAsync<InvalidOperationException>(
+            //    () => Wait.Until(() => IterateResults(false, 2, 2), TimeSpan.FromSeconds(5), typeof(InvalidProgramException)));
         }
 
         private void TestVoidDelegate()
@@ -174,20 +198,66 @@ namespace IntelliTect.TestTools.Selenate.Tests
             throw new EqualException(expected, value);
         }
 
-        private void IterateResults(bool passTest)
+        private void IterateResults(int secondsToFail = 1, int numberOfDifferentExceptions = 1)
         {
-            if (passTest)
+            if (_End == DateTime.MinValue)
             {
-                return;
+                _End = DateTime.Now.AddSeconds(secondsToFail);
             }
-            _Attempts++;
-            if (_Attempts % 2 == 0)
+
+            while (DateTime.Now < _End)
             {
-                throw new InvalidOperationException();
+                _Attempts++;
+                switch (numberOfDifferentExceptions)
+                {
+                    case 1:
+                        CheckFirstException();
+                        break;
+                    case 2:
+                        CheckFirstException();
+                        CheckSecondException();
+                        break;
+                    case 3:
+                        CheckFirstException();
+                        CheckSecondException();
+                        CheckThirdException();
+                        break;
+                    case 4:
+                        CheckFirstException();
+                        CheckSecondException();
+                        CheckThirdException();
+                        throw new ArgumentNullException();
+                    default:
+                        throw new ArgumentException();
+                }
             }
-            throw new InvalidProgramException();
+
+            void CheckFirstException()
+            {
+                if (_Attempts % 2 == 1)
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+
+            void CheckSecondException()
+            {
+                if (_Attempts % 2 == 0)
+                {
+                    throw new InvalidProgramException();
+                }
+            }
+
+            void CheckThirdException()
+            {
+                if (_Attempts % 3 == 0)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+            }
         }
 
         private int _Attempts = 0;
+        private DateTime _End = DateTime.MinValue;
     }
 }
