@@ -26,53 +26,53 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public void CheckActionParamsForMixedInvalidTypeChecking()
+        public async Task CheckActionParamsForMixedInvalidTypeChecking()
         {
-            Assert.ThrowsAsync<ArgumentException>(
+            await Assert.ThrowsAsync<ArgumentException>(
                 () => Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(object)));
         }
 
         [Fact]
-        public void CheckFuncParamsForMixedInvalidTypeChecking()
+        public async Task CheckFuncParamsForMixedInvalidTypeChecking()
         {
-            Assert.ThrowsAsync<ArgumentException>(
+            await Assert.ThrowsAsync<ArgumentException>(
                 () => Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(object), typeof(Exception)));
         }
 
         [Fact]
-        public void CheckActionParamsForValidTypeChecking()
+        public async Task CheckActionParamsForValidTypeChecking()
         {
-            Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(NullReferenceException));
+            await Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(NullReferenceException));
         }
 
         [Fact]
-        public void CheckFuncParamsForValidTypeChecking()
+        public async Task CheckFuncParamsForValidTypeChecking()
         {
-            Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(NullReferenceException));
+            await Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(NullReferenceException));
         }
 
         [Fact]
-        public void CheckActionsParamsForBaseTypeChecking()
+        public async Task CheckActionsParamsForBaseTypeChecking()
         {
-            Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(Exception));
+            await Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(Exception));
         }
 
         [Fact]
-        public void CheckFuncParamsForBaseTypeChecking()
+        public async Task CheckFuncParamsForBaseTypeChecking()
         {
-            Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(Exception));
+            await Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(Exception));
         }
 
         [Fact]
-        public void CheckActionParamsForMixedTypeChecking()
+        public async Task CheckActionParamsForMixedTypeChecking()
         {
-            Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException));
+            await Wait.Until(TestVoidDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException));
         }
 
         [Fact]
-        public void CheckFuncParamsForMixedTypeChecking()
+        public async Task CheckFuncParamsForMixedTypeChecking()
         {
-            Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException));
+            await Wait.Until(TestReturnDelegate, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException));
         }
 
         // Might need explicit scenarios for both func and action scenarios in the below examples.
@@ -104,9 +104,9 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public void CheckForExpectedSuccess()
+        public async Task CheckForExpectedSuccess()
         {
-            Wait.Until<EqualException>(() => Equals(5, 5), TimeSpan.FromSeconds(1));
+            await Wait.Until<EqualException>(() => Equals(5, 5), TimeSpan.FromSeconds(1));
         }
 
         [Fact]
@@ -161,14 +161,14 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         //[Fact]
-        public void CheckForMultipleFailuresByGenericOneUnexpected()
+        public async Task CheckForMultipleFailuresByGenericOneUnexpected()
         {
             //Assert.ThrowsAsync<InvalidOperationException>(
             //    () => Wait.Until<InvalidProgramException>(() => IterateResults(false, 2, 2), TimeSpan.FromSeconds(5)));
         }
 
         //[Fact]
-        public void CheckForMultipleFailuresByParamsOneUnexpected()
+        public async Task CheckForMultipleFailuresByParamsOneUnexpected()
         {
             //Assert.ThrowsAsync<InvalidOperationException>(
             //    () => Wait.Until(() => IterateResults(false, 2, 2), TimeSpan.FromSeconds(5), typeof(InvalidProgramException)));
