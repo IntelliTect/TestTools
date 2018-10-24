@@ -17,7 +17,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>An async task that can return a value of type TResult</returns>
         public static Task<TResult> Until<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
-            CheckParams(exceptionsToIgnore);
+            VerifyAllExceptionTypes(exceptionsToIgnore);
             return ExecuteWait(func, timeToWait, exceptionsToIgnore);
         }
 
@@ -30,7 +30,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>An async task for the operation</returns>
         public static Task Until(Action action, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
-            CheckParams(exceptionsToIgnore);
+            VerifyAllExceptionTypes(exceptionsToIgnore);
             return ExecuteWait(action, timeToWait, exceptionsToIgnore);
         }
 
@@ -205,9 +205,9 @@ namespace IntelliTect.TestTools.Selenate
             throw new AggregateException(exceptions);
         }
 
-        private static void CheckParams(params Type[] exes)
+        private static void VerifyAllExceptionTypes(params Type[] exes)
         {
-            if (!exes.Any(e => e.IsSubclassOf(typeof(Exception)) || e.UnderlyingSystemType == typeof(Exception)))
+            if (!exes.All(e => e.IsSubclassOf(typeof(Exception)) || e == typeof(Exception)))
             {
                 throw new ArgumentException("Invalid type passed into exceptionsToIgnore parameter. Must be of type Exception.");
             }
