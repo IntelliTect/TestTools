@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -168,7 +169,8 @@ namespace IntelliTect.TestTools.Selenate
 
         private static async Task<TResult> ExecuteWait<TResult>(Func<TResult> actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
         {
-            DateTime endTime = DateTime.Now.Add(timeToWait);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             List<Exception> exceptions = new List<Exception>();
             do
             {
@@ -181,13 +183,14 @@ namespace IntelliTect.TestTools.Selenate
                     exceptions.Add(ex);
                 }
                 await Task.Delay(250);
-            } while (DateTime.Now < endTime);
+            } while (sw.Elapsed < timeToWait);
             throw new AggregateException(exceptions);
         }
 
         private static async Task ExecuteWait(Action actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
         {
-            DateTime endTime = DateTime.Now.Add(timeToWait);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             List<Exception> exceptions = new List<Exception>();
             do
             {
@@ -201,7 +204,7 @@ namespace IntelliTect.TestTools.Selenate
                     exceptions.Add(ex);
                 }
                 await Task.Delay(250);
-            } while (DateTime.Now < endTime);
+            } while (sw.Elapsed < timeToWait);
             throw new AggregateException(exceptions);
         }
 
