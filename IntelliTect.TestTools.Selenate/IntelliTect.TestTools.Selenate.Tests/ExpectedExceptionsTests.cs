@@ -9,14 +9,14 @@ namespace IntelliTect.TestTools.Selenate.Tests
         [Fact]
         public async Task CheckActionsParamsForBaseTypeChecking()
         {
-            AggregateException ae = await Assert.ThrowsAsync<AggregateException>(() => Wait.Until(TestVoidException, TimeSpan.FromSeconds(1), typeof(Exception)));
+            AggregateException ae = await Assert.ThrowsAsync<AggregateException>(() => Wait.Until(ThrowExceptionWithNoReturn, TimeSpan.FromSeconds(1), typeof(Exception)));
             Assert.Contains(ae.InnerExceptions, e => e.GetType() == typeof(Exception));
         }
 
         [Fact]
         public async Task CheckFuncParamsForBaseTypeChecking()
         {
-            AggregateException ae = await Assert.ThrowsAsync<AggregateException>(() => Wait.Until(TestReturnException, TimeSpan.FromSeconds(1), typeof(Exception)));
+            AggregateException ae = await Assert.ThrowsAsync<AggregateException>(() => Wait.Until(ThrowExceptionWithReturn, TimeSpan.FromSeconds(1), typeof(Exception)));
             Assert.Contains(ae.InnerExceptions, e => e.GetType() == typeof(Exception));
         }
 
@@ -24,7 +24,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public async Task CheckActionParamsForMixedTypeChecking()
         {
             AggregateException ae = await Assert.ThrowsAsync<AggregateException>(
-                () => Wait.Until(TestVoidException, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException)));
+                () => Wait.Until(ThrowExceptionWithNoReturn, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException)));
             Assert.Contains(ae.InnerExceptions, e => e.GetType() == typeof(Exception));
             // Verify that we only catch the actual exceptions thrown
             Assert.DoesNotContain(ae.InnerExceptions, e => e.GetType() == typeof(NullReferenceException));
@@ -34,7 +34,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public async Task CheckFuncParamsForMixedTypeChecking()
         {
             AggregateException ae = await Assert.ThrowsAsync<AggregateException>(
-                () => Wait.Until(TestReturnException, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException)));
+                () => Wait.Until(ThrowExceptionWithReturn, TimeSpan.FromSeconds(1), typeof(Exception), typeof(NullReferenceException)));
             Assert.Contains(ae.InnerExceptions, e => e.GetType() == typeof(Exception));
             // Verify that we only catch the actual exceptions thrown
             Assert.DoesNotContain(ae.InnerExceptions, e => e.GetType() == typeof(NullReferenceException));

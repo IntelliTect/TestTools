@@ -7,22 +7,22 @@ namespace IntelliTect.TestTools.Selenate.Tests
 {
     public class BaseTest
     {
-        protected void TestVoidException()
+        protected void ThrowExceptionWithNoReturn()
         {
             throw new Exception();
         }
 
-        protected bool TestReturnException()
+        protected bool ThrowExceptionWithReturn()
         {
             throw new Exception();
         }
 
-        protected void TestVoidNullRefException()
+        protected void ThrowNullRefExceptionWithNoReturn()
         {
             throw new NullReferenceException();
         }
 
-        protected void TestReturnNullRefException()
+        protected bool ThrowNullRefExceptionWithReturn()
         {
             throw new NullReferenceException();
         }
@@ -38,6 +38,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
             return true;
         }
 
+        // Find a better way to do this to better facilitate test parallelization
         private void ThrowExceptions(int secondsToFail, int numberOfExceptions)
         {
             if (_Timeout == TimeSpan.MinValue)
