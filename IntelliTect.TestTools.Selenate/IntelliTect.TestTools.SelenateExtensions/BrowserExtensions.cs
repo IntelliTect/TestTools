@@ -15,8 +15,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <returns></returns>
         public static Task SwitchWindow(this Browser browser, string title, int secondsToWait = 15)
         {
-            ConditionalWait wait = new ConditionalWait();
-            return wait.WaitFor<NoSuchWindowException>(() => browser.Driver.SwitchTo().Window(title), TimeSpan.FromSeconds(secondsToWait));
+            return Wait.Until<NoSuchWindowException>(() => browser.Driver.SwitchTo().Window(title), TimeSpan.FromSeconds(secondsToWait));
         }
 
         /// <summary>
@@ -26,8 +25,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <returns></returns>
         public static Task<IAlert> Alert(this Browser browser, int secondsToWait = 15)
         {
-            ConditionalWait wait = new ConditionalWait();
-            return wait.WaitFor<
+            return Wait.Until<
                 NoAlertPresentException,
                 UnhandledAlertException,
                 IAlert>
@@ -43,11 +41,10 @@ namespace IntelliTect.TestTools.SelenateExtensions
         {
             // Note, some applications will break out of switching to a frame if something on page is still loading.
             // See if restarting the whole search like we currently do on PTT is necessary, or if we can just wait for something to finish loading
-            ConditionalWait wait = new ConditionalWait();
             foreach (By by in bys)
             {
                 IWebElement element = browser.Driver.FindElement(by);
-                await wait.WaitFor<
+                await Wait.Until<
                             NoSuchFrameException,
                             InvalidOperationException,
                             StaleElementReferenceException,

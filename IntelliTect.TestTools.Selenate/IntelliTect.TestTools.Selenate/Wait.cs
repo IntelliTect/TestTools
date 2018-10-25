@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace IntelliTect.TestTools.Selenate
 {
-    public class ConditionalWait
+    public static class Wait
     {
         /// <summary>
         /// Repeatedly checks for a condition with void return type until it is satisifed or a timeout is reached
@@ -15,12 +16,9 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <param name="exceptionsToIgnore">A list of exceptions to ignore when attempting to evaluate the function</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
+        public static Task<TResult> Until<TResult>(Func<TResult> func, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
-            if(exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
-            {
-                throw new ArgumentException("Invalid type passed into exceptionsToIgnore paramter. Must be of type Exception.");
-            }
+            VerifyAllExceptionTypes(exceptionsToIgnore);
             return ExecuteWait(func, timeToWait, exceptionsToIgnore);
         }
 
@@ -31,12 +29,9 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <param name="exceptionsToIgnore">A list of exceptions to ignore when attempting to evaluate the function</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor(Action action, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
+        public static Task Until(Action action, TimeSpan timeToWait, params Type[] exceptionsToIgnore)
         {
-            if (exceptionsToIgnore.Any(t => t.GetType() != typeof(Exception)))
-            {
-                throw new ArgumentException("Invalid type passed into exceptionsToIgnore paramter. Must be of type Exception.");
-            }
+            VerifyAllExceptionTypes(exceptionsToIgnore);
             return ExecuteWait(action, timeToWait, exceptionsToIgnore);
         }
 
@@ -48,7 +43,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TException, TResult>(Func<TResult> func, TimeSpan timeToWait)
+        public static Task<TResult> Until<TException, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException : Exception
         {
             return ExecuteWait(func, timeToWait, typeof(TException));
@@ -61,7 +56,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="action">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor<TException>(Action action, TimeSpan timeToWait)
+        public static Task Until<TException>(Action action, TimeSpan timeToWait)
             where TException : Exception
         {
             return ExecuteWait(action, timeToWait, typeof(TException));
@@ -76,7 +71,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TException1, TException2, TResult>(Func<TResult> func, TimeSpan timeToWait)
+        public static Task<TResult> Until<TException1, TException2, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
         {
@@ -91,7 +86,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="action">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor<TException1, TException2>(Action action, TimeSpan timeToWait)
+        public static Task Until<TException1, TException2>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
         {
@@ -108,7 +103,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TException1, TException2, TException3, TResult>(Func<TResult> func, TimeSpan timeToWait)
+        public static Task<TResult> Until<TException1, TException2, TException3, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
@@ -125,7 +120,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="action">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor<TException1, TException2, TException3>(Action action, TimeSpan timeToWait)
+        public static Task Until<TException1, TException2, TException3>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
@@ -144,7 +139,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task that can return a value of type TResult</returns>
-        public Task<TResult> WaitFor<TException1, TException2, TException3, TException4, TResult>(Func<TResult> func, TimeSpan timeToWait)
+        public static Task<TResult> Until<TException1, TException2, TException3, TException4, TResult>(Func<TResult> func, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
@@ -163,7 +158,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="action">Function to check for valid evaluation</param>
         /// <param name="timeToWait">Time to try evaluating the given function until an exception is thrown</param>
         /// <returns>An async task for the operation</returns>
-        public Task WaitFor<TException1, TException2, TException3, TException4>(Action action, TimeSpan timeToWait)
+        public static Task Until<TException1, TException2, TException3, TException4>(Action action, TimeSpan timeToWait)
             where TException1 : Exception
             where TException2 : Exception
             where TException3 : Exception
@@ -172,9 +167,10 @@ namespace IntelliTect.TestTools.Selenate
             return ExecuteWait(action, timeToWait, typeof(TException1), typeof(TException2), typeof(TException3), typeof(TException4));
         }
 
-        private async Task<TResult> ExecuteWait<TResult>(Func<TResult> actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
+        private static async Task<TResult> ExecuteWait<TResult>(Func<TResult> actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
         {
-            DateTime endTime = DateTime.Now.Add(timeToWait);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             List<Exception> exceptions = new List<Exception>();
             do
             {
@@ -187,13 +183,14 @@ namespace IntelliTect.TestTools.Selenate
                     exceptions.Add(ex);
                 }
                 await Task.Delay(250);
-            } while (DateTime.Now < endTime);
+            } while (sw.Elapsed < timeToWait);
             throw new AggregateException(exceptions);
         }
 
-        private async Task ExecuteWait(Action actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
+        private static async Task ExecuteWait(Action actionToWaitForComplete, TimeSpan timeToWait, params Type[] types)
         {
-            DateTime endTime = DateTime.Now.Add(timeToWait);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             List<Exception> exceptions = new List<Exception>();
             do
             {
@@ -207,8 +204,16 @@ namespace IntelliTect.TestTools.Selenate
                     exceptions.Add(ex);
                 }
                 await Task.Delay(250);
-            } while (DateTime.Now < endTime);
+            } while (sw.Elapsed < timeToWait);
             throw new AggregateException(exceptions);
+        }
+
+        private static void VerifyAllExceptionTypes(params Type[] exes)
+        {
+            if (!exes.All(e => e.IsSubclassOf(typeof(Exception)) || e == typeof(Exception)))
+            {
+                throw new ArgumentException("Invalid type passed into exceptionsToIgnore parameter. Must be of type Exception.");
+            }
         }
     }
 }
