@@ -1,5 +1,5 @@
 <Project>
-  <Target Name="TestPackage" AfterTargets="Pack">
+  <Target Name="TestPackage">
     <Exec Command="powershell.exe -noprofile -file $(ProjectDirectory)..\Test-NuGetPackage.ps1 $(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg $(AssemblyName)" />
   </Target>
   <Target Name="CopyPackage" AfterTargets="TestPackage">
