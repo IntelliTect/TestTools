@@ -13,7 +13,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <Authors>Mark Michaelis</Authors>
-    <Version>0.5.1-beta-180924-1</Version>
+    <!--Version>0.5.1-beta-180924-1</Version-->
     <Company>IntelliTect</Company>
     <Title>IntelliTect.TestTools.Console</Title>
     <Description>Redirects the console to enable unit testing of console output and the injecting of console input.</Description>
