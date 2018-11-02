@@ -16,6 +16,7 @@
     <RepositoryType />
     <PackageTags>selenium, ui test, automated test, testing, web test</PackageTags>
     <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
