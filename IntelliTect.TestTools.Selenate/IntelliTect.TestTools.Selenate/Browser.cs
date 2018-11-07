@@ -2,13 +2,9 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.IE;
 using OpenQA.Selenium.Remote;
-using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IntelliTect.TestTools.Selenate
@@ -141,7 +137,6 @@ namespace IntelliTect.TestTools.Selenate
                     chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
                     driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
-
                     break;
                 case BrowserType.InternetExplorer:
                     InternetExplorerOptions ieCaps = new InternetExplorerOptions

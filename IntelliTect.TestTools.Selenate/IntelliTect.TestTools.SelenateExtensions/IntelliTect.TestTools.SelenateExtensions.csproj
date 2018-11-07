@@ -6,6 +6,15 @@
     <WarningsAsErrors />
     <WarningLevel>4</WarningLevel>
     <NoWarn />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Mike Curn</Authors>
+    <Company>IntelliTect</Company>
+    <Description>A set of classes for doing a default implementation of Selenate, which is a wrapper for interacting with Selenium in a way that makes calls more reliable than the basic implementation of Selenium</Description>
+    <PackageLicenseUrl>https://github.com/IntelliTect/TestTools/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/IntelliTect/TestTools</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/IntelliTect/TestTools/tree/master/IntelliTect.TestTools.Selenate</RepositoryUrl>
+    <PackageTags>selenium, ui test, automated test, testing, web test, extension</PackageTags>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
