@@ -79,7 +79,8 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        ///Waits until a function evaluates to true OR times out after a specified period of time
+        /// Waits until a function evaluates and returns the results OR fails after a specified period of time.
+        /// NoSuchElement, StaleElement, ElementNotVisible, and InvalidElementState exceptions will return a result of false while all other exceptions will immediately throw
         /// </summary>
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Seconds to wait until timeout / return false</param>
@@ -88,19 +89,12 @@ namespace IntelliTect.TestTools.Selenate
         {
             try
             {
-                if (await Wait.Until<
-                NoSuchElementException,
-                StaleElementReferenceException,
-                ElementNotVisibleException,
-                InvalidElementStateException,
-                bool>(func, TimeSpan.FromSeconds(secondsToWait)))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return await Wait.Until<
+                    NoSuchElementException,
+                    StaleElementReferenceException,
+                    ElementNotVisibleException,
+                    InvalidElementStateException,
+                    bool>( func, TimeSpan.FromSeconds( secondsToWait ) );
             }
             catch (AggregateException) // Worth checking for specific inner exceptions?
             {
