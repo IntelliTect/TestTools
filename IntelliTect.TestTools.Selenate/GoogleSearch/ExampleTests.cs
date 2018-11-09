@@ -38,7 +38,7 @@ namespace GoogleSearch
         {
             await Google.SearchForItem("selenium automation");
             await Google.GoToHomePage();
-            Assert.IsFalse(await Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed),
+            Assert.IsFalse(await Browser.WaitForExpectedState(() => Harness.SearchResultsDiv.Displayed, expectedResult: false),
                 "Search results displayed when they were not expected");
         }
 

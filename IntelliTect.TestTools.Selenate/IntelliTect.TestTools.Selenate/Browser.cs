@@ -4,6 +4,7 @@ using OpenQA.Selenium.IE;
 using OpenQA.Selenium.Remote;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -72,7 +73,7 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return await Wait.Until<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by), TimeSpan.FromSeconds(secondsToWait));
             }
-            catch(AggregateException)
+            catch (AggregateException)
             {
                 return Array.Empty<IWebElement>();
             }
@@ -85,22 +86,34 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Seconds to wait until timeout / return false</param>
         /// <returns></returns>
-        public async Task<bool> WaitUntil(Func<bool> func, int secondsToWait = 15)
+        public async Task<bool> WaitForExpectedState(Func<bool> func, bool expectedResult = true, int secondsToWait = 15)
         {
-            try
+            bool result;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            do
             {
-                return await Wait.Until<
-                    NoSuchElementException,
-                    StaleElementReferenceException,
-                    ElementNotVisibleException,
-                    InvalidElementStateException,
-                    bool>( func, TimeSpan.FromSeconds( secondsToWait ) );
-            }
-            catch (AggregateException) // Worth checking for specific inner exceptions?
-            {
-                return false;
-            }
+                try
+                {
+                    result = await Wait.Until<
+                        NoSuchElementException,
+                        StaleElementReferenceException,
+                        ElementNotVisibleException,
+                        InvalidElementStateException,
+                        bool>(func, TimeSpan.FromSeconds(secondsToWait));
+                    if (result == expectedResult)
+                    {
+                        return result;
+                    }
+                }
+                catch (AggregateException) // Worth checking for specific inner exceptions?
+                {
+                    result = false;
+                }
+            } while (sw.Elapsed < TimeSpan.FromSeconds(secondsToWait));
 
+
+            return !result;
         }
 
         public void TakeScreenshot()

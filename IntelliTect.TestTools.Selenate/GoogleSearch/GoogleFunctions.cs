@@ -19,20 +19,20 @@ namespace GoogleSearch
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
             await Harness.SearchInput.FillInWithWhenReady(searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
-            return await Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed);
+            return await Browser.WaitForExpectedState(() => Harness.SearchResultsDiv.Displayed);
         }
 
         public Task<bool> FindSearchResultItem(string result)
         {
             // Don't need to await this since it would just be on one line
             var headers = Harness.SearchResultsHeadersList;
-            return Browser.WaitUntil(() => headers.Any(h => h.Text == result));
+            return Browser.WaitForExpectedState(() => headers.Any(h => h.Text == result));
         }
 
         public async Task<bool> GoToHomePage()
         {
             await Harness.GoHomeButton.Result.ClickWhenReady();
-            return await Browser.WaitUntil(() => Harness.GoogleSearchButton.Displayed);
+            return await Browser.WaitForExpectedState(() => Harness.GoogleSearchButton.Displayed);
         }
 
         private GoogleBrowser Browser { get; }
