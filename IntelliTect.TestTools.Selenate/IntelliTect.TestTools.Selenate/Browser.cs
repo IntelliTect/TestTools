@@ -79,6 +79,36 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
+        public async Task<bool> IsElementInExpectedState(Func<bool> func, bool expectedResult = true, int secondsToWait = 15)
+        {
+            bool result;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            do
+            {
+                try
+                {
+                    result = await Wait.Until<
+                    NoSuchElementException,
+                    StaleElementReferenceException,
+                    ElementNotVisibleException,
+                    InvalidElementStateException,
+                    bool>(func, TimeSpan.FromSeconds(secondsToWait));
+                }
+                catch (AggregateException)
+                {
+                    result = false;
+                }
+                if (result == expectedResult)
+                {
+                    return result;
+                }
+            } while (sw.Elapsed < TimeSpan.FromSeconds(secondsToWait));
+
+            return !result;
+        }
+
         /// <summary>
         /// Waits until a function evaluates and returns the results OR fails after a specified period of time.
         /// NoSuchElement, StaleElement, ElementNotVisible, and InvalidElementState exceptions will return a result of false while all other exceptions will immediately throw
@@ -86,34 +116,30 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Seconds to wait until timeout / return false</param>
         /// <returns></returns>
-        public async Task<bool> WaitForExpectedState(Func<bool> func, bool expectedResult = true, int secondsToWait = 15)
+        [Obsolete("Retiring method in favor of IsElementInExpectedState")]
+        public async Task<bool> WaitUntil(Func<bool> func, int secondsToWait = 15)
         {
-            bool result;
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            do
+            try
             {
-                try
+                if (await Wait.Until<
+                NoSuchElementException,
+                StaleElementReferenceException,
+                ElementNotVisibleException,
+                InvalidElementStateException,
+                bool>(func, TimeSpan.FromSeconds(secondsToWait)))
                 {
-                    result = await Wait.Until<
-                        NoSuchElementException,
-                        StaleElementReferenceException,
-                        ElementNotVisibleException,
-                        InvalidElementStateException,
-                        bool>(func, TimeSpan.FromSeconds(secondsToWait));
-                    if (result == expectedResult)
-                    {
-                        return result;
-                    }
+                    return true;
                 }
-                catch (AggregateException) // Worth checking for specific inner exceptions?
+                else
                 {
-                    result = false;
+                    return false;
                 }
-            } while (sw.Elapsed < TimeSpan.FromSeconds(secondsToWait));
+            }
+            catch (AggregateException) // Worth checking for specific inner exceptions?
+            {
+                return false;
+            }
 
-
-            return !result;
         }
 
         public void TakeScreenshot()
