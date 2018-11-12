@@ -16,7 +16,7 @@
     <RepositoryType />
     <PackageTags>selenium, ui test, automated test, testing, web test</PackageTags>
     <PackageReleaseNotes>Found additional issues with Browser.WaitUntil. Deprecating in favor of a new method: IsElementInExpectedState, which has an argument for the result you expect back so that we know how to handle exceptions</PackageReleaseNotes>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <AssemblyVersion>1.0.3.0</AssemblyVersion>
     <FileVersion>1.0.3.0</FileVersion>
   </PropertyGroup>
