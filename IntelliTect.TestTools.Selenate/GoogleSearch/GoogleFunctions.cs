@@ -22,11 +22,10 @@ namespace GoogleSearch
             return await Browser.IsElementInExpectedState(() => Harness.SearchResultsDiv.Displayed);
         }
 
-        public Task<bool> FindSearchResultItem(string result)
+        public Task<bool> FindSearchResultItem(string result, bool itemExists = true)
         {
             // Don't need to await this since it would just be on one line
-            var headers = Harness.SearchResultsHeadersList;
-            return Browser.IsElementInExpectedState(() => headers.Any(h => h.Text == result));
+            return Browser.IsElementInExpectedState(() => Harness.SearchResultsHeadersList.Any(h => h.Text == result), itemExists);
         }
 
         public async Task<bool> GoToHomePage()

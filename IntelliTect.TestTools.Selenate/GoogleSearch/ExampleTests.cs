@@ -29,7 +29,7 @@ namespace GoogleSearch
         public async Task VerifySeleniumDoesNotExistForElement()
         {
             await Google.SearchForItem("selenium element");
-            Assert.IsFalse(await Google.FindSearchResultItem("Selenium - Web Browser Automation"),
+            Assert.IsFalse(await Google.FindSearchResultItem("Selenium - Web Browser Automation", false),
                 "Found a specific search result for Selenium - Web Browser Automation when none was expected");
         }
 
