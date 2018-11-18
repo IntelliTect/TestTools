@@ -82,31 +82,28 @@ namespace IntelliTect.TestTools.Selenate
         public async Task<bool> IsElementInExpectedState(Func<bool> func, bool expectedResult = true, int secondsToWait = 15)
         {
             bool result;
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            do
+            try
             {
-                try
-                {
-                    result = await Wait.Until<
+                return await Wait.Until<
                     NoSuchElementException,
                     StaleElementReferenceException,
                     ElementNotVisibleException,
                     InvalidElementStateException,
-                    bool>(func, TimeSpan.FromSeconds(secondsToWait));
-                }
-                catch (AggregateException)
-                {
-                    result = false;
-                }
-                if (result == expectedResult)
-                {
-                    return result;
-                }
-            } while (sw.Elapsed < TimeSpan.FromSeconds(secondsToWait));
+                    bool>(CheckForExpectedResult, TimeSpan.FromSeconds(secondsToWait));
+            }
+            catch (AggregateException)
+            {
+                result = false;
+            }
 
-            return !result;
+            return result;
+
+            // Using a local function purely for code conciseness above. Move to it's own method if this is ever needed by other checks.
+            bool CheckForExpectedResult()
+            {
+                bool r;
+                return (r = func()) == expectedResult ? r : throw new InvalidElementStateException();
+            }
         }
 
         /// <summary>
