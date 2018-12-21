@@ -3,6 +3,7 @@ using IntelliTect.TestTools.Selenate;
 using OpenQA.Selenium;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using OpenQA.Selenium.Support.UI;
 
 namespace IntelliTect.TestTools.SelenateExtensions
 {
@@ -45,9 +46,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// then tabs out of the field or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        public static async Task FillInWithAndTabWhenReady(this IWebElement element, string value)
+        public static /*async*/ void FillInWithAndTabWhenReady(this IWebElement element, string value)
         {
-            await element.FillInWithWhenReady(value);
+            //await element.FillInWithWhenReady(value);
             // Worth wrapping the below in a wait?
             element.SendKeys(Keys.Tab);
         }
@@ -58,34 +59,61 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        public static async Task FillInWithWhenReady(this IWebElement element, string value, int secondstoTry = 5)
+        public static /*async*/ void FillInWithWhenReady(this IWebElement element, IWebDriver driver, string value, int secondstoTry = 5)
         {
-            var count = 0;
-            while (element.GetAttribute("value") != value && count < 5)
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondstoTry));
+            wait.IgnoreExceptionTypes(
+                typeof(ElementNotVisibleException),
+                typeof(ElementNotInteractableException),
+                typeof(StaleElementReferenceException),
+                typeof(InvalidElementStateException));
+
+            //var count = 0;
+            for ( int i = 0; i < 5; i++ )
             {
-                await Wait.Until<NoSuchElementException, 
-                    ElementNotVisibleException,
-                    StaleElementReferenceException>(
-                    () => element.Clear(), TimeSpan.FromSeconds(secondstoTry));
-                await Wait.Until<NoSuchElementException, 
-                    ElementNotVisibleException, 
-                    ElementNotInteractableException,
-                    StaleElementReferenceException>(
-                    () => element.SendKeys(value), TimeSpan.FromSeconds(secondstoTry));
-                count++;
+                wait.Until( c =>
+                {
+                    element.Clear();
+                    return null as object;
+                } );
+
+                wait.Until( s =>
+                {
+                    element.SendKeys( value );
+                    return null as object;
+                } );
+
+                if ( element.GetAttribute( "value" ) == value )
+                    return;
             }
+            //while (element.GetAttribute("value") != value && count < 5)
+            //{
+                
+
+
+            //    await Wait.Until<NoSuchElementException,
+            //        ElementNotVisibleException,
+            //        StaleElementReferenceException>(
+            //        () => element.Clear(), TimeSpan.FromSeconds(secondstoTry));
+            //    await Wait.Until<NoSuchElementException,
+            //        ElementNotVisibleException,
+            //        ElementNotInteractableException,
+            //        StaleElementReferenceException>(
+            //        () => element.SendKeys(value), TimeSpan.FromSeconds(secondstoTry));
+            //    count++;
+            //}
         }
 
         /// <summary>
         /// Waits for the element to be in a valid state, then clicks on it or throws after a certain amount of time
         /// </summary>
-        public static Task ClickWhenReady( this IWebElement element, int secondsToTry = 5 )
+        public static Task ClickWhenReady(this IWebElement element, int secondsToTry = 5)
         {
             return Wait.Until<
                 NoSuchElementException,
                 ElementNotVisibleException,
                 ElementClickInterceptedException,
-                StaleElementReferenceException>( () => element.Click(), TimeSpan.FromSeconds( secondsToTry ) );
+                StaleElementReferenceException>(() => element.Click(), TimeSpan.FromSeconds(secondsToTry));
         }
     }
 }
