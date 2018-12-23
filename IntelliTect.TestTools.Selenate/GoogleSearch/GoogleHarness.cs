@@ -18,7 +18,7 @@ namespace GoogleSearch
         public IWebElement SearchResultsDiv =>
                 Browser.FindElement(By.CssSelector("div[data-async-context^='query:']"));
         public IReadOnlyCollection<IWebElement> SearchResultsHeadersList => 
-            Browser.FindElements(By.CssSelector("div[id='rso']>div div[class='g'] div[class='rc']>h3>a")).GetAwaiter().GetResult();
+            Browser.FindElements(By.CssSelector("div[id='rso']>div div[class='g'] div[class='rc'] a>h3"));
         public IWebElement GoHomeButton => Browser.FindElement(By.CssSelector("div[class='logo']"));
 
         private GoogleBrowser Browser { get; }

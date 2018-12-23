@@ -17,28 +17,28 @@ namespace GoogleSearch
         }
 
         [TestMethod]
-        public async Task SearchForSeleniumOnGoogle()
+        public void SearchForSeleniumOnGoogle()
         {
-            Assert.IsTrue(await Google.SearchForItem("selenium automation"), 
+            Assert.IsTrue(Google.SearchForItem("selenium automation"), 
                 "No search results displayed when they were expected");
-            Assert.IsTrue(await Google.FindSearchResultItem("Selenium - Web Browser Automation"),
+            Assert.IsTrue(Google.FindSearchResultItem("Selenium - Web Browser Automation"),
                 "Did not find a specific search result for Selenium - Web Browser Automation");
         }
 
         [TestMethod]
-        public async Task VerifySeleniumDoesNotExistForElement()
+        public void VerifySeleniumDoesNotExistForElement()
         {
-            await Google.SearchForItem("selenium element");
-            Assert.IsFalse(await Google.FindSearchResultItem("Selenium - Web Browser Automation"),
+            Google.SearchForItem("selenium element");
+            Assert.IsFalse(Google.FindSearchResultItem("Selenium - Web Browser Automation"),
                 "Found a specific search result for Selenium - Web Browser Automation when none was expected");
         }
 
         [TestMethod]
-        public async Task ReturnToHomepage()
+        public void ReturnToHomepage()
         {
-            await Google.SearchForItem("selenium automation");
-            await Google.GoToHomePage();
-            Assert.IsFalse(await Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed),
+            Google.SearchForItem("selenium automation");
+            Google.GoToHomePage();
+            Assert.IsFalse(Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed),
                 "Search results displayed when they were not expected");
         }
 
