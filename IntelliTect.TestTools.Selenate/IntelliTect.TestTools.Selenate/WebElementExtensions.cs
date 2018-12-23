@@ -13,20 +13,28 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// Attempts to find a child element of this element, only returning when the child element is found OR throws when a timeout is reached
         /// </summary>
         /// <param name="by">The selenium By statement for the child element</param>
-        public static Task<IWebElement> FindElementWhenReady(this IWebElement element, By by, int secondsToTry = 5)
+        public static IWebElement FindElementWhenReady(this IWebElement element, IWebDriver driver, By by, int secondsToTry = 5)
         {
-            return Wait.Until<NoSuchElementException, StaleElementReferenceException, IWebElement>(
-                () => element.FindElement(by), TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
+            wait.IgnoreExceptionTypes(
+                typeof(NoSuchElementException),
+                typeof(StaleElementReferenceException));
+
+            return wait.Until( f => element.FindElement( by ) );
         }
 
         /// <summary>
         /// Attempts to find all child elements matching a certian criteria of this element, only returning when at least one child element is found OR throws when a timeout is reached
         /// </summary>
         /// <param name="by">The selenium By statement for the child element</param>
-        public static Task<IReadOnlyCollection<IWebElement>> FindElementsWhenReady(this IWebElement element, By by, int secondsToTry = 5)
+        public static IReadOnlyCollection<IWebElement> FindElementsWhenReady(this IWebElement element, IWebDriver driver, By by, int secondsToTry = 5)
         {
-            return Wait.Until<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(
-                () => element.FindElements(by), TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
+            wait.IgnoreExceptionTypes(
+                typeof(NoSuchElementException),
+                typeof(StaleElementReferenceException));
+
+            return wait.Until(f => element.FindElements(by));
         }
 
         /// <summary>
@@ -46,10 +54,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// then tabs out of the field or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        public static /*async*/ void FillInWithAndTabWhenReady(this IWebElement element, string value)
+        public static void FillInWithAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
-            //await element.FillInWithWhenReady(value);
-            // Worth wrapping the below in a wait?
+            FillInWithWhenReady(element, driver, value, secondsToTry );
             element.SendKeys(Keys.Tab);
         }
 
@@ -59,9 +66,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        public static void FillInWithWhenReady(this IWebElement element, IWebDriver driver, string value, int secondstoTry = 5)
+        public static void FillInWithWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondstoTry));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),
                 typeof(ElementNotInteractableException),
