@@ -15,8 +15,8 @@
     <RepositoryUrl>https://github.com/IntelliTect/TestTools/tree/master/IntelliTect.TestTools.Selenate</RepositoryUrl>
     <RepositoryType />
     <PackageTags>selenium, ui test, automated test, testing, web test</PackageTags>
-    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
-    <Version>1.0.1</Version>
+    <PackageReleaseNotes>Updates for moving back to WebDriverWait with more effective usage</PackageReleaseNotes>
+    <Version>1.1.0-beta</Version>
   </PropertyGroup>
 
   <ItemGroup>
