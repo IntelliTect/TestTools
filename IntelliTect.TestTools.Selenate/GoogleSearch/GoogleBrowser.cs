@@ -16,12 +16,6 @@ namespace GoogleSearch
             return Find(by);
         }
 
-        // Instead of doing this, I should just do a separate project demonstrating async usage on something more complex than a Google search
-        public IWebElement FindElementAsync(By by)
-        {
-            return Find(by);
-        }
-
         // When running tests in succession, Google sometimes refuses the connection.
         // Refresh to kick it into gear.
         private IWebElement Find(By by)

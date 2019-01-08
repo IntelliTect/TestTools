@@ -26,7 +26,7 @@ namespace GoogleSearch
         {
             // Don't need to await this since it would just be on one line
             var headers = Harness.SearchResultsHeadersList;
-            return Browser.WaitUntil(() => headers.Any(h => h.Text == result));
+            return Browser.WaitUntil(() => headers.Any(h => h.Text == result), 5);
         }
 
         public bool GoToHomePage()

@@ -15,7 +15,8 @@ namespace IntelliTect.TestTools.Selenate
         Chrome,
         InternetExplorer,
         Firefox,
-        Edge
+        Edge,
+        PhantomJS
         // What else is worth supporting? If we support IE, there might be a few others worth supporting
     }
     public class Browser
@@ -202,6 +203,8 @@ namespace IntelliTect.TestTools.Selenate
                 case BrowserType.Firefox:
                     throw new NotImplementedException();
                 case BrowserType.Edge:
+                    throw new NotImplementedException();
+                case BrowserType.PhantomJS:
                     throw new NotImplementedException();
                 default:
                     throw new ArgumentException($"Unknown browser: {browser}");
