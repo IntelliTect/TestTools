@@ -57,7 +57,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public IWebElement FindElement(By by, int secondsToWait = 15)
         {
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
             return wait.Until(f => Driver.FindElement(by));
         }
