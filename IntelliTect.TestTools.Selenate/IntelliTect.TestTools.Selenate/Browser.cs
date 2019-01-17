@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using OpenQA.Selenium.Support.UI;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -14,7 +15,8 @@ namespace IntelliTect.TestTools.Selenate
         Chrome,
         InternetExplorer,
         Firefox,
-        Edge
+        Edge,
+        PhantomJS
         // What else is worth supporting? If we support IE, there might be a few others worth supporting
     }
     public class Browser
@@ -45,7 +47,6 @@ namespace IntelliTect.TestTools.Selenate
             Driver = driver;
         }
 
-        // Might be worth making this protected
         public IWebDriver Driver { get; }
 
         /// <summary>
@@ -54,10 +55,11 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-        public async Task<IWebElement> FindElement(By by, int secondsToWait = 15)
+        public IWebElement FindElement(By by, int secondsToWait = 15)
         {
-            // Figure out a good way to allow a global override on the wait timeout.
-            return await Wait.Until<NoSuchElementException, StaleElementReferenceException, IWebElement>(() => Driver.FindElement(by), TimeSpan.FromSeconds(secondsToWait));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
+            return wait.Until(f => Driver.FindElement(by));
         }
 
         /// <summary>
@@ -66,13 +68,15 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
-        public async Task<IReadOnlyCollection<IWebElement>> FindElements(By by, int secondsToWait = 15)
+        public IReadOnlyCollection<IWebElement> FindElements(By by, int secondsToWait = 15)
         {
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
             try
             {
-                return await Wait.Until<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(() => Driver.FindElements(by), TimeSpan.FromSeconds(secondsToWait));
+                return wait.Until(f => Driver.FindElements(by));
             }
-            catch(AggregateException)
+            catch (WebDriverTimeoutException)
             {
                 return Array.Empty<IWebElement>();
             }
@@ -84,25 +88,23 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Seconds to wait until timeout / return false</param>
         /// <returns></returns>
-        public async Task<bool> WaitUntil(Func<bool> func, int secondsToWait = 15)
+        public bool WaitUntil(Func<bool> func, int secondsToWait = 15)
         {
+            WebDriverWait wait = new WebDriverWait( Driver, TimeSpan.FromSeconds( secondsToWait ) );
+            wait.IgnoreExceptionTypes( 
+                typeof(NoSuchElementException),
+                typeof(StaleElementReferenceException),
+                typeof(ElementNotVisibleException),
+                typeof(InvalidElementStateException));
             try
             {
-                if (await Wait.Until<
-                NoSuchElementException,
-                StaleElementReferenceException,
-                ElementNotVisibleException,
-                InvalidElementStateException,
-                bool>(func, TimeSpan.FromSeconds(secondsToWait)))
+                if ( wait.Until( f => func() ) )
                 {
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
-            catch (AggregateException) // Worth checking for specific inner exceptions?
+            catch (WebDriverTimeoutException)
             {
                 return false;
             }
@@ -118,6 +120,54 @@ namespace IntelliTect.TestTools.Selenate
             {
                 Screenshot screenshot = takeScreenshot.GetScreenshot();
                 screenshot?.SaveAsFile(fullPath, ScreenshotImageFormat.Png);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to switch to the window by title for a certain number of seconds before failing if the switch is unsuccessful
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="secondsToWait"></param>
+        /// <returns></returns>
+        public void SwitchWindow(string title, int secondsToWait = 15)
+        {
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
+            wait.IgnoreExceptionTypes(typeof(NoSuchWindowException));
+            wait.Until(w => Driver.SwitchTo().Window(title));
+        }
+
+        /// <summary>
+        /// Checks for a present alert for a certain number of seconds before continuing
+        /// </summary>
+        /// <param name="secondsToWait"></param>
+        /// <returns></returns>
+        public IAlert FindAlert(int secondsToWait = 15)
+        {
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
+            wait.IgnoreExceptionTypes(typeof(NoAlertPresentException), typeof(UnhandledAlertException));
+            return wait.Until( a => Driver.SwitchTo().Alert() );
+        }
+
+        /// <summary>
+        /// Switches to each frame in succession to avoid having to explicitely call SwitchTo() multipled times for nested frames
+        /// </summary>
+        /// <param name="bys"></param>
+        /// <returns></returns>
+        public void FrameSwitchAttempt(int secondsToWait = 15, params By[] bys)
+        {
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
+            wait.IgnoreExceptionTypes(
+                typeof(NoSuchFrameException), 
+                typeof(InvalidOperationException), 
+                typeof(StaleElementReferenceException), 
+                typeof(NotFoundException));
+
+            // Note, some applications will break out of switching to a frame if something on page is still loading.
+            // See if restarting the whole search like we currently do on PTT is necessary, or if we can just wait for something to finish loading
+            foreach (By by in bys)
+            {
+                IWebElement element = FindElement(by);
+                wait.Until(f => Driver.SwitchTo().Frame(element));
             }
         }
 
@@ -153,6 +203,8 @@ namespace IntelliTect.TestTools.Selenate
                 case BrowserType.Firefox:
                     throw new NotImplementedException();
                 case BrowserType.Edge:
+                    throw new NotImplementedException();
+                case BrowserType.PhantomJS:
                     throw new NotImplementedException();
                 default:
                     throw new ArgumentException($"Unknown browser: {browser}");

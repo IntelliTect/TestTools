@@ -5,11 +5,9 @@ VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.Selenate", "IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate.csproj", "{7C7F3C1A-A0AD-428F-8AFF-A411561E75F6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.SelenateExtensions", "IntelliTect.TestTools.SelenateExtensions\IntelliTect.TestTools.SelenateExtensions.csproj", "{3C88AC62-F655-4BD0-8D5A-02DCF08C92EC}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleSearch", "GoogleSearch\GoogleSearch.csproj", "{14D1346C-1742-427F-82E8-719B5F44D177}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.TestTools.Selenate.Tests", "IntelliTect.TestTools.Selenate.Tests\IntelliTect.TestTools.Selenate.Tests.csproj", "{E10DF00E-54B5-4961-96A0-33A42054992E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.SelenateExtensions", "IntelliTect.TestTools.SelenateExtensions\IntelliTect.TestTools.SelenateExtensions.csproj", "{CB5B241B-8CFD-4441-8214-DDE8CD1E2F92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,18 +19,14 @@ Global
 		{7C7F3C1A-A0AD-428F-8AFF-A411561E75F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C7F3C1A-A0AD-428F-8AFF-A411561E75F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C7F3C1A-A0AD-428F-8AFF-A411561E75F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3C88AC62-F655-4BD0-8D5A-02DCF08C92EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C88AC62-F655-4BD0-8D5A-02DCF08C92EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C88AC62-F655-4BD0-8D5A-02DCF08C92EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C88AC62-F655-4BD0-8D5A-02DCF08C92EC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{14D1346C-1742-427F-82E8-719B5F44D177}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14D1346C-1742-427F-82E8-719B5F44D177}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14D1346C-1742-427F-82E8-719B5F44D177}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14D1346C-1742-427F-82E8-719B5F44D177}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E10DF00E-54B5-4961-96A0-33A42054992E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E10DF00E-54B5-4961-96A0-33A42054992E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E10DF00E-54B5-4961-96A0-33A42054992E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E10DF00E-54B5-4961-96A0-33A42054992E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB5B241B-8CFD-4441-8214-DDE8CD1E2F92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB5B241B-8CFD-4441-8214-DDE8CD1E2F92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB5B241B-8CFD-4441-8214-DDE8CD1E2F92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB5B241B-8CFD-4441-8214-DDE8CD1E2F92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

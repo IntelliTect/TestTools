@@ -18,6 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="IntelliTect.IntelliWait" Version="1.1.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.13.1" />
   </ItemGroup>
 

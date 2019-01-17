@@ -14,25 +14,25 @@ namespace GoogleSearch
             Harness = new GoogleHarness(Browser);
         }
 
-        public async Task<bool> SearchForItem(string searchItem)
+        public bool SearchForItem(string searchItem)
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
-            await Harness.SearchInput.FillInWithWhenReady(searchItem);
+            Harness.SearchInput.SendKeysWhenReady(Browser.Driver, searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
-            return await Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed);
+            return Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed);
         }
 
-        public Task<bool> FindSearchResultItem(string result)
+        public bool FindSearchResultItem(string result)
         {
             // Don't need to await this since it would just be on one line
             var headers = Harness.SearchResultsHeadersList;
-            return Browser.WaitUntil(() => headers.Any(h => h.Text == result));
+            return Browser.WaitUntil(() => headers.Any(h => h.Text == result), 5);
         }
 
-        public async Task<bool> GoToHomePage()
+        public bool GoToHomePage()
         {
-            await Harness.GoHomeButton.Result.ClickWhenReady();
-            return await Browser.WaitUntil(() => Harness.GoogleSearchButton.Displayed);
+            Harness.GoHomeButton.ClickWhenReady(Browser.Driver);
+            return Browser.WaitUntil(() => Harness.GoogleSearchButton.Displayed);
         }
 
         private GoogleBrowser Browser { get; }

@@ -1,11 +1,12 @@
 ﻿using System;
-using IntelliTect.TestTools.Selenate;
 using OpenQA.Selenium;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using IntelliTect.IntelliWait;
 
 namespace IntelliTect.TestTools.SelenateExtensions
 {
+    // Warnings disabled as this class will be getting deprecated soon
     public static class WebElementExtensions
     {
         /// <summary>
@@ -14,7 +15,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="by">The selenium By statement for the child element</param>
         public static Task<IWebElement> FindElementWhenReady(this IWebElement element, By by, int secondsToTry = 5)
         {
+#pragma warning disable 618
             return Wait.Until<NoSuchElementException, StaleElementReferenceException, IWebElement>(
+#pragma warning restore 618
                 () => element.FindElement(by), TimeSpan.FromSeconds(secondsToTry));
         }
 
@@ -24,7 +27,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="by">The selenium By statement for the child element</param>
         public static Task<IReadOnlyCollection<IWebElement>> FindElementsWhenReady(this IWebElement element, By by, int secondsToTry = 5)
         {
+#pragma warning disable 618
             return Wait.Until<NoSuchElementException, StaleElementReferenceException, IReadOnlyCollection<IWebElement>>(
+#pragma warning restore 618
                 () => element.FindElements(by), TimeSpan.FromSeconds(secondsToTry));
         }
 
@@ -63,15 +68,17 @@ namespace IntelliTect.TestTools.SelenateExtensions
             var count = 0;
             while (element.GetAttribute("value") != value && count < 5)
             {
-                await Wait.Until<NoSuchElementException, 
+#pragma warning disable 618
+                await Wait.Until<NoSuchElementException,
                     ElementNotVisibleException,
                     StaleElementReferenceException>(
                     () => element.Clear(), TimeSpan.FromSeconds(secondstoTry));
-                await Wait.Until<NoSuchElementException, 
-                    ElementNotVisibleException, 
+                await Wait.Until<NoSuchElementException,
+                    ElementNotVisibleException,
                     ElementNotInteractableException,
                     StaleElementReferenceException>(
                     () => element.SendKeys(value), TimeSpan.FromSeconds(secondstoTry));
+#pragma warning restore 618
                 count++;
             }
         }
@@ -79,13 +86,15 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <summary>
         /// Waits for the element to be in a valid state, then clicks on it or throws after a certain amount of time
         /// </summary>
-        public static Task ClickWhenReady( this IWebElement element, int secondsToTry = 5 )
+        public static Task ClickWhenReady(this IWebElement element, int secondsToTry = 5)
         {
+#pragma warning disable 618
             return Wait.Until<
+#pragma warning restore 618
                 NoSuchElementException,
                 ElementNotVisibleException,
                 ElementClickInterceptedException,
-                StaleElementReferenceException>( () => element.Click(), TimeSpan.FromSeconds( secondsToTry ) );
+                StaleElementReferenceException>(() => element.Click(), TimeSpan.FromSeconds(secondsToTry));
         }
     }
 }
