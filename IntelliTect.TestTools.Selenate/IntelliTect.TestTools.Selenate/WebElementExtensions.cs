@@ -54,9 +54,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// then tabs out of the field or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        public static void FillInWithAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
+        public static void SendKeysAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
-            FillInWithWhenReady(element, driver, value, secondsToTry );
+            SendKeysWhenReady(element, driver, value, secondsToTry );
             element.SendKeys(Keys.Tab);
         }
 
@@ -66,7 +66,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        public static void FillInWithWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
+        public static void SendKeysWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
