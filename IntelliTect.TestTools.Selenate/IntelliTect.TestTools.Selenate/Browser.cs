@@ -70,7 +70,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public IReadOnlyCollection<IWebElement> FindElements(By by, int secondsToWait = 15)
         {
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
             try
             {
