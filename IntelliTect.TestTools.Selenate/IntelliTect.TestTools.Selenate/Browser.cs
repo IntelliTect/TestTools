@@ -7,17 +7,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using OpenQA.Selenium.Support.UI;
+using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.PhantomJS;
+using OpenQA.Selenium.Edge;
 
 namespace IntelliTect.TestTools.Selenate
 {
     public enum BrowserType
     {
         Chrome,
+        HeadlessChrome,
         InternetExplorer,
         Firefox,
-        Edge,
-        PhantomJS
-        // What else is worth supporting? If we support IE, there might be a few others worth supporting
+        Edge
     }
     public class Browser
     {
@@ -182,8 +184,8 @@ namespace IntelliTect.TestTools.Selenate
                 case BrowserType.Chrome:
                     ChromeOptions chromeOptions = new ChromeOptions();
                     chromeOptions.AddArgument("--disable-extension");
-                    chromeOptions.AddArgument("no-sandbox");
-                    chromeOptions.AddArgument("disable-infobars");
+                    chromeOptions.AddArgument("--no-sandbox");
+                    chromeOptions.AddArgument("--disable-infobars");
                     chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
                     driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
@@ -201,11 +203,21 @@ namespace IntelliTect.TestTools.Selenate
                     driver = new InternetExplorerDriver(ieCaps);
                     break;
                 case BrowserType.Firefox:
-                    throw new NotImplementedException();
+                    driver = new FirefoxDriver();
+                    break;
                 case BrowserType.Edge:
-                    throw new NotImplementedException();
-                case BrowserType.PhantomJS:
-                    throw new NotImplementedException();
+                    driver = new EdgeDriver();
+                    break;
+                case BrowserType.HeadlessChrome:
+                    ChromeOptions headlessChromeOptions = new ChromeOptions();
+                    headlessChromeOptions.AddArgument("--disable-extension");
+                    headlessChromeOptions.AddArgument("--headless");
+                    headlessChromeOptions.AddArgument("--no-sandbox");
+                    headlessChromeOptions.AddArgument("--disable-infobars");
+                    headlessChromeOptions.AddUserProfilePreference("credentials_enable_service", false);
+                    headlessChromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
+                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), headlessChromeOptions, TimeSpan.FromMinutes(1));
+                    break;
                 default:
                     throw new ArgumentException($"Unknown browser: {browser}");
             }
