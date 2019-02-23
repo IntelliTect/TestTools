@@ -5,10 +5,8 @@ using OpenQA.Selenium.Remote;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Edge;
 
 namespace IntelliTect.TestTools.Selenate
