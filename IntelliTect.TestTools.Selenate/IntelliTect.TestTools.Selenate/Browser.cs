@@ -188,7 +188,7 @@ namespace IntelliTect.TestTools.Selenate
                     chromeOptions.AddArgument("--disable-infobars");
                     chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
-                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions, TimeSpan.FromMinutes(1));
+                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions);
                     break;
                 case BrowserType.InternetExplorer:
                     InternetExplorerOptions ieCaps = new InternetExplorerOptions
@@ -200,13 +200,18 @@ namespace IntelliTect.TestTools.Selenate
                         IntroduceInstabilityByIgnoringProtectedModeSettings = true,
                         RequireWindowFocus = false
                     };
-                    driver = new InternetExplorerDriver(ieCaps);
+                    driver = new InternetExplorerDriver(Directory.GetCurrentDirectory(), ieCaps);
                     break;
                 case BrowserType.Firefox:
-                    driver = new FirefoxDriver();
+                    FirefoxOptions ffOptions = new FirefoxOptions();
+                    ffOptions.AddArgument("-safe-mode");
+                    driver = new FirefoxDriver(Directory.GetCurrentDirectory(), ffOptions);
                     break;
                 case BrowserType.Edge:
-                    driver = new EdgeDriver();
+                    EdgeOptions edgeOptions = new EdgeOptions();
+                    edgeOptions.UseInPrivateBrowsing = true;
+                    edgeOptions.UnhandledPromptBehavior = UnhandledPromptBehavior.Accept;
+                    driver = new EdgeDriver(Directory.GetCurrentDirectory(), edgeOptions);
                     break;
                 case BrowserType.HeadlessChrome:
                     ChromeOptions headlessChromeOptions = new ChromeOptions();
@@ -216,7 +221,7 @@ namespace IntelliTect.TestTools.Selenate
                     headlessChromeOptions.AddArgument("--disable-infobars");
                     headlessChromeOptions.AddUserProfilePreference("credentials_enable_service", false);
                     headlessChromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
-                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), headlessChromeOptions, TimeSpan.FromMinutes(1));
+                    driver = new ChromeDriver(Directory.GetCurrentDirectory(), headlessChromeOptions);
                     break;
                 default:
                     throw new ArgumentException($"Unknown browser: {browser}");

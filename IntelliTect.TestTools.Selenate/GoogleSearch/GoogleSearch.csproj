@@ -14,9 +14,9 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.2.1" />
     <PackageReference Include="MSTest.TestFramework" Version="1.2.1" />
+    <PackageReference Include="Selenium.Firefox.WebDriver" Version="0.23.0" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="2.41.0" />
     <PackageReference Include="Selenium.WebDriver.IEDriver" Version="3.14.0" />
-    <PackageReference Include="WebDriver.GeckoDriver" Version="0.20.1" />
   </ItemGroup>
 
   <ItemGroup>
