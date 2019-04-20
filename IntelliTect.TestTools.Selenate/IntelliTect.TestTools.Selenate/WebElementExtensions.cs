@@ -97,21 +97,21 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <summary>
         /// Waits for the element to be in a valid state, then clicks on it or throws after a certain amount of time
         /// </summary>
-        public static void ClickWhenReady(this IWebElement element, IWebDriver driver, int secondsToTry = 5)
-        {
-            WebDriverWait wait = new WebDriverWait( driver, TimeSpan.FromSeconds( secondsToTry ) );
-            wait.IgnoreExceptionTypes(
-                typeof(ElementNotVisibleException),
-                typeof(ElementNotInteractableException),
-                typeof(StaleElementReferenceException),
-                typeof(InvalidElementStateException),
-                typeof(ElementClickInterceptedException));
+        //public static void ClickWhenReady(this IWebElement element, IWebDriver driver, int secondsToTry = 5)
+        //{
+        //    WebDriverWait wait = new WebDriverWait( driver, TimeSpan.FromSeconds( secondsToTry ) );
+        //    wait.IgnoreExceptionTypes(
+        //        typeof(ElementNotVisibleException),
+        //        typeof(ElementNotInteractableException),
+        //        typeof(StaleElementReferenceException),
+        //        typeof(InvalidElementStateException),
+        //        typeof(ElementClickInterceptedException));
 
-            wait.Until( c =>
-            {
-                element.Click();
-                return true;
-            } );
-        }
+        //    wait.Until( c =>
+        //    {
+        //        element.Click();
+        //        return true;
+        //    } );
+        //}
     }
 }

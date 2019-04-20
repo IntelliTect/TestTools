@@ -82,6 +82,27 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
+        public bool CheckElementVisibility(Func<bool> func, int secondsToWait = 15)
+        {
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
+            wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(InvalidElementStateException));
+            try
+            {
+                return wait.Until(f => func());
+            }
+            catch(WebDriverTimeoutException ex) 
+                when (ex.InnerException.GetType() == typeof(ElementNotVisibleException)
+                    || ex.InnerException.GetType() == typeof(NoSuchElementException))
+            {
+                return false;
+            }
+        }
+
+        public void CheckElementEnabled(Func<bool> func, int secondsToWait = 15)
+        {
+
+        }
+
         /// <summary>
         ///Waits until a function evaluates to true OR times out after a specified period of time
         /// </summary>

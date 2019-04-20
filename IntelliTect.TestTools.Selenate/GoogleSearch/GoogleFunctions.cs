@@ -3,6 +3,7 @@ using OpenQA.Selenium;
 using System.Linq;
 using System.Threading.Tasks;
 using IntelliTect.TestTools.SelenateExtensions;
+using IntelliTect.TestTools.Selenate;
 
 namespace GoogleSearch
 {
@@ -12,6 +13,7 @@ namespace GoogleSearch
         {
             Browser = browser;
             Harness = new GoogleHarness(Browser);
+            Element = new Element(Browser.Driver);
         }
 
         public bool SearchForItem(string searchItem)
@@ -31,11 +33,12 @@ namespace GoogleSearch
 
         public bool GoToHomePage()
         {
-            Harness.GoHomeButton.ClickWhenReady(Browser.Driver);
+            Element.ClickElementWhenReady(Harness.GoHomeButton);
             return Browser.WaitUntil(() => Harness.GoogleSearchButton.Displayed);
         }
 
         private GoogleBrowser Browser { get; }
         private GoogleHarness Harness { get; }
+        private Element Element { get; }
     }
 }
