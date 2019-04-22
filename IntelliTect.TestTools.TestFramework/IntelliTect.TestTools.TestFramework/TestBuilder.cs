@@ -32,7 +32,7 @@ namespace IntelliTect.TestTools.TestFramework
             Data.Add(default(T));
             return this;
         }
-        
+
         public TestBuilder AddData(object data)
         {
             Data.Add(data);
@@ -52,13 +52,13 @@ namespace IntelliTect.TestTools.TestFramework
             //    testBlock();
             //    Debug.WriteLine(testBlock.Method);
             //}
-            foreach(var tb in TestBlockTypes)
+            foreach (var tb in TestBlockTypes)
             {
-                var parameters = tb..GetParameters();
-                foreach(var p in parameters)
-                {
+                //    var parameters = tb..GetParameters();
+                //    foreach(var p in parameters)
+                //    {
 
-                }
+                //    }
             }
         }
 
