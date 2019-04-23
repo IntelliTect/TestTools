@@ -1,3 +1,4 @@
+using ExampleTests.TestBlocks;
 using IntelliTect.TestTools.TestFramework;
 using Xunit;
 
@@ -27,7 +28,7 @@ namespace ExampleTests
 
             builder
                 .AddTestBlock<TestBlocks.TestBlock1>()
-                .AddData(false)
+                .AddData(new TestBlock2ExpectedValues { ExpectedResult = true }, new TestBlock2ActualValues { ActualResult = false })
                 .AddTestBlock<TestBlocks.TestBlock2>()
                 .ExecuteTest();
         }
