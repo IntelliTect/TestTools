@@ -10,15 +10,15 @@ namespace IntelliTect.TestTools.TestFramework
     public class TestBuilder
     {
 
-        //public TestBuilder AddTestBlock(Action method)
-        //{
-        //    TestBlocks.Add(method);
-        //    return this;
-        //}
+        public TestBuilder AddTestBlock(Action method)
+        {
+            TestBlocks.Add(method);
+            return this;
+        }
 
-        //public TestBuilder AddTestBlock(params Action[] methods)
+        //public TestBuilder AddTestBlock<TResult>(params Func<TResult>[] methods)
         //{
-        //    TestBlocks.AddRange(methods);
+        //    TestBlocks2.AddRange(methods);
         //    return this;
         //}
 
@@ -52,7 +52,20 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        public void ExecuteTest()
+        public void ExecuteTestByDelegate()
+        {
+            foreach (Action tb in TestBlocks)
+            {
+                Debug.WriteLine($"Starting test block {tb.Method.Name}");
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                tb();
+                sw.Stop();
+                Debug.WriteLine($"Time for test block to execute: {sw.Elapsed}");
+            }
+        }
+
+        public void ExecuteTestByBlockType()
         {
             foreach (Type tb in TestBlockTypes)
             {
@@ -90,7 +103,8 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         private List<Type> TestBlockTypes { get; set; } = new List<Type>();
-        //private List<Action> TestBlocks { get; set; } = new List<Action>();
+        private List<Action> TestBlocks { get; set; } = new List<Action>();
+        private List<Delegate> TestBlocks2 { get; set; } = new List<Delegate>();
         private List<object> Data { get; set; } = new List<object>();
     }
 }
