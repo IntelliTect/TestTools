@@ -1,11 +1,17 @@
 using ExampleTests.TestBlocks;
 using IntelliTect.TestTools.TestFramework;
+using System.Reflection;
 using Xunit;
 
 namespace ExampleTests
 {
     public class IntelliTectTests
     {
+        private void Test(MethodInfo method)
+        {
+
+        }
+
         [Fact]
         public void Test1()
         {
@@ -16,8 +22,12 @@ namespace ExampleTests
 
 
             TestBlockGroup testing = new TestBlockGroup();
-            bool r1 = false;
+
+            Test(testing.TestBlock1);
+
+            var expectedResult = new TestBlock2ExpectedValues { ExpectedResult = true };
             TestBuilder builder = new TestBuilder();
+            //builder.AddTestBlock(testing.TestBlock1);
             //builder.AddTestBlock(
             //    () => { return testing.TestBlock1(); },
             //    () => {
@@ -25,18 +35,23 @@ namespace ExampleTests
             //        return false; }
             //).ExecuteTestByDelegate();
 
-            builder
-                .AddTestBlock(() => {
-                    r1 = testing.TestBlock1(); })
-                .AddTestBlock(() => {
-                    testing.TestBlock2(new TestBlock2ExpectedValues { ExpectedResult = true }, new TestBlock2ActualValues { ActualResult = r1 }); })
-                .ExecuteTestByDelegate();
+            //builder
+            //    .AddTestBlock(testing.TestBlock1)
+            //    .AddTestBlock(() => { testing.TestBlock2(expectedResult, actualResult); return false; })
+            //    .ExecuteTestByDelegate();
+
+            //builder
+            //    .AddTestBlock(() => {
+            //        r1 = testing.TestBlock1(); })
+            //    .AddTestBlock(() => {
+            //        testing.TestBlock2(new TestBlock2ExpectedValues { ExpectedResult = true }, new TestBlock2ActualValues { ActualResult = r1 }); })
+            //    .ExecuteTestByDelegate();
 
             builder
                 .AddTestBlock<TestBlocks.TestBlock1>()
-                .AddData(new TestBlock2ExpectedValues { ExpectedResult = true }, new TestBlock2ActualValues { ActualResult = false })
+                .AddData(expectedResult)
                 .AddTestBlock<TestBlocks.TestBlock2>()
-                .ExecuteTestByBlockType();
+                .ExecuteTestBlock();
         }
     }
 }

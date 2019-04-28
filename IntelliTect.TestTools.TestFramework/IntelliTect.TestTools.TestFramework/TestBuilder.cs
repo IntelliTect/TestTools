@@ -10,11 +10,29 @@ namespace IntelliTect.TestTools.TestFramework
     public class TestBuilder
     {
 
-        public TestBuilder AddTestBlock(Action method)
-        {
-            TestBlocks.Add(method);
-            return this;
-        }
+        //public TestBuilder AddTestBlock(Action method)
+        //{
+        //    TestBlocks2.Add(method);
+        //    return this;
+        //}
+
+        //public TestBuilder AddTestBlock(MethodInfo method)
+        //{
+        //    TestBlocks2.Add(method);
+        //    return this;
+        //}
+
+        //public TestBuilder AddTestBlock<T, TResult>(Func<T, TResult> method)
+        //{
+        //    TestBlocks2.Add(method);
+        //    return this;
+        //}
+
+        //public TestBuilder AddTestBlock<T1, T2, TResult>(Func<T1, T2, TResult> method)
+        //{
+        //    TestBlocks2.Add(method);
+        //    return this;
+        //}
 
         //public TestBuilder AddTestBlock<TResult>(params Func<TResult>[] methods)
         //{
@@ -52,20 +70,31 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        public void ExecuteTestByDelegate()
-        {
-            foreach (Action tb in TestBlocks)
-            {
-                Debug.WriteLine($"Starting test block {tb.Method.Name}");
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                tb();
-                sw.Stop();
-                Debug.WriteLine($"Time for test block to execute: {sw.Elapsed}");
-            }
-        }
+        //public void ExecuteTestByDelegate()
+        //{
+        //    //foreach (Action tb in TestBlocks)
+        //    //{
+        //    //    Debug.WriteLine($"Starting test block {tb.Method.Name}");
+        //    //    Stopwatch sw = new Stopwatch();
+        //    //    var test = tb.Method.GetParameters();
+        //    //    sw.Start();
+        //    //    tb();
+        //    //    sw.Stop();
+        //    //    Debug.WriteLine($"Time for test block to execute: {sw.Elapsed}");
+        //    //}
+        //    foreach (Delegate tb in TestBlocks2)
+        //    {
+        //        Debug.WriteLine($"Starting test block {tb.Method.Name}");
+        //        Stopwatch sw = new Stopwatch();
+        //        var test = tb.Method.GetParameters();
+        //        sw.Start();
+        //        object result = tb.Method.Invoke(tb.Target, new object[] { });
+        //        sw.Stop();
+        //        Debug.WriteLine($"Time for test block to execute: {sw.Elapsed}");
+        //    }
+        //}
 
-        public void ExecuteTestByBlockType()
+        public void ExecuteTestBlock()
         {
             foreach (Type tb in TestBlockTypes)
             {

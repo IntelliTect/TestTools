@@ -5,7 +5,7 @@ namespace ExampleTests.TestBlocks
 {
     public class TestBlock2
     {
-        public void Execute(TestBlock2ExpectedValues expected, TestBlock2ActualValues actual)
+        public void Execute(TestBlock2ExpectedValues expected, TestBlock1ReturnValues actual)
         {
             Debug.WriteLine($"Testing some more stuff... This test block probably fails. :( ");
             Assert.Equal(expected.ExpectedResult, actual.ActualResult);
@@ -17,7 +17,7 @@ namespace ExampleTests.TestBlocks
         public bool ExpectedResult { get; set; }
     }
 
-    public class TestBlock2ActualValues
+    public class TestBlock1ReturnValues
     {
         public bool ActualResult { get; set; }
     }
