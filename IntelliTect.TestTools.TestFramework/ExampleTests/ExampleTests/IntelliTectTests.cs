@@ -1,27 +1,47 @@
 using ExampleTests.TestBlocks;
 using IntelliTect.TestTools.TestFramework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
+using System.IO;
 using Xunit;
 
 namespace ExampleTests
 {
-    public class IntelliTectTests
+    public class IntelliTectTests : IDisposable
     {
+        public IntelliTectTests()
+        {
+            //ChromeOptions chromeOptions = new ChromeOptions();
+            //chromeOptions.AddArgument("--disable-extension");
+            //chromeOptions.AddArgument("--no-sandbox");
+            //chromeOptions.AddArgument("--disable-infobars");
+            //chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
+            //chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
+            Driver = new ChromeDriver(Directory.GetCurrentDirectory()/*, chromeOptions*/);
+        }
+
         [Fact]
         public void Test1()
         {
-            var expectedResult = new TestBlock2ExpectedValues { ExpectedResult = true };
+            var expectedResult = new Data.Expected.SiteStatus { IsAvailable = true };
 
             // Is there a better way to do this to show the inputs and outputs of test blocks?
 
             TestBuilder builder = new TestBuilder();
             builder
-                .AddTestBlock<TestBlocks.TestBlock1>()
+                .AddData(Driver)
+                .AddTestBlock<TestBlocks.NavigateToWebsite>()
                 .AddData(expectedResult)
-                .AddTestBlock<TestBlocks.TestBlock2>()
+                .AddTestBlock<TestBlocks.VerifyWebsiteAvailability>()
                 .ExecuteTestBlock();
         }
+
+        public void Dispose()
+        {
+            Driver.Dispose();
+        }
+
+        private IWebDriver Driver { get; set; }
     }
 }
