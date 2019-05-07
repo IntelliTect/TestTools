@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace IntelliTect.TestTools.TestFramework
         // Probably change this to a factory pattern?
         public TestBuilder AddData<T>()
         {
-            Data.Add(default(T));
+            AddDataToBag(default(T));
             return this;
         }
 
@@ -31,7 +32,10 @@ namespace IntelliTect.TestTools.TestFramework
 
         public TestBuilder AddData(params object[] data)
         {
-            Data.AddRange(data);
+            foreach(var d in data)
+            {
+                AddDataToBag(d);
+            }
             return this;
         }
 
@@ -41,15 +45,34 @@ namespace IntelliTect.TestTools.TestFramework
             foreach (Type tb in TestBlockTypes)
             {
                 MethodInfo execute = tb.GetMethod("Execute");
-                
                 // Clean this code up...
-                List<ParameterInfo> argInfo = execute.GetParameters().ToList();
+
                 ConstructorInfo[] ctors = tb.GetConstructors();
                 // Assume only one for now. Expand on later.
-                argInfo.AddRange(ctors.First().GetParameters().ToList());
+                ParameterInfo[] ctorArgs = ctors.First().GetParameters();
 
-                object[] args = new object[argInfo.Count];
-                for (int i = 0; i < argInfo.Count; i++)
+                object[] args = new object[ctorArgs.Length];
+                for (int i = 0; i < ctorArgs.Length; i++)
+                {
+                    // Super dirty. Clean this up.
+                    var t = ctorArgs[i].ParameterType;
+                    var p = Data.SingleOrDefault(d => d.GetType() == t);
+                    if (p == null)
+                        p = Data.SingleOrDefault(d => d.GetType().BaseType == t);
+                    if (p == null)
+                        // This will produce unexpected results if we load up two different browser types. It will grab whatever is first.
+                        p = Data.Single(d => d.GetType().GetInterfaces().ToList().Contains(t));
+                    args[i] = p;
+                }
+
+                object tbInstance = ctors.First().Invoke(args);
+                //Don't convert in-line...
+                //Log.Info($"Creating test block with following inputs {JsonConvert.SerializeObject(args)}");
+                // Clean this code up...
+                ParameterInfo[] argInfo = execute.GetParameters();
+
+                args = new object[argInfo.Length];
+                for (int i = 0; i < argInfo.Length; i++)
                 {
                     var t = argInfo[i].ParameterType;
                     var p = Data.Single(d => d.GetType() == t);
@@ -60,28 +83,30 @@ namespace IntelliTect.TestTools.TestFramework
                 // and properties
                 //ConstructorInfo ctor = tb.GetConstructor(Type.EmptyTypes);
                 //object tbInstance = ctor.Invoke(new object[] {});
-                object tbInstance = ctors.First().Invoke(new object[] { });
+                //object tbInstance = ctors.First().Invoke(new object[] { });
 
 
-                Debug.WriteLine($"Starting test block {tb.Name}");
+                Log.Info($"Starting test block {tb.Name}");
+                Log.Info($"Using additional inputs {JsonConvert.SerializeObject(args, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 object result = execute.Invoke(tbInstance, args);
                 sw.Stop();
-                Debug.WriteLine($"Time for test block to execute: {sw.Elapsed}");
-                if(result != null)
+                Log.Info($"Time for test block to execute: {sw.Elapsed}");
+                if (result != null)
                 {
-                    Data.Add(result);
+                    Log.Info($"Test block returned... {JsonConvert.SerializeObject(result, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
+                    AddDataToBag(result);
                 }
             }
         }
 
         private void AddDataToBag(params object[] data)
         {
-            foreach(var d in data)
+            foreach (var d in data)
             {
                 var existingType = Data.SingleOrDefault(f => f.GetType() == d.GetType());
-                if(existingType != null)
+                if (existingType != null)
                 {
                     Data.Remove(existingType);
                 }
@@ -91,5 +116,6 @@ namespace IntelliTect.TestTools.TestFramework
 
         private List<Type> TestBlockTypes { get; set; } = new List<Type>();
         private List<object> Data { get; set; } = new List<object>();
+        private Log Log { get; set; } = new Log();
     }
 }
