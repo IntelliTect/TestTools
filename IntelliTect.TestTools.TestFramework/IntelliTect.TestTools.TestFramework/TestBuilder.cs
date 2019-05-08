@@ -39,52 +39,45 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        // Should this return a new type?
+        public TestBuilder Build()
+        {
+            foreach (Type tb in TestBlockTypes)
+            {
+                ConstructorInfo[] ctors = tb.GetConstructors();
+                ParameterInfo[] ctorArgs = ctors.First().GetParameters();
+                object[] args = GetArguments(ctorArgs);
+
+                // Create instance of test block
+                object tbInstance = ctors.First().Invoke(args);
+
+                // Gather properties
+                MethodInfo execute = tb.GetMethod("Execute");
+                ParameterInfo[] argInfo = execute.GetParameters();
+                args = GetArguments(argInfo);
+            }
+            return this;
+        }
+
         public void ExecuteTestBlock()
         {
             // Check for non-existent types here
+
+            // Execute test blocks
             foreach (Type tb in TestBlockTypes)
             {
-                MethodInfo execute = tb.GetMethod("Execute");
-                // Clean this code up...
-
+                // Get constructor
                 ConstructorInfo[] ctors = tb.GetConstructors();
-                // Assume only one for now. Expand on later.
                 ParameterInfo[] ctorArgs = ctors.First().GetParameters();
+                object[] args = GetArguments(ctorArgs);
 
-                object[] args = new object[ctorArgs.Length];
-                for (int i = 0; i < ctorArgs.Length; i++)
-                {
-                    // Super dirty. Clean this up.
-                    var t = ctorArgs[i].ParameterType;
-                    var p = Data.SingleOrDefault(d => d.GetType() == t);
-                    if (p == null)
-                        p = Data.SingleOrDefault(d => d.GetType().BaseType == t);
-                    if (p == null)
-                        // This will produce unexpected results if we load up two different browser types. It will grab whatever is first.
-                        p = Data.Single(d => d.GetType().GetInterfaces().ToList().Contains(t));
-                    args[i] = p;
-                }
-
+                // Create instance of test block
                 object tbInstance = ctors.First().Invoke(args);
-                //Don't convert in-line...
-                //Log.Info($"Creating test block with following inputs {JsonConvert.SerializeObject(args)}");
-                // Clean this code up...
+
+                // Gather properties
+                MethodInfo execute = tb.GetMethod("Execute");
                 ParameterInfo[] argInfo = execute.GetParameters();
-
-                args = new object[argInfo.Length];
-                for (int i = 0; i < argInfo.Length; i++)
-                {
-                    var t = argInfo[i].ParameterType;
-                    var p = Data.Single(d => d.GetType() == t);
-                    args[i] = p;
-                }
-
-                // Need to do this first, up above. Probably can't group finding all of the constructor params
-                // and properties
-                //ConstructorInfo ctor = tb.GetConstructor(Type.EmptyTypes);
-                //object tbInstance = ctor.Invoke(new object[] {});
-                //object tbInstance = ctors.First().Invoke(new object[] { });
-
+                args = GetArguments(argInfo);
 
                 Log.Info($"Starting test block {tb.Name}");
                 Log.Info($"Using additional inputs {JsonConvert.SerializeObject(args, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
@@ -101,6 +94,19 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
+        private object[] GetArguments(ParameterInfo[] parameters)
+        {
+            object[] args = new object[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var t = parameters[i].ParameterType;
+                if (!TryGetItemFromBag(t, out object p))
+                    throw new Exception("Could not find type in bag. Eventually replace this with a new exception");
+                args[i] = p;
+            }
+            return args;
+        }
+
         private void AddDataToBag(params object[] data)
         {
             foreach (var d in data)
@@ -112,6 +118,22 @@ namespace IntelliTect.TestTools.TestFramework
                 }
                 Data.Add(d);
             }
+        }
+
+        private bool TryGetItemFromBag(Type typeToFind, out object data)
+        {
+            data = Data.SingleOrDefault(d => d.GetType() == typeToFind);
+            if (data == null)
+            {
+                data = Data.SingleOrDefault(d => d.GetType().BaseType == typeToFind);
+                if (data == null)
+                {
+                    // This will produce unexpected results if we load up two different browser types. It will grab whatever is first.
+                    data = Data.Single(d => d.GetType().GetInterfaces().ToList().Contains(typeToFind));
+                }
+            }
+
+            return data != null ? true : false;
         }
 
         private List<Type> TestBlockTypes { get; set; } = new List<Type>();
