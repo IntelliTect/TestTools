@@ -32,7 +32,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         public TestBuilder AddData(params object[] data)
         {
-            foreach(var d in data)
+            foreach (var d in data)
             {
                 AddDataToBag(d);
             }
@@ -40,51 +40,72 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         // Should this return a new type?
-        public TestBuilder Build()
+        // Also... should we call it something like "Validate" or "Build"? "Build" seems more consistent with the pattern.
+        // ALSO... can we avoid iterating over the arguments twice? Maybe use this method to pair up test blocks with the arguments? See example below...
+        public TestBuilder ValidateTest()
         {
-            foreach (Type tb in TestBlockTypes)
+            // Need to build a temporary list to get return values...
+            Type[] existingOrReturnedParams = new Type[0];
+            Type[] askedForParams = new Type[0];
+
+            foreach (Type tbt in TestBlockTypes)
             {
-                ConstructorInfo[] ctors = tb.GetConstructors();
-                ParameterInfo[] ctorArgs = ctors.First().GetParameters();
-                object[] args = GetArguments(ctorArgs);
+                var tb = new TestBlock();
+                // Gather constructor arguments
+                tb.Constructor = tbt.GetConstructors().First();
 
-                // Create instance of test block
-                object tbInstance = ctors.First().Invoke(args);
+                // Update below method. This will fail in certain circumstances when we're relying on a return value
+                // Maybe have two separate methods: ValidateAndFetch, and DoesItemExist?
+                tb.ConstructorArguments = ValidateAndFetchTestBlockParameters(tb.Constructor.GetParameters());
 
-                // Gather properties
-                MethodInfo execute = tb.GetMethod("Execute");
-                ParameterInfo[] argInfo = execute.GetParameters();
-                args = GetArguments(argInfo);
+                // Gather Execute method arguments
+                tb.ExecuteMethod = tbt.GetMethod("Execute");
+
+                if (tb.ExecuteMethod.ReturnType != typeof(void))
+                    existingOrReturnedParams = existingOrReturnedParams.Concat(new Type[] { tb.ExecuteMethod.ReturnType }).ToArray();
+
+                foreach(var c in tb.Constructor.GetParameters())
+                {
+                    askedForParams = askedForParams.Concat(new Type[] { c.ParameterType }).ToArray();
+                }
+
+                foreach(var p in tb.ExecuteMethod.GetParameters())
+                {
+                    askedForParams = askedForParams.Concat(new Type[] { p.ParameterType }).ToArray();
+                }
+
+                // Update below method. This will fail in certain circumstances when we're relying on a return value
+                tb.ExecuteArguments = ValidateAndFetchTestBlockParameters(tb.ExecuteMethod.GetParameters());
             }
+
+            foreach (var d in Data)
+            {
+                existingOrReturnedParams = existingOrReturnedParams.Concat(new Type[] { d.GetType() }).ToArray();
+            }
+
+            // Verify everything matches here. As with fetching, getting the drivers is going to rely on comparing the IWebDriver interface to the implemented interfaces
+            // Maybe remove all other objects as the types check out?
+
             return this;
         }
 
-        public void ExecuteTestBlock()
+        public void ExecuteTestCase()
         {
-            // Check for non-existent types here
-
-            // Execute test blocks
-            foreach (Type tb in TestBlockTypes)
+            foreach (var tb in TestBlocksAndArguments)
             {
-                // Get constructor
-                ConstructorInfo[] ctors = tb.GetConstructors();
-                ParameterInfo[] ctorArgs = ctors.First().GetParameters();
-                object[] args = GetArguments(ctorArgs);
+                ConstructorInfo ctor = tb.ExecuteMethod.DeclaringType.GetConstructors().First();
 
                 // Create instance of test block
-                object tbInstance = ctors.First().Invoke(args);
+                object tbInstance = ctor.Invoke(tb.ConstructorArguments);
 
-                // Gather properties
-                MethodInfo execute = tb.GetMethod("Execute");
-                ParameterInfo[] argInfo = execute.GetParameters();
-                args = GetArguments(argInfo);
+                Log.Info($"Starting test block {tb}");
+                Log.Info($"Using additional inputs {JsonConvert.SerializeObject(tb.ExecuteArguments, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
 
-                Log.Info($"Starting test block {tb.Name}");
-                Log.Info($"Using additional inputs {JsonConvert.SerializeObject(args, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
-                object result = execute.Invoke(tbInstance, args);
+                object result = tb.ExecuteMethod.Invoke(tbInstance, tb.ExecuteArguments);
                 sw.Stop();
+
                 Log.Info($"Time for test block to execute: {sw.Elapsed}");
                 if (result != null)
                 {
@@ -94,16 +115,66 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        private object[] GetArguments(ParameterInfo[] parameters)
+        public void UnsafeExecuteTestCase()
+        {
+            // Check for non-existent types here?
+
+            // Execute test blocks
+            foreach (Type tb in TestBlockTypes)
+            {
+                // Get constructor and arguments
+                Log.Info($"Gathering constructor arguments for test block {tb}...");
+                ConstructorInfo[] ctors = tb.GetConstructors();
+                ParameterInfo[] ctorArgs = ctors.First().GetParameters();
+                object[] args = ValidateAndFetchTestBlockParameters(ctorArgs);
+
+                // Create instance of test block
+                object tbInstance = ctors.First().Invoke(args);
+
+                // Gather Execute method arguments
+                Log.Info($"Gathering properties for test block {tb}...");
+                MethodInfo execute = tb.GetMethod("Execute");
+                ParameterInfo[] argInfo = execute.GetParameters();
+                args = ValidateAndFetchTestBlockParameters(argInfo);
+
+                Log.Info($"Starting test block {tb.Name}");
+                Log.Info($"Using additional inputs {JsonConvert.SerializeObject(args, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
+
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                object result = execute.Invoke(tbInstance, args);
+                sw.Stop();
+
+                Log.Info($"Time for test block to execute: {sw.Elapsed}");
+                if (result != null)
+                {
+                    Log.Info($"Test block returned... {JsonConvert.SerializeObject(result, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
+                    AddDataToBag(result);
+                }
+            }
+        }
+
+        private bool ItemExistsInBag()
+        {
+
+        }
+
+        private object[] ValidateAndFetchTestBlockParameters(ParameterInfo[] parameters)
         {
             object[] args = new object[parameters.Length];
             for (int i = 0; i < parameters.Length; i++)
             {
                 var t = parameters[i].ParameterType;
                 if (!TryGetItemFromBag(t, out object p))
-                    throw new Exception("Could not find type in bag. Eventually replace this with a new exception");
+                {
+                    // Check for factories once that's implemented
+                    string message = $"...expected an object of type {t.GetType()}, however none could be found in the item bag.";
+                    Log.Info(message);
+                    throw new ArgumentException(message);
+                }
                 args[i] = p;
             }
+            Log.Info("Found all required items.");
             return args;
         }
 
@@ -120,16 +191,27 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
+        
+
         private bool TryGetItemFromBag(Type typeToFind, out object data)
         {
             data = Data.SingleOrDefault(d => d.GetType() == typeToFind);
             if (data == null)
             {
+                // Probably shouldn't do below as it breaks validation
                 data = Data.SingleOrDefault(d => d.GetType().BaseType == typeToFind);
                 if (data == null)
                 {
                     // This will produce unexpected results if we load up two different browser types. It will grab whatever is first.
-                    data = Data.Single(d => d.GetType().GetInterfaces().ToList().Contains(typeToFind));
+                    foreach (var d in Data)
+                    {
+                        Type[] interfaces = d.GetType().GetInterfaces();
+                        if (interfaces.Length > 0 && interfaces.Contains(typeToFind))
+                        {
+                            data = d;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -138,6 +220,16 @@ namespace IntelliTect.TestTools.TestFramework
 
         private List<Type> TestBlockTypes { get; set; } = new List<Type>();
         private List<object> Data { get; set; } = new List<object>();
+        private List<TestBlock> TestBlocksAndArguments { get; set; }
         private Log Log { get; set; } = new Log();
+    }
+
+    public class TestBlock
+    {
+        public ConstructorInfo Constructor { get; set; }
+        public object[] ConstructorArguments { get; set; }
+        // Probably need to add class properties
+        public object[] ExecuteArguments { get; set; }
+        public MethodInfo ExecuteMethod { get; set; }
     }
 }

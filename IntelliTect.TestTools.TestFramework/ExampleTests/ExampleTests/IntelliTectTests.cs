@@ -18,6 +18,7 @@ namespace ExampleTests
             //chromeOptions.AddArgument("--disable-infobars");
             //chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
             //chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
+            // Change to factory
             Driver = new ChromeDriver(Directory.GetCurrentDirectory()/*, chromeOptions*/);
         }
 
@@ -34,7 +35,8 @@ namespace ExampleTests
                 .AddTestBlock<TestBlocks.NavigateToWebsite>()
                 .AddData(expectedResult)
                 .AddTestBlock<TestBlocks.VerifyWebsiteAvailability>()
-                .ExecuteTestBlock();
+                .ValidateTest()
+                .UnsafeExecuteTestCase();
         }
 
         public void Dispose()

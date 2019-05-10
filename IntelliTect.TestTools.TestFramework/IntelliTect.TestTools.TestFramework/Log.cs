@@ -6,6 +6,11 @@ namespace IntelliTect.TestTools.TestFramework
     {
         public void Info(string message)
         {
+            LogToDebug(message);
+        }
+
+        private void LogToDebug(string message)
+        {
             Debug.WriteLine(message);
         }
     }
