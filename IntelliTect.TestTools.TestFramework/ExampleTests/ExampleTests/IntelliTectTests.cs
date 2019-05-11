@@ -35,8 +35,7 @@ namespace ExampleTests
                 .AddTestBlock<TestBlocks.NavigateToWebsite>()
                 .AddData(expectedResult)
                 .AddTestBlock<TestBlocks.VerifyWebsiteAvailability>()
-                .ValidateTest()
-                .UnsafeExecuteTestCase();
+                .ExecuteTestCase();
         }
 
         public void Dispose()

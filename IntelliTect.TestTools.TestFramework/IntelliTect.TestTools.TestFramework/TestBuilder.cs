@@ -39,83 +39,7 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        // Should this return a new type?
-        // Also... should we call it something like "Validate" or "Build"? "Build" seems more consistent with the pattern.
-        // ALSO... can we avoid iterating over the arguments twice? Maybe use this method to pair up test blocks with the arguments? See example below...
-        public TestBuilder ValidateTest()
-        {
-            // Need to build a temporary list to get return values...
-            Type[] existingOrReturnedParams = new Type[0];
-            Type[] askedForParams = new Type[0];
-
-            foreach (Type tbt in TestBlockTypes)
-            {
-                var tb = new TestBlock();
-                // Gather constructor arguments
-                tb.Constructor = tbt.GetConstructors().First();
-
-                // Update below method. This will fail in certain circumstances when we're relying on a return value
-                // Maybe have two separate methods: ValidateAndFetch, and DoesItemExist?
-                tb.ConstructorArguments = ValidateAndFetchTestBlockParameters(tb.Constructor.GetParameters());
-
-                // Gather Execute method arguments
-                tb.ExecuteMethod = tbt.GetMethod("Execute");
-
-                if (tb.ExecuteMethod.ReturnType != typeof(void))
-                    existingOrReturnedParams = existingOrReturnedParams.Concat(new Type[] { tb.ExecuteMethod.ReturnType }).ToArray();
-
-                foreach(var c in tb.Constructor.GetParameters())
-                {
-                    askedForParams = askedForParams.Concat(new Type[] { c.ParameterType }).ToArray();
-                }
-
-                foreach(var p in tb.ExecuteMethod.GetParameters())
-                {
-                    askedForParams = askedForParams.Concat(new Type[] { p.ParameterType }).ToArray();
-                }
-
-                // Update below method. This will fail in certain circumstances when we're relying on a return value
-                tb.ExecuteArguments = ValidateAndFetchTestBlockParameters(tb.ExecuteMethod.GetParameters());
-            }
-
-            foreach (var d in Data)
-            {
-                existingOrReturnedParams = existingOrReturnedParams.Concat(new Type[] { d.GetType() }).ToArray();
-            }
-
-            // Verify everything matches here. As with fetching, getting the drivers is going to rely on comparing the IWebDriver interface to the implemented interfaces
-            // Maybe remove all other objects as the types check out?
-
-            return this;
-        }
-
         public void ExecuteTestCase()
-        {
-            foreach (var tb in TestBlocksAndArguments)
-            {
-                ConstructorInfo ctor = tb.ExecuteMethod.DeclaringType.GetConstructors().First();
-
-                // Create instance of test block
-                object tbInstance = ctor.Invoke(tb.ConstructorArguments);
-
-                Log.Info($"Starting test block {tb}");
-                Log.Info($"Using additional inputs {JsonConvert.SerializeObject(tb.ExecuteArguments, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
-
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                object result = tb.ExecuteMethod.Invoke(tbInstance, tb.ExecuteArguments);
-                sw.Stop();
-
-                Log.Info($"Time for test block to execute: {sw.Elapsed}");
-                if (result != null)
-                {
-                    Log.Info($"Test block returned... {JsonConvert.SerializeObject(result, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
-                    AddDataToBag(result);
-                }
-            }
-        }
-
-        public void UnsafeExecuteTestCase()
         {
             // Check for non-existent types here?
 
@@ -154,11 +78,6 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        private bool ItemExistsInBag()
-        {
-
-        }
-
         private object[] ValidateAndFetchTestBlockParameters(ParameterInfo[] parameters)
         {
             object[] args = new object[parameters.Length];
@@ -191,8 +110,6 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        
-
         private bool TryGetItemFromBag(Type typeToFind, out object data)
         {
             data = Data.SingleOrDefault(d => d.GetType() == typeToFind);
@@ -220,16 +137,6 @@ namespace IntelliTect.TestTools.TestFramework
 
         private List<Type> TestBlockTypes { get; set; } = new List<Type>();
         private List<object> Data { get; set; } = new List<object>();
-        private List<TestBlock> TestBlocksAndArguments { get; set; }
         private Log Log { get; set; } = new Log();
-    }
-
-    public class TestBlock
-    {
-        public ConstructorInfo Constructor { get; set; }
-        public object[] ConstructorArguments { get; set; }
-        // Probably need to add class properties
-        public object[] ExecuteArguments { get; set; }
-        public MethodInfo ExecuteMethod { get; set; }
     }
 }
