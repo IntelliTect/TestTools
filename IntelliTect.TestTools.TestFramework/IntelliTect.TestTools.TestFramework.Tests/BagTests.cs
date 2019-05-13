@@ -6,12 +6,13 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     public class BagTests
     {
         [Fact]
-        public void CanAddItemToBagByType()
+        public void CanAddItemToBag()
         {
-            TestBuilder builder = new TestBuilder();
-            builder.AddData<TestData>();
+            TestObjectsBag bag = new TestObjectsBag();
+            bag.AddItemToBag(new TestData());
 
-            Assert.True(builder.TryGetItemFromBag(typeof(TestData), out _));
+            Assert.True(bag.TryGetItemFromBag(typeof(TestData), out _), 
+                $"Did not find an item of type {typeof(TestData)} in the TestObjectsBag when we expected one");
         }
     }
 

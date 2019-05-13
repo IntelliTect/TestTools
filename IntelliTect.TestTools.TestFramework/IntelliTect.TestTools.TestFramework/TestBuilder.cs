@@ -19,13 +19,13 @@ namespace IntelliTect.TestTools.TestFramework
         // Probably change this to a factory pattern?
         public TestBuilder AddData<T>()
         {
-            AddDataToBag(default(T));
+            ObjectBag.AddItemToBag(default(T));
             return this;
         }
 
         public TestBuilder AddData(object data)
         {
-            AddDataToBag(data);
+            ObjectBag.AddItemToBag(data);
             return this;
         }
 
@@ -33,7 +33,7 @@ namespace IntelliTect.TestTools.TestFramework
         {
             foreach (var d in data)
             {
-                AddDataToBag(d);
+                ObjectBag.AddItemToBag(data);
             }
             return this;
         }
@@ -72,44 +72,9 @@ namespace IntelliTect.TestTools.TestFramework
                 if (result != null)
                 {
                     Log.Info($"Test block returned... {JsonConvert.SerializeObject(result, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
-                    AddDataToBag(result);
+                    ObjectBag.AddItemToBag(result);
                 }
             }
-        }
-
-        public bool TryGetItemFromBag(Type typeToFind, out object data)
-        {
-            data = Data.SingleOrDefault(d => d.GetType() == typeToFind);
-            if (data == null)
-            {
-                foreach (var d in Data)
-                {
-                    Type[] interfaces = d.GetType().GetInterfaces();
-                    if (interfaces.Length > 0 && interfaces.Contains(typeToFind))
-                    {
-                        data = d;
-                        break;
-                    }
-                }
-
-                // Probably shouldn't do below as it breaks validation
-                //data = Data.SingleOrDefault(d => d.GetType().BaseType == typeToFind);
-                //if (data == null)
-                //{
-                //    // This will produce unexpected results if we load up two different browser types. It will grab whatever is first.
-                //    foreach (var d in Data)
-                //    {
-                //        Type[] interfaces = d.GetType().GetInterfaces();
-                //        if (interfaces.Length > 0 && interfaces.Contains(typeToFind))
-                //        {
-                //            data = d;
-                //            break;
-                //        }
-                //    }
-                //}
-            }
-
-            return data != null ? true : false;
         }
 
         private object[] ValidateAndFetchTestBlockParameters(ParameterInfo[] parameters)
@@ -118,7 +83,7 @@ namespace IntelliTect.TestTools.TestFramework
             for (int i = 0; i < parameters.Length; i++)
             {
                 var t = parameters[i].ParameterType;
-                if (!TryGetItemFromBag(t, out object p))
+                if (!ObjectBag.TryGetItemFromBag(t, out object p))
                 {
                     // Check for factories once that's implemented
                     string message = $"...expected an object of type {t.GetType()}, however none could be found in the item bag.";
@@ -131,21 +96,8 @@ namespace IntelliTect.TestTools.TestFramework
             return args;
         }
 
-        private void AddDataToBag(params object[] data)
-        {
-            foreach (var d in data)
-            {
-                var existingType = Data.SingleOrDefault(f => f.GetType() == d.GetType());
-                if (existingType != null)
-                {
-                    Data.Remove(existingType);
-                }
-                Data.Add(d);
-            }
-        }
-
         private List<Type> TestBlockTypes { get; set; } = new List<Type>();
-        private List<object> Data { get; set; } = new List<object>();
+        private TestObjectsBag ObjectBag { get; set; } = new TestObjectsBag();
         private Log Log { get; set; } = new Log();
     }
 }
