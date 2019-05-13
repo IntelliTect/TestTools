@@ -10,7 +10,6 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
-        // DON'T FORGET TO UNIT TEST ONCE YOU'RE BACK ON YOUR NORMAL MACHINE
         public TestBuilder AddTestBlock<T>()
         {
             TestBlockTypes.Add(typeof(T));
@@ -78,6 +77,41 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
+        public bool TryGetItemFromBag(Type typeToFind, out object data)
+        {
+            data = Data.SingleOrDefault(d => d.GetType() == typeToFind);
+            if (data == null)
+            {
+                foreach (var d in Data)
+                {
+                    Type[] interfaces = d.GetType().GetInterfaces();
+                    if (interfaces.Length > 0 && interfaces.Contains(typeToFind))
+                    {
+                        data = d;
+                        break;
+                    }
+                }
+
+                // Probably shouldn't do below as it breaks validation
+                //data = Data.SingleOrDefault(d => d.GetType().BaseType == typeToFind);
+                //if (data == null)
+                //{
+                //    // This will produce unexpected results if we load up two different browser types. It will grab whatever is first.
+                //    foreach (var d in Data)
+                //    {
+                //        Type[] interfaces = d.GetType().GetInterfaces();
+                //        if (interfaces.Length > 0 && interfaces.Contains(typeToFind))
+                //        {
+                //            data = d;
+                //            break;
+                //        }
+                //    }
+                //}
+            }
+
+            return data != null ? true : false;
+        }
+
         private object[] ValidateAndFetchTestBlockParameters(ParameterInfo[] parameters)
         {
             object[] args = new object[parameters.Length];
@@ -108,31 +142,6 @@ namespace IntelliTect.TestTools.TestFramework
                 }
                 Data.Add(d);
             }
-        }
-
-        private bool TryGetItemFromBag(Type typeToFind, out object data)
-        {
-            data = Data.SingleOrDefault(d => d.GetType() == typeToFind);
-            if (data == null)
-            {
-                // Probably shouldn't do below as it breaks validation
-                data = Data.SingleOrDefault(d => d.GetType().BaseType == typeToFind);
-                if (data == null)
-                {
-                    // This will produce unexpected results if we load up two different browser types. It will grab whatever is first.
-                    foreach (var d in Data)
-                    {
-                        Type[] interfaces = d.GetType().GetInterfaces();
-                        if (interfaces.Length > 0 && interfaces.Contains(typeToFind))
-                        {
-                            data = d;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return data != null ? true : false;
         }
 
         private List<Type> TestBlockTypes { get; set; } = new List<Type>();

@@ -6,6 +6,9 @@ namespace IntelliTect.TestTools.TestFramework
     // Temp name
     public class ApplicationBag
     {
-        private List<object> Applications { get; set; }
+        // Add
+        // Get
+        // Remove
+        private List<object> Data { get; set; }
     }
 }
