@@ -78,7 +78,7 @@ namespace IntelliTect.TestTools.TestFramework
             // Throw exception here instead?
         }
 
-        // Worth converting this to a HashSet? Or maybe a Dictionary with the type as a key (or an optional key?)
+        // Worth converting this to a HashSet? Or maybe a Dictionary with the type as a key (or a specifiable key?)
         private List<object> DataBag { get; set; } = new List<object>();
     }
 }
