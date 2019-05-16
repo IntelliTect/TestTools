@@ -22,6 +22,11 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
+        public void AddItemToBag<T>()
+        {
+            AddItemToBag(Activator.CreateInstance(typeof(T)));
+        }
+
         public bool TryGetItemFromBag(object objectToFind, out object data)
         {
             return TryGetItemFromBag(objectToFind.GetType(), out data);

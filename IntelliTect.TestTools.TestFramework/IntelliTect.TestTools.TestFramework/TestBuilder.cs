@@ -17,24 +17,21 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         // Probably change this to a factory pattern?
-        public TestBuilder AddData<T>()
+        public TestBuilder AddItemToBag<T>()
         {
             ObjectBag.AddItemToBag(default(T));
             return this;
         }
 
-        public TestBuilder AddData(object data)
+        public TestBuilder AddItemToBag(object data)
         {
             ObjectBag.AddItemToBag(data);
             return this;
         }
 
-        public TestBuilder AddData(params object[] data)
+        public TestBuilder AddItemToBag(params object[] data)
         {
-            foreach (var d in data)
-            {
-                ObjectBag.AddItemToBag(data);
-            }
+            ObjectBag.AddItemToBag(data);
             return this;
         }
 

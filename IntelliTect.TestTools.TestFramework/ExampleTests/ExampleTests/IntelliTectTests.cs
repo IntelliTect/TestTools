@@ -12,14 +12,8 @@ namespace ExampleTests
     {
         public IntelliTectTests()
         {
-            //ChromeOptions chromeOptions = new ChromeOptions();
-            //chromeOptions.AddArgument("--disable-extension");
-            //chromeOptions.AddArgument("--no-sandbox");
-            //chromeOptions.AddArgument("--disable-infobars");
-            //chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
-            //chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
             // Change to factory
-            Driver = new ChromeDriver(Directory.GetCurrentDirectory()/*, chromeOptions*/);
+            Driver = new ChromeDriver(Directory.GetCurrentDirectory());
         }
 
         [Fact]
@@ -31,9 +25,9 @@ namespace ExampleTests
 
             TestBuilder builder = new TestBuilder();
             builder
-                .AddData(Driver)
+                .AddItemToBag(Driver)
                 .AddTestBlock<TestBlocks.NavigateToWebsite>()
-                .AddData(expectedResult)
+                .AddItemToBag(expectedResult)
                 .AddTestBlock<TestBlocks.VerifyWebsiteAvailability>()
                 .ExecuteTestCase();
         }

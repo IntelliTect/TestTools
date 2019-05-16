@@ -1,8 +1,5 @@
 ﻿using ExampleTests.Pages;
 using OpenQA.Selenium;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ExampleTests.TestBlocks
 {
