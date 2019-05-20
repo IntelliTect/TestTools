@@ -16,6 +16,54 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
 
         [Fact]
+        public void CanFindSimpleItemByObject()
+        {
+            string cth = "Cthulhu!";
+            TestObjectsBag bag = new TestObjectsBag();
+            bag.AddItemToBag(cth);
+
+            bag.TryGetItemFromBag(cth, out object foundString);
+
+            Assert.Equal(cth, foundString);
+        }
+
+        [Fact]
+        public void CanFindSimpleItemByType()
+        {
+            TestData data = new TestData();
+            TestObjectsBag bag = new TestObjectsBag();
+            bag.AddItemToBag(data);
+
+            bag.TryGetItemFromBag(typeof(TestData), out object foundData);
+
+            Assert.Equal(data, foundData);
+        }
+
+        [Fact]
+        public void CanFindItemByType()
+        {
+            TestData data = new TestData();
+            TestObjectsBag bag = new TestObjectsBag();
+            bag.AddItemToBag(data);
+
+            bag.TryGetItemFromBag(data, out object foundData);
+
+            Assert.Equal(data, foundData);
+        }
+
+        [Fact]
+        public void CanFindItemByObject()
+        {
+            string cth = "Cthulhu!";
+            TestObjectsBag bag = new TestObjectsBag();
+            bag.AddItemToBag(cth);
+
+            bag.TryGetItemFromBag(typeof(string), out object foundString);
+
+            Assert.Equal(cth, foundString);
+        }
+
+        [Fact]
         public void CanAddItemToBagByType()
         {
             TestObjectsBag bag = new TestObjectsBag();
