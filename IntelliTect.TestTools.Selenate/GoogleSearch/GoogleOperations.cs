@@ -7,9 +7,9 @@ using IntelliTect.TestTools.Selenate;
 
 namespace GoogleSearch
 {
-    public class GoogleFunctions
+    public class GoogleOperations
     {
-        public GoogleFunctions(GoogleBrowser browser)
+        public GoogleOperations(GoogleBrowser browser)
         {
             Browser = browser;
             Harness = new GoogleHarness(Browser);
