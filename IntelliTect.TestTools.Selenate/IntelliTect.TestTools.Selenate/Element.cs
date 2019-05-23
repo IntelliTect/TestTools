@@ -10,7 +10,7 @@ namespace IntelliTect.TestTools.Selenate
     {
         public Element(IWebDriver driver)
         {
-            this.driver = driver;
+            this.Driver = driver;
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         public void ClickElementWhenReady(IWebElement element, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),
                 typeof(ElementNotInteractableException),
@@ -41,9 +41,25 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
+        public void SendKeysWhenReady(IWebElement element, string textToSend, int secondsToTry = 5)
+        {
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
+            wait.IgnoreExceptionTypes(
+                typeof(ElementNotVisibleException),
+                typeof(ElementNotInteractableException),
+                typeof(StaleElementReferenceException),
+                typeof(InvalidElementStateException),
+                typeof(NoSuchElementException));
+
+            wait.Until(sk => {
+                element.SendKeys(textToSend);
+                return true;
+            });
+        }
+
         public bool CheckForVisibilityState(IWebElement element, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),
                 typeof(StaleElementReferenceException),
@@ -63,7 +79,7 @@ namespace IntelliTect.TestTools.Selenate
 
         public bool CheckForEnabledState(IWebElement element, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),
                 typeof(StaleElementReferenceException),
@@ -72,6 +88,6 @@ namespace IntelliTect.TestTools.Selenate
             return wait.Until(d => element.Enabled);
         }
 
-        private IWebDriver driver { get; set; }
+        private IWebDriver Driver { get; set; }
     }
 }
