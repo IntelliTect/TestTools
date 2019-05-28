@@ -29,7 +29,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         public bool TryGetItemFromBag(Type typeToFind, out object data)
         {
-            data = DataBag.SingleOrDefault(d => d.GetType() == typeToFind);
+            data = DataBag.FirstOrDefault(d => d.GetType() == typeToFind);
             if (data == null)
             {
                 foreach (var d in DataBag)
