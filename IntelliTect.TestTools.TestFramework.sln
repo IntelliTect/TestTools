@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleTests", "IntelliTect.TestTools.TestFramework\ExampleTests\ExampleTests\ExampleTests.csproj", "{748A0D88-12EA-4C3F-8705-4D6BC1AD3F11}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.TestFramework", "IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework.csproj", "{FF66F1B9-EF9B-4D21-8C20-0B4A47B3C4D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.TestTools.TestFramework.Tests", "IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework.Tests\IntelliTect.TestTools.TestFramework.Tests.csproj", "{E64B6292-F8AF-475F-B45E-9BAB7D695579}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.TestFramework.Tests", "IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework.Tests\IntelliTect.TestTools.TestFramework.Tests.csproj", "{E64B6292-F8AF-475F-B45E-9BAB7D695579}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

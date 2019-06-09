@@ -1,17 +1,25 @@
-﻿using System.Diagnostics;
-
-namespace IntelliTect.TestTools.TestFramework
+﻿namespace IntelliTect.TestTools.TestFramework
 {
-    public class Log
+    public class Log : ILogger
     {
+        public void Debug(string message)
+        {
+            LogToDebug($"Debug: {message}");
+        }
+
+        public void Error(string message)
+        {
+            LogToDebug($"Error: {message}");
+        }
+
         public void Info(string message)
         {
-            LogToDebug(message);
+            LogToDebug($"Info: {message}");
         }
 
         private void LogToDebug(string message)
         {
-            Debug.WriteLine(message);
+            System.Diagnostics.Debug.WriteLine(message);
         }
     }
 }

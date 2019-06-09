@@ -1,100 +1,80 @@
-﻿using Newtonsoft.Json;
+﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
-        public TestBuilder AddTestBlock<T>()
+        public TestBuilder AddTestBlock<T>() where T : ITestBlock
         {
-            TestBlockTypes.Add(typeof(T));
+            // Is there a better way to do this so I don't have to store the test block type twice?
+            _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
+            // Can I do this as part of a transient service? It seems weird to mix Autofac and MS.Extensions.DI this way
+            //_Services.AddTransient(typeof(T));
             return this;
         }
 
-        // Probably change this to a factory pattern?
-        public TestBuilder AddItemToBag<T>()
+        public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
-            ObjectBag.AddItemToBag(default(T));
+            _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
+            //_Services.AddTransient(typeof(T));
             return this;
         }
 
-        public TestBuilder AddItemToBag(object data)
+        public TestBuilder AddTestCaseService<T>(Func<IServiceProvider, object> serviceFactory)
         {
-            ObjectBag.AddItemToBag(data);
-            return this;
-        }
-
-        public TestBuilder AddItemToBag(params object[] data)
-        {
-            ObjectBag.AddItemToBag(data);
+            _Services.AddScoped(typeof(T), serviceFactory);
             return this;
         }
 
         public void ExecuteTestCase()
         {
-            // Check for non-existent types here?
-
-            // Execute test blocks
-            foreach (Type tb in TestBlockTypes)
+            #region move to a Build() method and validate all dependencies are satisfied?
+            var containerBuilder = new ContainerBuilder();
+            containerBuilder.Populate(_Services);
+            // Can't figure out how to get property injection to work any other way...
+            // This really seems like I'm mixing MS and Autofac in weird ways...
+            foreach (var tb in _TestBlocksAndParams)
             {
-                // Get constructor and arguments
-                Log.Info($"Gathering constructor arguments for test block {tb}...");
-                ConstructorInfo[] ctors = tb.GetConstructors();
-                ParameterInfo[] ctorArgs = ctors.First().GetParameters();
-                object[] args = ValidateAndFetchTestBlockParameters(ctorArgs);
+                containerBuilder.RegisterType(tb.TestBlockType).PropertiesAutowired();
+            }
+            var container = containerBuilder.Build();
+            var serviceProvider = new AutofacServiceProvider(container);
+            #endregion
 
-                // Create instance of test block
-                object tbInstance = ctors.First().Invoke(args);
-
-                // Gather Execute method arguments
-                Log.Info($"Gathering properties for test block {tb}...");
-                MethodInfo execute = tb.GetMethod("Execute");
-                ParameterInfo[] argInfo = execute.GetParameters();
-                args = ValidateAndFetchTestBlockParameters(argInfo);
-
-                Log.Info($"Starting test block {tb.Name}");
-                Log.Info($"Using additional inputs {JsonConvert.SerializeObject(args, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
-
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                object result = execute.Invoke(tbInstance, args);
-                sw.Stop();
-
-                Log.Info($"Time for test block to execute: {sw.Elapsed}");
-                if (result != null)
+            var logger = serviceProvider.GetService<ILogger>() ?? new Log();
+            using (var scope = serviceProvider.CreateScope())
+            {
+                foreach(var tb in _TestBlocksAndParams)
                 {
-                    Log.Info($"Test block returned... {JsonConvert.SerializeObject(result, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto })}");
-                    ObjectBag.AddItemToBag(result);
+                    logger.Info($"Starting test block {tb.TestBlockType}");
+                    MethodInfo execute = tb.TestBlockType.GetMethod("Execute");
+                    // May need to resolve arguments explicitly here for logging purposes instead of adding the test block and then resolving that...
+                    var testBlockInstance = serviceProvider.GetService(tb.TestBlockType);
+                    try
+                    {
+                        var result = execute.Invoke(testBlockInstance, tb.TestBlockParameters);
+                    }
+                    catch(Exception e)
+                    {
+                        // What exceptions need to be caught here?
+                        // TargetInvocationException
+                        // ???
+                    }
+                    
+                    // Log stuff here
                 }
             }
+
+            // After all logging is finished up and we're ready to finish the test...
+            serviceProvider.Dispose();
         }
 
-        private object[] ValidateAndFetchTestBlockParameters(ParameterInfo[] parameters)
-        {
-            object[] args = new object[parameters.Length];
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                var t = parameters[i].ParameterType;
-                if (!ObjectBag.TryGetItemFromBag(t, out object p))
-                {
-                    // Check for factories once that's implemented
-                    string message = $"...expected an object of type {t.GetType()}, however none could be found in the item bag.";
-                    Log.Info(message);
-                    throw new ArgumentException(message);
-                }
-                args[i] = p;
-            }
-            Log.Info("Found all required items.");
-            return args;
-        }
-
-        private List<Type> TestBlockTypes { get; set; } = new List<Type>();
-        private TestObjectsBag ObjectBag { get; set; } = new TestObjectsBag();
-        private Log Log { get; set; } = new Log();
+        private List<(Type TestBlockType, object[] TestBlockParameters)> _TestBlocksAndParams { get; set; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
+        private IServiceCollection _Services { get; set; } = new ServiceCollection();
     }
 }

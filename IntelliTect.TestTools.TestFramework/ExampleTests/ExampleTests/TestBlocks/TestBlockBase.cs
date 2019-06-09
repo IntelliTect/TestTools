@@ -1,11 +1,12 @@
 ﻿using ExampleTests.Pages;
+using IntelliTect.TestTools.TestFramework;
 using OpenQA.Selenium;
 
 namespace ExampleTests.TestBlocks
 {
     // Better to do this as constructor, or straight property?
     // Would be less code for user if it was a property... No constructors calling back to base
-    public class TestBlockBase
+    public class TestBlockBase : ITestBlock
     {
         public TestBlockBase(IWebDriver driver)
         {

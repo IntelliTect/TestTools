@@ -1,13 +1,19 @@
-﻿using System.Diagnostics;
+﻿using ExampleTests.Data;
+using OpenQA.Selenium;
 using Xunit;
 
 namespace ExampleTests.TestBlocks
 {
-    public class VerifyWebsiteAvailability
+    public class VerifyWebsiteBodyIsDisplayed : TestBlockBase
     {
-        public void Execute(Data.Expected.SiteStatus expected, Data.Actual.SiteStatus actual)
+        public VerifyWebsiteBodyIsDisplayed(IWebDriver driver) : base(driver){ }
+
+        public Account Account { get; set; }
+
+        public void Execute(Data.SiteStatus expected)
         {
-            Assert.Equal(expected.IsAvailable, actual.IsAvailable);
+            var body = Driver.FindElement(By.TagName("body"));
+            Assert.Equal(expected.IsBodyAvailable, body.Displayed);
         }
     }
 }
