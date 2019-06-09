@@ -19,14 +19,15 @@ namespace GoogleSearch
         public bool SearchForItem(string searchItem)
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
-            Harness.SearchInput.SendKeysWhenReady(Browser.Driver, searchItem);
+            Harness.SearchInput.SendKeysAndTabWhenReady(Browser.Driver, searchItem);
+            Element.WaitForEnabledState(Harness.SearchInput);
+            Harness.SearchInput.SendKeys(searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
-            return Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed);
+            return Element.WaitForVisibleState(Harness.SearchResultsDiv);
         }
 
         public bool FindSearchResultItem(string result)
         {
-            // Don't need to await this since it would just be on one line
             var headers = Harness.SearchResultsHeadersList;
             return Browser.WaitUntil(() => headers.Any(h => h.Text == result), 5);
         }
@@ -34,7 +35,7 @@ namespace GoogleSearch
         public bool GoToHomePage()
         {
             Element.ClickElementWhenReady(Harness.GoHomeButton);
-            return Browser.WaitUntil(() => Harness.GoogleSearchButton.Displayed);
+            return Element.WaitForVisibleState(Harness.GoogleSearchButton);
         }
 
         private GoogleBrowser Browser { get; }

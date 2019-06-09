@@ -57,7 +57,7 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
-        public bool CheckForVisibilityState(IWebElement element, int secondsToTry = 5)
+        public bool WaitForVisibleState(IWebElement element, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
@@ -77,7 +77,7 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
-        public bool CheckForEnabledState(IWebElement element, int secondsToTry = 5)
+        public bool WaitForEnabledState(IWebElement element, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
