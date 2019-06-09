@@ -19,7 +19,6 @@ namespace GoogleSearch
         public bool SearchForItem(string searchItem)
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
-            Harness.SearchInput.SendKeysAndTabWhenReady(Browser.Driver, searchItem);
             Element.WaitForEnabledState(Harness.SearchInput);
             Harness.SearchInput.SendKeys(searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
