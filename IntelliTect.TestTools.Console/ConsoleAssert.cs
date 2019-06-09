@@ -17,7 +17,8 @@ namespace IntelliTect.TestTools.Console
         /// </summary>
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
-        /// <param name="action">Method to be run</param>
+        /// <param name="action">The action to run</param>
+        /// <param name="replaceCRLF">Replace carriage return line feed with <see cref="Environment.NewLine"/></param>
         static public string Expect(string expected, Action action, bool replaceCRLF = true)
         {
             return Expect(expected, action, (left, right) => left == right, replaceCRLF);
@@ -65,7 +66,9 @@ namespace IntelliTect.TestTools.Console
         /// </summary>
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
-        /// <param name="action">Method to be run</param>
+        /// <param name="action">The action to run</param>
+        /// <param name="comparisonOperator">The function expression used to compare the expected value with the result returned from <paramref name="action"/></param>
+        /// <param name="replaceCRLF">Replace carriage return line feed with <see cref="Environment.NewLine"/></param>
         static private string Expect(string expected, Action action, Func<string, string, bool> comparisonOperator, bool replaceCRLF = true)
         {
 
@@ -88,10 +91,11 @@ namespace IntelliTect.TestTools.Console
         /// </summary>
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
-        /// <param name="action">Method to be run</param>
-        static public string ExpectLike(string expected, Action action)
+        /// <param name="action">The action to run</param>
+        /// <param name="replaceCRLF">Replace carriage return line feed with <see cref="Environment.NewLine"/></param>
+        static public string ExpectLike(string expected, Action action, bool replaceCRLF = true)
         {
-            return Expect(expected, action, LikeOperator);
+            return Expect(expected, action, LikeOperator, replaceCRLF);
         }
 
         /// <summary>
@@ -102,10 +106,14 @@ namespace IntelliTect.TestTools.Console
         /// </summary>
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
-        /// <param name="action">Method to be run</param>
-        static public string ExpectLike(string expected, char escapeCharacter, Action action)
+        /// <param name="action">The action to run</param>
+        /// <param name="replaceCRLF">Replace carriage return line feed with <see cref="Environment.NewLine"/></param>
+        static public string ExpectLike(string expected, char escapeCharacter, Action action, bool replaceCRLF = true)
         {
-            return Expect(expected, action, (expectedPattern, output) => output.IsLike(expected, escapeCharacter));
+            return Expect(expected, action, 
+                (expectedPattern, output) => output.IsLike(expected, escapeCharacter),
+                replaceCRLF
+            );
         }
 
         static public string ReplaceCRLF(string input)
@@ -130,11 +138,13 @@ namespace IntelliTect.TestTools.Console
         /// <summary>
         /// Executes the unit test while providing console input.
         /// </summary>
-        /// <param name="givenInput">Input which will be given</param>
+        /// <param name="givenInput">Input which will be given at the console when prompted</param>
         /// <param name="expectedOutput">The expected output</param>
         /// <param name="action">Action to be tested</param>
         /// <param name="areEquivalentOperator">delegate for comparing the expected from actual output.</param>
-        static private string Execute(string givenInput, string expectedOutput, Action action,
+        /// <param name="replaceCRLF">Replace carriage return line feed with <see cref="Environment.NewLine"/></param>
+        static private string Execute(
+            string givenInput, string expectedOutput, Action action,
             Func<string, string, bool> areEquivalentOperator, bool replaceCRLF = true)
         {
             string output = Execute(givenInput, action, replaceCRLF);
@@ -165,7 +175,14 @@ namespace IntelliTect.TestTools.Console
 
         readonly static object ExecuteLock = new object();
 
-        public static string Execute(string givenInput, Action action, bool replaceCRLF = true)
+        /// <summary>
+        /// Executes the <paramref name="action"/> while providing console input.
+        /// </summary>
+        /// <param name="givenInput">Input which will be given at the console when prompted</param>
+        /// <param name="action">The action to run.</param>
+        /// <param name="replaceCRLF">Replace carriage return line feed with <see cref="Environment.NewLine"/></param>
+        public static string Execute(
+            string givenInput, Action action, bool replaceCRLF = true)
         {
             TextWriter savedOutputStream = System.Console.Out;
             TextReader savedInputStream = System.Console.In;
