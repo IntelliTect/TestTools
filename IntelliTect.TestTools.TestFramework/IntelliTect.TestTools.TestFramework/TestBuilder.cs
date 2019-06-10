@@ -55,6 +55,18 @@ namespace IntelliTect.TestTools.TestFramework
                     MethodInfo execute = tb.TestBlockType.GetMethod("Execute");
                     // May need to resolve arguments explicitly here for logging purposes instead of adding the test block and then resolving that...
                     var testBlockInstance = serviceProvider.GetService(tb.TestBlockType);
+
+                    #region get properties manually
+
+                    //var properties = tb.TestBlockType.GetProperties();
+                    //foreach (var prop in properties)
+                    //{
+                    //    testBlockInstance.GetType().GetProperty(prop.Name).SetValue(testBlockInstance, serviceProvider.GetService(prop.GetType()));
+                    //}
+
+                    #endregion
+
+
                     try
                     {
                         var result = execute.Invoke(testBlockInstance, tb.TestBlockParameters);
