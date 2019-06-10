@@ -1,10 +1,10 @@
 <Project>
 	<PropertyGroup>
-		<TargetFramework>netcoreapp2.1</TargetFramework>
+		<VersionPrefix>0.6.0</VersionPrefix>
+		<VersionPrefix Condition=" '$(BUILD_BUILDNUMBER)' != '' ">$(VersionPrefix)-ci.$(BUILD_BUILDNUMBER)</VersionPrefix>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	</PropertyGroup>
 	<ItemGroup>
