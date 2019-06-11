@@ -1,13 +1,24 @@
 <Project>
 	<PropertyGroup>
+    	<Company>IntelliTect</Company>
+		<Copyright>Copyright IntelliTect © 2019, All Rights Reserved.</Copyright>
+		<DefaultLanguage>en-US</DefaultLanguage>
+
 		<VersionPrefix>0.6.0</VersionPrefix>
-		<VersionPrefix Condition=" '$(BUILD_BUILDNUMBER)' != '' ">$(VersionPrefix)-ci.$(BUILD_BUILDNUMBER)</VersionPrefix>
+		<VersionSuffix Condition=" '$(TESTTOOLS_VERSION_SUFFIX)' != '' ">$(TESTTOOLS_VERSION_SUFFIX)</VersionSuffix>
+
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+			
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/IntelliTect/TestTools</PackageProjectUrl>
+		
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
-		<IncludeSymbols>true</IncludeSymbols>
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+
 	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19270-01" PrivateAssets="All"/>
+
+	<ItemGroup Condition="$(IsPackable) == 'true'">
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All"/>
 	</ItemGroup>
 </Project>
