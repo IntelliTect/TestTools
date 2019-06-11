@@ -3,6 +3,7 @@
     	<Company>IntelliTect</Company>
 		<Copyright>Copyright IntelliTect © 2019, All Rights Reserved.</Copyright>
 		<DefaultLanguage>en-US</DefaultLanguage>
+    <LangVersion>latest</LangVersion>
 
 		<VersionPrefix>0.6.0</VersionPrefix>
 		<VersionSuffix Condition=" '$(TESTTOOLS_VERSION_SUFFIX)' != '' ">$(TESTTOOLS_VERSION_SUFFIX)</VersionSuffix>
