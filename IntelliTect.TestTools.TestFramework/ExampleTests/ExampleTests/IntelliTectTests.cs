@@ -25,6 +25,9 @@ namespace ExampleTests
                 .AddTestCaseService<Account>(new AccountFactory().AccountId)
                 .AddTestBlock<TestBlocks.NavigateToWebsite>()
                 .AddTestBlock<TestBlocks.VerifyWebsiteBodyIsDisplayed>(expectedResult)
+                .AddDependencyInstance(expectedResult)
+                .AddTestBlock<TestBlocks.VerifyWebsiteBodyIsDisplayed>()
+                .AddTestBlock<TestBlocks.VerifyWebsiteBodyIsDisplayed>("1", "2", "3")
                 .ExecuteTestCase();
         }
     }

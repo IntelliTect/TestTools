@@ -9,6 +9,7 @@ namespace ExampleTests.TestBlocks
         public VerifyWebsiteBodyIsDisplayed(IWebDriver driver) : base(driver){ }
 
         public Account Account { get; set; }
+        public Car Car { get; set; }
 
         public void Execute(Data.SiteStatus expected)
         {

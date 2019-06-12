@@ -9,9 +9,10 @@ namespace ExampleTests.TestBlocks
 
         public Account Account { get; set; }
 
-        public void Execute()
+        public Car Execute()
         {
             HomePage.NavigateToPage();
+            return new Car { Make = "SomeCompany", Model = "Super fast model" };
         }
     }
 }
