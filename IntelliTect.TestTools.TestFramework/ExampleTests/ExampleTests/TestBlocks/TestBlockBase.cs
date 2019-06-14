@@ -1,5 +1,6 @@
 ﻿using ExampleTests.Pages;
 using IntelliTect.TestTools.TestFramework;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
 
 namespace ExampleTests.TestBlocks
@@ -8,15 +9,17 @@ namespace ExampleTests.TestBlocks
     // Would be less code for user if it was a property... No constructors calling back to base
     public class TestBlockBase : ITestBlock
     {
-        public TestBlockBase(IWebDriver driver)
-        {
-            Driver = driver;
-            HomePage = new HomePage(Driver);
-            Blogs = new Blogs(Driver);
-        }
+        //public TestBlockBase(IWebDriver driver)
+        //{
+        //    Driver = driver;
+        //    HomePage = new HomePage(Driver);
+        //    Blogs = new Blogs(Driver);
+        //}
 
         public HomePage HomePage { get; set; }
         public Blogs Blogs { get; set; }
+
+        [JsonIgnore]
         protected IWebDriver Driver { get; set; }
     }
 }

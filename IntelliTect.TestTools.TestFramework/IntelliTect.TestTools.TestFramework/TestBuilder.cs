@@ -11,6 +11,12 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
+        public TestBuilder AddTestBlock<T>(T testToAdd) where T : ITestBlock
+        {
+            _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
+            return this;
+        }
+
         public TestBuilder AddTestBlock<T>() where T : ITestBlock
         {
             // Is there a better way to do this so I don't have to store the test block type twice?
@@ -33,6 +39,13 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        public TestBuilder AddTestCaseService<T>()
+        {
+            _ServiceTypes.Add(typeof(T));
+            //_Services.AddScoped(typeof(T));
+            return this;
+        }
+
         public TestBuilder AddDependencyInstance(object objToAdd)
         {
             _Services.AddSingleton(objToAdd.GetType(), objToAdd);
@@ -49,6 +62,10 @@ namespace IntelliTect.TestTools.TestFramework
             foreach (var tb in _TestBlocksAndParams)
             {
                 containerBuilder.RegisterType(tb.TestBlockType).PropertiesAutowired();
+            }
+            foreach(var t in _ServiceTypes)
+            {
+                containerBuilder.RegisterTypes(_ServiceTypes.ToArray()).PropertiesAutowired();
             }
             var container = containerBuilder.Build();
             var serviceProvider = new AutofacServiceProvider(container);
@@ -149,5 +166,6 @@ namespace IntelliTect.TestTools.TestFramework
 
         private List<(Type TestBlockType, object[] TestBlockParameters)> _TestBlocksAndParams { get; set; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private IServiceCollection _Services { get; set; } = new ServiceCollection();
+        private HashSet<Type> _ServiceTypes { get; set; } = new HashSet<Type>();
     }
 }
