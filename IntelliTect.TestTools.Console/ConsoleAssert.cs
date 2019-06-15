@@ -3,6 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.CodeDom.Compiler;
+using System.CodeDom;
+using System.Linq.Expressions;
 
 namespace IntelliTect.TestTools.Console
 {
@@ -38,6 +41,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
+		[Obsolete]
         public static string ExpectNoTrimOutput(string expected, Action action)
         {
             return Expect(expected, action, (left, right) => left == right, false);
@@ -116,14 +120,16 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="comparisonOperator"></param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        private static string Expect(string expected, Action action, Func<string, string, bool> comparisonOperator, bool normalizeLineEndings = true)
+        /// <param name="equivalentOperatorErrorMessage">A textual desciption of the message if the result of <paramref name="action"/> does not match the <paramref name="expected"/> value</param>
+        private static string Expect(
+            string expected, Action action, Func<string, string, bool> comparisonOperator,
+            bool normalizeLineEndings = true, string equivalentOperatorErrorMessage= "Values are not equal")
         {
-            string[] data = Parse(expected);
+            (string input, string output) = Parse(expected);
 
-            string input = data[0];
-            string expectedOutput = data[1];
-
-            return Execute(input, expectedOutput, action, comparisonOperator, normalizeLineEndings);
+            return Execute(input, output, action, 
+                (left, right)=>comparisonOperator(left,right), 
+                normalizeLineEndings, equivalentOperatorErrorMessage);
         }
 
         private static readonly Func<string, string, bool> LikeOperator =
@@ -137,12 +143,14 @@ namespace IntelliTect.TestTools.Console
         /// </summary>
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
+        /// <param name="escapeCharacter"></param>
         /// <param name="action">Method to be run</param>
-        public static string ExpectLike(string expected, Action action)
+		[Obsolete]
+        public static string ExpectLike(string expected, char escapeCharacter, Action action)
         {
-            return Expect(expected, action, LikeOperator);
+            return Expect(expected, action, (pattern, output) => output.IsLike(pattern, escapeCharacter));
         }
-
+		
         /// <summary>
         /// Performs a unit test on a console-based method. A "view" of
         /// what a user would see in their console is provided as a string,
@@ -151,11 +159,14 @@ namespace IntelliTect.TestTools.Console
         /// </summary>
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
-        /// <param name="escapeCharacter"></param>
         /// <param name="action">Method to be run</param>
-        public static string ExpectLike(string expected, char escapeCharacter, Action action)
+        /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
+        /// <param name="escapeCharacter">The escape character for the wildcard caracters.  Default is '\'.</param>
+        public static string ExpectLike(string expected, Action action, 
+            bool normalizeLineEndings = true, char escapeCharacter = '\\')
         {
-            return Expect(expected, action, (pattern, output) => output.IsLike(pattern, escapeCharacter));
+            return Expect(expected, action, (pattern, output) => output.IsLike(pattern, escapeCharacter),
+                normalizeLineEndings, "The values are not like (using wildcards) each other");
         }
 
         /// <summary>
@@ -185,27 +196,38 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Action to be tested</param>
         /// <param name="areEquivalentOperator">delegate for comparing the expected from actual output.</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
+        /// <param name="equivalentOperatorErrorMessage">A textual desciption of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
         private static string Execute(string givenInput, string expectedOutput, Action action,
-            Func<string, string, bool> areEquivalentOperator, bool normalizeLineEndings = true)
+            Func<string, string, bool> areEquivalentOperator, 
+            bool normalizeLineEndings = true, string equivalentOperatorErrorMessage = "Values are not equal"
+            )
         {
-            string output = Execute(givenInput, action, normalizeLineEndings);
+            string output = Execute(givenInput, action);
 
             if (normalizeLineEndings)
             {
-                // output = NormalizeLineEndings(output, true);
+                output = NormalizeLineEndings(output, true);
                 expectedOutput = NormalizeLineEndings(expectedOutput, true);
             }
 
-            AssertExpectation(expectedOutput, output, areEquivalentOperator);
+            AssertExpectation(expectedOutput, output, areEquivalentOperator, equivalentOperatorErrorMessage);
             return output;
         }
 
-        private static void AssertExpectation(string expectedOutput, string output, Func<string, string, bool> areEquivalentOperator)
+        /// <summary>
+        /// Asserts whether the values are equivalent according to the <paramref name="areEquivalentOperator"/>"/>
+        /// </summary>
+        /// <param name="expectedOutput">The expected value of the output.</param>
+        /// <param name="output">The actual value output.</param>
+        /// <param name="areEquivalentOperator">The operator used to compare equivalency.</param>
+        /// <param name="equivalentOperatorErrorMessage">A textual desciption of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
+        private static void AssertExpectation(string expectedOutput, string output, Func<string, string, bool> areEquivalentOperator,
+            string equivalentOperatorErrorMessage = null)
         {
             bool failTest = !areEquivalentOperator(expectedOutput, output);
             if (failTest)
             {
-                throw new Exception(GetMessageText(expectedOutput, output));
+                throw new Exception(GetMessageText(expectedOutput, output, equivalentOperatorErrorMessage));
             }
         }
 
@@ -216,8 +238,7 @@ namespace IntelliTect.TestTools.Console
         /// </summary>
         /// <param name="givenInput">Input which will be given at the console when prompted</param>
         /// <param name="action">The action to run.</param>
-        /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        public static string Execute(string givenInput, Action action, bool normalizeLineEndings = true)
+        public static string Execute(string givenInput, Action action)
         {
             TextWriter savedOutputStream = System.Console.Out;
             TextReader savedInputStream = System.Console.In;
@@ -235,10 +256,6 @@ namespace IntelliTect.TestTools.Console
                         action();
 
                         output = writer.ToString();
-                        if (normalizeLineEndings)
-                        {
-                            output = NormalizeLineEndings(output, true);
-                        }
                     }
 
                     return output;
@@ -251,37 +268,16 @@ namespace IntelliTect.TestTools.Console
             }
         }
 
-        private static string GetMessageText(string expectedOutput, string output)
+
+        private static string GetMessageText(string expectedOutput, string output, string equivalentOperatorErrorMessage=null)
         {
             string result = "";
 
-            if (expectedOutput.Length <= 2 || output.Length <= 2)
-            {
-                // Don't display differing lengths.
-            }
-            else
-            {
-                result = $"expected: {(int)expectedOutput[expectedOutput.Length - 2]}{(int)expectedOutput[expectedOutput.Length - 1]}{Environment.NewLine}";
-                result += $"actual: {(int)output[output.Length - 2]}{(int)output[output.Length - 1]}{Environment.NewLine}";
-            }
-
-            if (WildcardPattern.WildCardCharacters.Any(c => expectedOutput.Contains(c)))
-            {
-                result += "NOTE: The expected string contains wildcard charaters: [,],?,*,#" + Environment.NewLine;
-            }
-
-            if (expectedOutput.Contains(Environment.NewLine))
-            {
-                result += string.Join(Environment.NewLine, "AreEqual failed:", "",
-                    "Expected:", "-----------------------------------", expectedOutput, "-----------------------------------",
-                    "Actual: ", "-----------------------------------", output, "-----------------------------------");
-            }
-            else
-            {
-                result += string.Join(Environment.NewLine, "AreEqual failed:",
-                    "Expected: ", expectedOutput,
-                    "Actual:   ", output);
-            }
+            result += string.Join(Environment.NewLine, $"{equivalentOperatorErrorMessage}:- ", 
+                "-----------------------------------",
+                $"Expected: { CSharpStringEncode( expectedOutput) }",
+                $"Actual  : { CSharpStringEncode( output) }", 
+                "-----------------------------------");
 
             int expectedOutputLength = expectedOutput.Length;
             int outputLength = output.Length;
@@ -324,24 +320,20 @@ namespace IntelliTect.TestTools.Console
         /// </example>
         private static string CSharpStringEncode(string text)
         {
-            return text;
-            // TODO: Can we recreate this in .Net Core?
-            //string result = "";
-            //using (var stringWriter = new StringWriter())
-            //{
-
-            //    using (var provider = System.CodeDom.Compiler.CodeDomProvider.CreateProvider("CSharp"))
-            //    {
-            //        provider.GenerateCodeFromExpression(
-            //            new System.CodeDom.CodePrimitiveExpression(text), stringWriter, null);
-            //        result = stringWriter.ToString();
-            //    }
-            //}
-            //return result;
+            string result;
+            using (var writer = new StringWriter())
+            using (var provider = CodeDomProvider.CreateProvider("CSharp")) 
+            {
+                provider.GenerateCodeFromExpression(new CodePrimitiveExpression(text), writer, 
+                    new CodeGeneratorOptions() { BlankLinesBetweenMembers = false });
+                result = writer.ToString();
+                // Remove extra lines added during code generation (Note: BlankLinesBetweenMembers = false does not suffice)
+                return Regex.Replace(result, @"\s*\+\s*", "");
+            }
         }
 
-        private static string CSharpStringEncode(char character) =>
-            CSharpStringEncode(character.ToString());
+        private static char CSharpStringEncode(char input) => CSharpStringEncode(input.ToString())[0];
+
 
         /// <summary>
         /// This parses a "view" string into two separate strings, one
@@ -351,7 +343,7 @@ namespace IntelliTect.TestTools.Console
         /// What a user would see in the console, but with input/output tokens.
         /// </param>
         /// <returns>[0] Input, and [1] Output</returns>
-        private static string[] Parse(string view)  // TODO: Return Tuple instead.
+        private static (string Input,string Output) Parse(string view)  // TODO: Return Tuple instead.
         {
             // Note: This could definitely be optimized, wanted to try it for experience. RegEx perhaps?
             bool isInput = false;
@@ -390,7 +382,7 @@ namespace IntelliTect.TestTools.Console
                 }
             }
 
-            return new string[] { input, output };
+            return (Input:input, Output:output);
         }
 
         // TODO: Should not use LikeOperator by default.  Add a ConsoleTestsComparisonOptions enum 
@@ -441,7 +433,7 @@ namespace IntelliTect.TestTools.Console
             process.WaitForExit();
             standardOutput = process.StandardOutput.ReadToEnd();
             standardError = process.StandardError.ReadToEnd();
-            AssertExpectation(expected, standardOutput, (left, right) => LikeOperator(left, right));
+            AssertExpectation(expected, standardOutput, (left, right) => LikeOperator(left, right), "The values are not like (using wildcards) each other");
             return process;
         }
     }
