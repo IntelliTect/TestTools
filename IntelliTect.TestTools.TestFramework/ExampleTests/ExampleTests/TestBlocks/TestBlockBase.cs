@@ -16,10 +16,13 @@ namespace ExampleTests.TestBlocks
         //    Blogs = new Blogs(Driver);
         //}
 
-        public HomePage HomePage { get; set; }
-        public Blogs Blogs { get; set; }
+        public Pages.IntelliTect IntelliTect { get; set; }
 
-        [JsonIgnore]
-        protected IWebDriver Driver { get; set; }
+        //[JsonIgnore]
+        //public HomePage HomePage { get; set; }
+        //[JsonIgnore]
+        //public Blogs Blogs { get; set; }
+        //[JsonIgnore]
+        //public IWebDriver Driver { get; set; }
     }
 }

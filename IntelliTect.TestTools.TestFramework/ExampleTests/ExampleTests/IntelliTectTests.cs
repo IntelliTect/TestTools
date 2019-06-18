@@ -22,15 +22,9 @@ namespace ExampleTests
             TestBuilder builder = new TestBuilder();
             builder
                 .AddTestCaseService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
-                .AddTestCaseService<Account>(new AccountFactory().AccountId)
-                .AddTestCaseService<Pages.HomePage>()
-                .AddTestCaseService<Pages.Blogs>()
+                .AddTestCaseService<Pages.IntelliTect>()
                 .AddTestBlock<TestBlocks.NavigateToWebsite>()
-                //.AddTestBlock<TestBlocks.VerifyWebsiteBodyIsDisplayed>(expectedResult)
-                .AddTestBlock(new TestBlocks.VerifyWebsiteBodyIsDisplayed(expectedResult))
-                //.AddDependencyInstance(expectedResult)
-                //.AddTestBlock<TestBlocks.VerifyWebsiteBodyIsDisplayed>()
-                //.AddTestBlock<TestBlocks.VerifyWebsiteBodyIsDisplayed>("1", "2", "3")
+                .AddTestBlock<TestBlocks.VerifyWebsiteBodyIsDisplayed>(expectedResult)
                 .ExecuteTestCase();
         }
     }

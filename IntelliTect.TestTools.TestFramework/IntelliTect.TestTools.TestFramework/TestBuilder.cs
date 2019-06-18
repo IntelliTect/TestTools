@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Autofac.Core;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -11,12 +12,6 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
-        public TestBuilder AddTestBlock<T>(T testToAdd) where T : ITestBlock
-        {
-            _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
-            return this;
-        }
-
         public TestBuilder AddTestBlock<T>() where T : ITestBlock
         {
             // Is there a better way to do this so I don't have to store the test block type twice?
@@ -72,14 +67,37 @@ namespace IntelliTect.TestTools.TestFramework
             #endregion
 
             var logger = serviceProvider.GetService<ILogger>() ?? new Log();
+            Exception testBlockException = null;
             using (var scope = serviceProvider.CreateScope())
             {
-                //IServiceProvider provier = new IServiceProvider();
                 HashSet<object> testBlockResults = new HashSet<object>();
                 foreach (var tb in _TestBlocksAndParams)
                 {
                     logger.Info($"Starting test block {tb.TestBlockType}");
-                    var testBlockInstance = scope.ServiceProvider.GetService(tb.TestBlockType);
+                    object testBlockInstance = null;
+
+                    try
+                    {
+                        testBlockInstance = scope.ServiceProvider.GetService(tb.TestBlockType);
+                    }
+                    catch(DependencyResolutionException e)
+                    {
+                        logger.Error($"Unable to find all dependencies necessary for test block {tb.TestBlockType}. " +
+                            $"Verify that all properties, constructors, and Execute method arguments for this test block " +
+                            $"have a resovable service, factory, or reference added with the AddTestCaseService or AddDependencyInstance methods");
+                        testBlockException = e;
+                        break;
+                    }
+
+                    if(testBlockInstance == null)
+                    {
+                        logger.Error($"Unable to find all dependencies necessary for test block {tb.TestBlockType}. " +
+                            $"Verify that all properties, constructors, and Execute method arguments for this test block " +
+                            $"have a resovable service, factory, or reference added with the AddTestCaseService or AddDependencyInstance methods");
+                        testBlockException = new DependencyResolutionException($"No registration found when trying to activate all dependencies for the test block {tb.TestBlockType}");
+                        break;
+                    }
+                    
 
                     // Log all of our inputs
                     var properties = testBlockInstance.GetType().GetProperties();
@@ -144,11 +162,11 @@ namespace IntelliTect.TestTools.TestFramework
                         }
 
                     }
-                    catch (Exception e)
+                    catch (TargetInvocationException e)
                     {
-                        // What exceptions need to be caught here?
-                        // TargetInvocationException
-                        // ???
+                        logger.Error($"Test block {tb.TestBlockType} failed with the exception: {e.InnerException}.");
+                        testBlockException = e.InnerException;
+                        break;
                     }
 
                     // Log stuff here
@@ -157,11 +175,22 @@ namespace IntelliTect.TestTools.TestFramework
 
             // After all logging is finished up and we're ready to finish the test...
             serviceProvider.Dispose();
+
+            if (testBlockException != null)
+                throw testBlockException;
         }
 
         private string GetObjectDataAsJsonString(object obj)
         {
-            return JsonConvert.SerializeObject(obj, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
+            try
+            {
+                return JsonConvert.SerializeObject(obj, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
+            }
+            catch(JsonSerializationException e)
+            {
+                return $"WARNING... Unable to parse JSON. See exception message and mark the relevant property or constructor with the [JsonIgnore] attribute: {e.Message}";
+            }
+            
         }
 
         private List<(Type TestBlockType, object[] TestBlockParameters)> _TestBlocksAndParams { get; set; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();

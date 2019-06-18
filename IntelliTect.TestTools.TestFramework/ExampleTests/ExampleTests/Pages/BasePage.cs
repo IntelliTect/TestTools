@@ -5,13 +5,13 @@ namespace ExampleTests.Pages
 {
     public class BasePage
     {
-        //public BasePage(IWebDriver driver)
-        //{
-        //    Driver = driver;
-        //}
+        public BasePage(IWebDriver driver)
+        {
+            Driver = driver;
+        }
 
         public string BaseUrl { get; set; } = @"https://intellitect.com/";
         [JsonIgnore]
-        public IWebDriver Driver { get; set; }
+        protected IWebDriver Driver { get; set; }
     }
 }
