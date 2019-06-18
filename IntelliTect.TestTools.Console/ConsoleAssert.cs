@@ -36,15 +36,15 @@ namespace IntelliTect.TestTools.Console
         /// where their input (including line-breaks) is surrounded by double
         /// less-than/greater-than signs, like so: "Input please: &lt;&lt;Input&gt;&gt;"
         /// </para>
-        /// <para>Newlines will not be normalized, and trailing newlines will not be trimmed.</para>
         /// </summary>
         /// <param name="expected">Expected "view" to be seen on the console,
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
-		[Obsolete]
-        public static string ExpectNoTrimOutput(string expected, Action action)
+        /// <param name="args">Args to pass to the function.</param>
+        /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
+        public static string Expect(string expected, Action<string[]> action, bool normalizeLineEndings = true, params string[] args)
         {
-            return Expect(expected, action, (left, right) => left == right, false);
+            return Expect(expected, ()=>action(args), (left, right) => left == right, normalizeLineEndings);
         }
 
         /// <summary>
@@ -74,7 +74,25 @@ namespace IntelliTect.TestTools.Console
                 throw new Exception($"The value returned from {nameof(func)} ({@return}) was not the { nameof(expectedReturn) }({expectedReturn}) value.");
             }
         }
-
+        
+        /// <summary>
+        /// <para>
+        /// Performs a unit test on a console-based method. A "view" of
+        /// what a user would see in their console is provided as a string,
+        /// where their input (including line-breaks) is surrounded by double
+        /// less-than/greater-than signs, like so: "Input please: &lt;&lt;Input&gt;&gt;"
+        /// </para>
+        /// <para>Newlines will not be normalized, and trailing newlines will not be trimmed.</para>
+        /// </summary>
+        /// <param name="expected">Expected "view" to be seen on the console,
+        /// including both input and output</param>
+        /// <param name="action">Method to be run</param>
+        [Obsolete]
+        public static string ExpectNoTrimOutput(string expected, Action action)
+        {
+            return Expect(expected, action, (left, right) => left == right, false);
+        }
+        
         /// <summary>
         /// <para>
         /// Performs a unit test on a console-based method. A "view" of
