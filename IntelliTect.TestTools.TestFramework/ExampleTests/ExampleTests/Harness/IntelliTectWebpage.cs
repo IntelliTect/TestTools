@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
 using OpenQA.Selenium;
 
-namespace ExampleTests.Pages
+namespace ExampleTests.Harness
 {
-    public class IntelliTect : BasePage
+    public class IntelliTectWebpage : BasePage
     {
-        public IntelliTect(IWebDriver driver) : base(driver)
+        public IntelliTectWebpage(IWebDriver driver) : base(driver)
         {
             HomePage = new HomePage(Driver);
             Blogs = new Blogs(Driver);

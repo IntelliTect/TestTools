@@ -58,10 +58,7 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 containerBuilder.RegisterType(tb.TestBlockType).PropertiesAutowired();
             }
-            foreach(var t in _ServiceTypes)
-            {
-                containerBuilder.RegisterTypes(_ServiceTypes.ToArray()).PropertiesAutowired();
-            }
+            containerBuilder.RegisterTypes(_ServiceTypes.ToArray()).PropertiesAutowired();
             var container = containerBuilder.Build();
             var serviceProvider = new AutofacServiceProvider(container);
             #endregion
@@ -188,7 +185,7 @@ namespace IntelliTect.TestTools.TestFramework
             }
             catch(JsonSerializationException e)
             {
-                return $"WARNING... Unable to parse JSON. See exception message and mark the relevant property or constructor with the [JsonIgnore] attribute: {e.Message}";
+                return $"Unable to serialize to JSON. Mark the relevant property or constructor with the [JsonIgnore] attribute: {e.Message}";
             }
             
         }

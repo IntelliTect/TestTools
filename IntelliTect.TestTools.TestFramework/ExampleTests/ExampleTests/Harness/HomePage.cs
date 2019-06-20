@@ -1,10 +1,10 @@
 ﻿using OpenQA.Selenium;
 
-namespace ExampleTests.Pages
+namespace ExampleTests.Harness
 {
     public class HomePage : BasePage
     {
-        public HomePage(IWebDriver driver) : base(driver){ }
+        public HomePage(IWebDriver driver) : base(driver) { }
 
         public void NavigateToPage()
         {

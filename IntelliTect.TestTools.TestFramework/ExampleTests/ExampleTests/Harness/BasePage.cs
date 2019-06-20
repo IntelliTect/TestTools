@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OpenQA.Selenium;
 
-namespace ExampleTests.Pages
+namespace ExampleTests.Harness
 {
     public class BasePage
     {
