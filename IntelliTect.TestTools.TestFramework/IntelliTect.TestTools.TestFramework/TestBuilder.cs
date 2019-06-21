@@ -14,17 +14,13 @@ namespace IntelliTect.TestTools.TestFramework
     {
         public TestBuilder AddTestBlock<T>() where T : ITestBlock
         {
-            // Is there a better way to do this so I don't have to store the test block type twice?
             _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
-            // Can I do this as part of a transient service? It seems weird to mix Autofac and MS.Extensions.DI this way
-            //_Services.AddTransient(typeof(T));
             return this;
         }
 
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
             _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
-            //_Services.AddTransient(typeof(T));
             return this;
         }
 
@@ -94,7 +90,6 @@ namespace IntelliTect.TestTools.TestFramework
                         testBlockException = new DependencyResolutionException($"No registration found when trying to activate all dependencies for the test block {tb.TestBlockType}");
                         break;
                     }
-                    
 
                     // Log all of our inputs
                     var properties = testBlockInstance.GetType().GetProperties();
@@ -107,39 +102,26 @@ namespace IntelliTect.TestTools.TestFramework
                     var executeParams = execute.GetParameters();
                     object[] executeArgs = new object[executeParams.Length];
 
-                    // Populate either with DI or params list.
-                    // Not both... at least not yet. That code is a lot more complicated.
-                    // E.G. we'd have to check the lenghts, make sure the params list is <= execute args
-                    // Then figure out if we params list lines up to the start or end of the execute args
-                    // THEN figure out what to do with everything left over...
-                    if (tb.TestBlockParameters != null)
+                    // Is this the right order of checking? Or should we prioritize test block results first?
+                    // Initial thought is that if someone is passing in explicit arguments, they probably have a good reason, so we should start there
+                    if(executeArgs.Length > 0)
                     {
-                        if(executeParams.Length != tb.TestBlockParameters.Length)
+                        if(tb.TestBlockParameters != null && executeParams.Length == tb.TestBlockParameters.Length)
                         {
-                            // Probably don't throw an exception. Instead break out of execution?
-                            // We have a chance to resolve this in the "else" case.
-                            throw new ArgumentException($"Unable to resolve Execute method arguments for test block {tb.TestBlockType}." +
-                                $"Check if parameters passed in through AddTestBlock<T>(params object[]) match the first or last set of parameters on {tb.TestBlockType}.Execute()" +
-                                $"E.G.: AddTestBlock<{tb.TestBlockType}>(\"string1\", \"string2\" and {tb.TestBlockType}.Execute(string arg1, string arg2).");
+                            executeArgs = tb.TestBlockParameters;
                         }
-                        executeArgs = tb.TestBlockParameters;
-                    }
-                    else
-                    {
-                        for(int i = 0; i < executeArgs.Length; i++)
+                        else
                         {
-                            // DON'T FORGET!
-                            // Need to test for all of these conditions.
-                            object foundResult =
-                                testBlockResults?.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
-                                ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType)
-                                ?? throw new ArgumentNullException("Unable to resolve Execute method arguments");
-                            executeArgs[i] = foundResult;
+                            for (int i = 0; i < executeArgs.Length; i++)
+                            {
+                                object foundResult =
+                                    testBlockResults?.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
+                                    ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType)
+                                    ?? throw new ArgumentNullException("Unable to resolve Execute method arguments");
+                                executeArgs[i] = foundResult;
+                            }
                         }
-                    }
 
-                    if (executeArgs.Length > 0)
-                    {
                         foreach (var arg in executeArgs)
                         {
                             logger.Debug($"Handing argument into Execute(): {GetObjectDataAsJsonString(arg)}");
@@ -160,6 +142,12 @@ namespace IntelliTect.TestTools.TestFramework
                     {
                         logger.Error($"Test block {tb.TestBlockType} failed with the exception: {e.InnerException}.");
                         testBlockException = e.InnerException;
+                        break;
+                    }
+                    catch (ArgumentException e)
+                    {
+                        logger.Error($"Test block {tb.TestBlockType} failed with the exception: {e}.");
+                        testBlockException = e;
                         break;
                     }
 
