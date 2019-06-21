@@ -1,19 +1,17 @@
 ﻿using ExampleTests.Data;
+using Xunit;
 
 namespace ExampleTests.TestBlocks
 {
     public class LogIn : TestBlockBase
     {
-        public LogIn(Account account)
-        {
-            _Account = account;
-        }
+        public Account Account { get; set; }
 
         public void Execute()
         {
-
+            // Do stuff with account object
+            Assert.True(Account.Id != 0);
+            Assert.False(string.IsNullOrWhiteSpace(Account.Password));
         }
-
-        private Account _Account { get; }
     }
 }

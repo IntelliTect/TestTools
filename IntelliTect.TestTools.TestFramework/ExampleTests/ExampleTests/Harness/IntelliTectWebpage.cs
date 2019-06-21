@@ -12,8 +12,8 @@ namespace ExampleTests.Harness
         }
 
         [JsonIgnore]
-        public HomePage HomePage { get; set; }
+        public HomePage HomePage { get; }
         [JsonIgnore]
-        public Blogs Blogs { get; set; }
+        public Blogs Blogs { get; }
     }
 }

@@ -7,6 +7,15 @@ namespace ExampleTests
 {
     public class IntelliTectTests
     {
+        // Convert to tests for real websites.
+        // For scenarios I can't do on IntelliTect's site, try:
+        // http://the-internet.herokuapp.com/
+        // https://www.ultimateqa.com/automation/
+        // https://demoqa.com/
+        // http://automationpractice.com/index.php
+        // https://www.telerik.com/support/demos <-- Might be good for multi-language testing? Check out ConversationUI
+        // https://restful-booker.herokuapp.com/ <-- for API tests
+
         [Fact]
         public void Test1()
         {
@@ -32,7 +41,7 @@ namespace ExampleTests
             builder
                 .AddTestCaseService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
                 .AddTestCaseService<Harness.IntelliTectWebpage>()
-                .AddTestBlock<TestBlocks.RegisterAndReturnNewAccount>("Tester", "McTesterson")
+                .AddTestBlock<TestBlocks.RegisterAndReturnNewAccount>("NewTester", "McTest")
                 .AddTestBlock<TestBlocks.VerifyAccountRegisteredCorrectly>()
                 .ExecuteTestCase();
         }

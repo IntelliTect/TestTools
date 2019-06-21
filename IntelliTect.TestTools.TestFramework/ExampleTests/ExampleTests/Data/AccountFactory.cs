@@ -39,7 +39,8 @@ namespace ExampleTests.Data
             {
                 Id = acctId,
                 FirstName = "Tester",
-                LastName = "McTesterson"
+                LastName = "McTesterson",
+                Password = "Password!"
             };
             return acct;
         }

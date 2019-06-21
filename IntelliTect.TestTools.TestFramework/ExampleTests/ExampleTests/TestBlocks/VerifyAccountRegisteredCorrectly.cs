@@ -1,4 +1,5 @@
 ﻿using ExampleTests.Data;
+using Xunit;
 
 namespace ExampleTests.TestBlocks
 {
@@ -6,7 +7,9 @@ namespace ExampleTests.TestBlocks
     {
         public void Execute(Account account)
         {
-            // Figure out best way to pass in stuff here to verify that the account is correct
+            Assert.Equal("NewTester", account.FirstName);
+            Assert.Equal("McTest", account.LastName);
+            Assert.Equal(98765, account.Id);
         }
     }
 }
