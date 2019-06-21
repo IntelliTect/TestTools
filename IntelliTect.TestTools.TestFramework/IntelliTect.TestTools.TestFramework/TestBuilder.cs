@@ -128,16 +128,13 @@ namespace IntelliTect.TestTools.TestFramework
                     {
                         for(int i = 0; i < executeArgs.Length; i++)
                         {
-                            if (testBlockResults.Count > 0)
-                            {
-                                // DON'T FORGET!
-                                // Need to test for all of these conditions.
-                                object foundResult =
-                                    testBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
-                                    ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType)
-                                    ?? throw new ArgumentNullException("Unable to resolve Execute method arguments");
-                                executeArgs[i] = foundResult;
-                            }
+                            // DON'T FORGET!
+                            // Need to test for all of these conditions.
+                            object foundResult =
+                                testBlockResults?.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
+                                ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType)
+                                ?? throw new ArgumentNullException("Unable to resolve Execute method arguments");
+                            executeArgs[i] = foundResult;
                         }
                     }
 
