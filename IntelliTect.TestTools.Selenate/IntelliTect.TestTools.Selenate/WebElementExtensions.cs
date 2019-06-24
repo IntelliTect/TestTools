@@ -82,7 +82,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// then tabs out of the field or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        [Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
+        //[Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void SendKeysAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
@@ -109,7 +109,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        [Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
+        //[Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void SendKeysWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
@@ -141,7 +141,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <summary>
         /// Waits for the element to be in a valid state, then clicks on it or throws after a certain amount of time
         /// </summary>
-        [Obsolete("Use ElementHandler.ClickWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
+        //[Obsolete("Use ElementHandler.ClickWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void ClickWhenReady(this IWebElement element, IWebDriver driver, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
