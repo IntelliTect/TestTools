@@ -85,22 +85,8 @@ namespace IntelliTect.TestTools.SelenateExtensions
         //[Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void SendKeysAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
-            wait.IgnoreExceptionTypes(
-                typeof(ElementNotVisibleException),
-                typeof(ElementNotInteractableException),
-                typeof(StaleElementReferenceException),
-                typeof(InvalidElementStateException));
-
-            wait.Until(s =>
-            {
-                element.Clear();
-                element.SendKeys(value);
-                if (element.GetAttribute("value") != value)
-                    return false;
-                element.SendKeys(Keys.Tab);
-                return true;
-            });
+            SendKeysWhenReady(element, driver, value, secondsToTry);
+            element.SendKeys(Keys.Tab);
         }
 
         /// <summary>
