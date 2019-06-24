@@ -49,11 +49,40 @@ namespace IntelliTect.TestTools.SelenateExtensions
         }
 
         /// <summary>
+        /// Clears the current text, 
+        /// uses SendKeys to send the specified value to the element, 
+        /// </summary>
+        /// <param name="value">Value to send to the element</param>
+        public static void ClearAndSendKeys(this IWebElement element, string value)
+        {
+            element.Clear();
+            element.SendKeys(value);
+            if (element.GetAttribute("value") != value)
+            {
+                element.Clear();
+                element.SendKeys(value);
+            }
+        }
+
+        /// <summary>
+        /// Clears the current text, 
+        /// uses SendKeys to send the specified value to the element, 
+        /// then tabs out of the field
+        /// </summary>
+        /// <param name="value">Value to send to the element</param>
+        public static void ClearAndSendKeysAndTab(this IWebElement element, string value)
+        {
+            ClearAndSendKeys(element, value);
+            element.SendKeys(Keys.Tab);
+        }
+
+        /// <summary>
         /// Waits for the element to be in a valid state, then clears the current text, 
         /// uses SendKeys to send the specified value to the element, 
         /// then tabs out of the field or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
+        [Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void SendKeysAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
@@ -80,7 +109,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// or throws after a certain amount of time
         /// </summary>
         /// <param name="value">Value to send to the element</param>
-        [Obsolete("Use Element.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
+        [Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void SendKeysWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
@@ -112,21 +141,24 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <summary>
         /// Waits for the element to be in a valid state, then clicks on it or throws after a certain amount of time
         /// </summary>
-        //public static void ClickWhenReady(this IWebElement element, IWebDriver driver, int secondsToTry = 5)
-        //{
-        //    WebDriverWait wait = new WebDriverWait( driver, TimeSpan.FromSeconds( secondsToTry ) );
-        //    wait.IgnoreExceptionTypes(
-        //        typeof(ElementNotVisibleException),
-        //        typeof(ElementNotInteractableException),
-        //        typeof(StaleElementReferenceException),
-        //        typeof(InvalidElementStateException),
-        //        typeof(ElementClickInterceptedException));
+        [Obsolete("Use ElementHandler.ClickWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
+        public static void ClickWhenReady(this IWebElement element, IWebDriver driver, int secondsToTry = 5)
+        {
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
+            wait.IgnoreExceptionTypes(
+                typeof(ElementNotVisibleException),
+                typeof(ElementNotInteractableException),
+                typeof(StaleElementReferenceException),
+                typeof(InvalidElementStateException),
+                typeof(ElementClickInterceptedException),
+                typeof(NoSuchElementException));
 
-        //    wait.Until( c =>
-        //    {
-        //        element.Click();
-        //        return true;
-        //    } );
-        //}
+            // Worth wrapping in a try/catch and throwing inner exception?
+            wait.Until(c =>
+            {
+                element.Click();
+                return true;
+            });
+        }
     }
 }

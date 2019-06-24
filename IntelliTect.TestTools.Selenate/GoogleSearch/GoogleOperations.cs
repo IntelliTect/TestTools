@@ -13,7 +13,7 @@ namespace GoogleSearch
         {
             Browser = browser;
             Harness = new GoogleHarness(Browser);
-            Element = new Element(Browser.Driver);
+            Element = new ElementHandler(Browser.Driver);
         }
 
         public bool SearchForItem(string searchItem)
@@ -39,6 +39,6 @@ namespace GoogleSearch
 
         private GoogleBrowser Browser { get; }
         private GoogleHarness Harness { get; }
-        private Element Element { get; }
+        private ElementHandler Element { get; }
     }
 }

@@ -83,7 +83,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        ///Waits until a function evaluates to true OR times out after a specified period of time
+        ///Waits until a function evaluates to true OR times out and returns false after a specified period of time
         /// </summary>
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Seconds to wait until timeout / return false</param>
