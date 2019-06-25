@@ -78,7 +78,7 @@ namespace IntelliTect.TestTools.Selenate
                 return wait.Until(d => element.Displayed);
             }
             catch (WebDriverException ex)
-                when (ex.InnerException.GetType() == typeof(ElementNotVisibleException)
+                when (ex.InnerException is ElementNotVisibleException
                         || ex.InnerException.GetType() == typeof(NoSuchElementException))
             {
                 return false;
