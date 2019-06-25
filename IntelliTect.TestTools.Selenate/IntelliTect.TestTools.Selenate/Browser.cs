@@ -11,14 +11,24 @@ using OpenQA.Selenium.Edge;
 
 namespace IntelliTect.TestTools.Selenate
 {
+    /// <summary>
+    /// Enum representing all supported browser types of <see cref="Browser"/>
+    /// </summary>
     public enum BrowserType
     {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         Chrome,
         HeadlessChrome,
         InternetExplorer,
         Firefox,
         Edge
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     }
+
+    /// <summary>
+    /// Wrapper around a <see cref="IWebDriver"/> that provides numerous
+    /// utilities for interacting with the underlying driver.
+    /// </summary>
     public class Browser
     {
         /// <summary>
@@ -47,6 +57,9 @@ namespace IntelliTect.TestTools.Selenate
             Driver = driver;
         }
 
+        /// <summary>
+        /// The underlying <see cref="IWebDriver"/> of the <see cref="Browser"/> instance.
+        /// </summary>
         public IWebDriver Driver { get; }
 
         /// <summary>
@@ -111,6 +124,10 @@ namespace IntelliTect.TestTools.Selenate
 
         }
 
+        /// <summary>
+        /// Take a screenshot of the browser, and save it to a "screenshots"
+        /// directory inside the current working directory.
+        /// </summary>
         public void TakeScreenshot()
         {
             string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
@@ -151,6 +168,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Switches to each frame in succession to avoid having to explicitely call SwitchTo() multipled times for nested frames
         /// </summary>
+        /// <param name="secondsToWait"></param>
         /// <param name="bys"></param>
         /// <returns></returns>
         public void FrameSwitchAttempt(int secondsToWait = 15, params By[] bys)
@@ -171,6 +189,11 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
+        /// <summary>
+        /// Create a new driver for the given browser type.
+        /// </summary>
+        /// <param name="browser">The browser to create a driver for.</param>
+        /// <returns>The driver created.</returns>
         protected IWebDriver InitDriver(BrowserType browser)
         {
             Driver?.Quit();

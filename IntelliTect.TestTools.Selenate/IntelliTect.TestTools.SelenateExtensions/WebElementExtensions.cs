@@ -7,12 +7,15 @@ using IntelliTect.IntelliWait;
 namespace IntelliTect.TestTools.SelenateExtensions
 {
     // Warnings disabled as this class will be getting deprecated soon
+#pragma warning disable 1591 // Missing XML comment for publicly visible type or member
     public static class WebElementExtensions
     {
         /// <summary>
         /// Attempts to find a child element of this element, only returning when the child element is found OR throws when a timeout is reached
         /// </summary>
+        /// <param name="element"></param>
         /// <param name="by">The selenium By statement for the child element</param>
+        /// <param name="secondsToTry"></param>
         public static Task<IWebElement> FindElementWhenReady(this IWebElement element, By by, int secondsToTry = 5)
         {
 #pragma warning disable 618
@@ -24,7 +27,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <summary>
         /// Attempts to find all child elements matching a certian criteria of this element, only returning when at least one child element is found OR throws when a timeout is reached
         /// </summary>
+        /// <param name="element"></param>
         /// <param name="by">The selenium By statement for the child element</param>
+        /// <param name="secondsToTry"></param>
         public static Task<IReadOnlyCollection<IWebElement>> FindElementsWhenReady(this IWebElement element, By by, int secondsToTry = 5)
         {
 #pragma warning disable 618
@@ -36,6 +41,8 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <summary>
         /// Scrolls the current element a certain number of pixels down from the top of the screen. Primarily used to get around headers that cover up elements
         /// </summary>
+        /// <param name="element"></param>
+        /// <param name="driver"></param>
         /// <param name="pixelsFromTopOfScreen">The number of pixels to scroll from the top of the screen. More will put the element farther down on the screen</param>
         public static void ScrollIntoView(this IWebElement element, IWebDriver driver, int pixelsFromTopOfScreen = 200)
         {
@@ -49,6 +56,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// uses SendKeys to send the specified value to the element, 
         /// then tabs out of the field or throws after a certain amount of time
         /// </summary>
+        /// <param name="element"></param>
         /// <param name="value">Value to send to the element</param>
         public static async Task FillInWithAndTabWhenReady(this IWebElement element, string value)
         {
@@ -62,7 +70,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// then clears the current text and uses SendKeys to send the specified value to the element 
         /// or throws after a certain amount of time
         /// </summary>
+        /// <param name="element"></param>
         /// <param name="value">Value to send to the element</param>
+        /// <param name="secondstoTry"></param>
         public static async Task FillInWithWhenReady(this IWebElement element, string value, int secondstoTry = 5)
         {
             var count = 0;

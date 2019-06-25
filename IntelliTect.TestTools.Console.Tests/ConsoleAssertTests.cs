@@ -11,7 +11,7 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void ConsoleTester_Sample_InigoMontoya()
         {
-            string view =
+            const string view =
 @"First name: <<Inigo
 >>Last name: <<Montoya
 >>Hello, Inigo Montoya.";
@@ -32,7 +32,7 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void ConsoleTester_HelloWorld_NoInput()
         {
-            string view = @"Hello World";
+            const string view = "Hello World";
 
             ConsoleAssert.Expect(view, () =>
             {
@@ -43,7 +43,7 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void ConsoleTester_HelloWorld_TrimLF()
         {
-            string view = "Hello World\n";
+            const string view = "Hello World\n";
 
             ConsoleAssert.Expect(view, () =>
             {
@@ -54,7 +54,7 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void GivenStringLiteral_ExpectedOutputNormalized_OutputMatches()
         {
-            string view = @"Begin
+            const string view = @"Begin
 Middle
 End";
             ConsoleAssert.Expect(view, () =>
@@ -63,13 +63,12 @@ End";
                 System.Console.WriteLine("Middle");
                 System.Console.WriteLine("End");
             }, true);
-
         }
 
         [TestMethod]
         public void ConsoleTester_HelloWorld_TrimCRLF()
         {
-            string view = @"Hello World";
+            const string view = "Hello World";
 
             ConsoleAssert.Expect(view, () =>
             {
@@ -80,7 +79,7 @@ End";
         [TestMethod]
         public void ConsoleTester_HelloWorld_MissingNewline()
         {
-            string view = @"Hello World
+            const string view = @"Hello World
 ";
 
             ConsoleAssert.Expect(view, () =>
@@ -88,7 +87,6 @@ End";
                 System.Console.WriteLine("Hello World");
             });
         }
-
 
         [TestMethod]
         public void ExecuteProcess_PingLocalhost_Success()
@@ -109,14 +107,25 @@ End";
             }
             else
             {
-                string standardOutput, standardInput;
-                System.Diagnostics.Process process = ConsoleAssert.ExecuteProcess(
+                ConsoleAssert.ExecuteProcess(
 $@"
 Pinging * ?::1? with 32 bytes of data:
 Reply from ::1: time*",
-                "ping.exe", "-n 4 localhost", out standardOutput, out standardInput);
+                "ping.exe", "-n 4 localhost", out string standardOutput, out _);
                 Assert.IsTrue(standardOutput.ToLower().IsLike($"*{ Environment.MachineName.ToLower()}*"));
             }
+        }
+
+        [TestMethod]
+        public void ExecuteLike_GivenVariableCRLFWithNLComparedToCRNL_Success()
+        {
+            const string expected = "(abstract, 1)\n(abstract, 2)\n\n";
+            const string output = "(abstract, 1)\r\n(abstract, 2)\r\n";
+
+            IntelliTect.TestTools.Console.ConsoleAssert.ExpectLike(expected, () =>
+            {
+                System.Console.WriteLine(output);
+            });
         }
     }
 }

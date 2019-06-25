@@ -2,21 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    <WarningLevel>4</WarningLevel>
-    <NoWarn />
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Mike Curn</Authors>
-    <Company>IntelliTect</Company>
-    <Description>A set of classes for interacting with Selenium in a way makes calls more reliable than the basic implementation of Selenium</Description>
-    <PackageLicenseUrl>https://github.com/IntelliTect/TestTools/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/IntelliTect/TestTools</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/IntelliTect/TestTools/tree/master/IntelliTect.TestTools.Selenate</RepositoryUrl>
-    <RepositoryType />
-    <PackageTags>selenium, ui test, automated test, testing, web test</PackageTags>
-    <PackageReleaseNotes>Updates to consolidate WebDriverWait implementations for element-specific or browser-specific usages</PackageReleaseNotes>
-    <Version>1.2.0-beta</Version>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
