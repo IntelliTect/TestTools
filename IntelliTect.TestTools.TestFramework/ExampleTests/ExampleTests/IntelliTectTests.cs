@@ -27,8 +27,8 @@ namespace ExampleTests
 
             TestBuilder builder = new TestBuilder();
             builder
-                .AddTestCaseService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
-                .AddTestCaseService<Harness.IntelliTectWebpage>()
+                .AddDependencyService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
+                .AddDependencyService<Harness.IntelliTectWebpage>()
                 .AddTestBlock<TestBlocks.NavigateToWebsite>()
                 .AddTestBlock<TestBlocks.VerifyWebsiteBodyIsDisplayed>(expectedResult)
                 .ExecuteTestCase();
@@ -39,8 +39,8 @@ namespace ExampleTests
         {
             TestBuilder builder = new TestBuilder();
             builder
-                .AddTestCaseService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
-                .AddTestCaseService<Harness.IntelliTectWebpage>()
+                .AddDependencyService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
+                .AddDependencyService<Harness.IntelliTectWebpage>()
                 .AddTestBlock<TestBlocks.RegisterAndReturnNewAccount>("NewTester", "McTest")
                 .AddTestBlock<TestBlocks.VerifyAccountRegisteredCorrectly>()
                 .ExecuteTestCase();
@@ -51,9 +51,9 @@ namespace ExampleTests
         {
             TestBuilder builder = new TestBuilder();
             builder
-                .AddTestCaseService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
-                .AddTestCaseService<Account>(new AccountFactory().Account)
-                .AddTestCaseService<Harness.IntelliTectWebpage>()
+                .AddDependencyService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
+                .AddDependencyService<Account>(new AccountFactory().Account)
+                .AddDependencyService<Harness.IntelliTectWebpage>()
                 .AddTestBlock<TestBlocks.LogIn>()
                 .AddTestBlock<TestBlocks.VerifyAccountSummary>()
                 .ExecuteTestCase();

@@ -59,7 +59,6 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void MismatchedCountAddTestBlockParamsAndExecuteArgsFails()
         {
-            // Currently, this test should fail...
             TestBuilder builder = new TestBuilder();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
 
@@ -81,18 +80,17 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new TestBuilder();
             builder
-                .AddTestCaseService<ExampleDataThing>()
-                .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
+                .AddDependencyService<ExampleDataThing>()
+                .AddTestBlock<ExampleTestBlockWithConstructorForOwnType>()
                 .ExecuteTestCase();
         }
 
-        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
         [Fact]
         public void FetchByServiceForProperty()
         {
             TestBuilder builder = new TestBuilder();
             builder
-                .AddTestCaseService<ExampleDataThing>()
+                .AddDependencyService<ExampleDataThing>()
                 .AddTestBlock<ExampleTestBlockWithPropertyForOwnType>()
                 .ExecuteTestCase();
         }
@@ -102,8 +100,39 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new TestBuilder();
             builder
-                .AddTestCaseService<ExampleDataThing>()
-                .AddTestBlock<ExampleTestBlockWithConstructorForOwnType>()
+                .AddDependencyService<ExampleDataThing>()
+                .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
+                .ExecuteTestCase();
+        }
+
+        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
+        [Fact]
+        public void FetchByFactoryForConstructor()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
+                .AddTestBlock<ExampleTestBlockForFactoryWithConstructor>()
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void FetchByFactoryForProperty()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
+                .AddTestBlock<ExampleTestBlockForFactoryWithProperty>()
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void FetchByFactoryForExecuteArg()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
+                .AddTestBlock<ExampleTestBlockForFactoryWithExecuteArg>()
                 .ExecuteTestCase();
         }
     }
@@ -185,8 +214,36 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         private ExampleDataThing _Input { get; }
     }
 
-    public class ExampleDataThing
+    public class ExampleTestBlockForFactoryWithExecuteArg : ITestBlock
     {
-        public string Testing { get; } = "Testing";
+        public void Execute(ExampleDataThing input)
+        {
+            Assert.Equal("TestingOverride", input.Testing);
+        }
+    }
+
+    public class ExampleTestBlockForFactoryWithProperty : ITestBlock
+    {
+        public ExampleDataThing Input { get; set; }
+
+        public void Execute()
+        {
+            Assert.Equal("TestingOverride", Input.Testing);
+        }
+    }
+
+    public class ExampleTestBlockForFactoryWithConstructor : ITestBlock
+    {
+        public ExampleTestBlockForFactoryWithConstructor(ExampleDataThing input)
+        {
+            _Input = input;
+        }
+
+        public void Execute()
+        {
+            Assert.Equal("TestingOverride", _Input.Testing);
+        }
+
+        private ExampleDataThing _Input { get; }
     }
 }

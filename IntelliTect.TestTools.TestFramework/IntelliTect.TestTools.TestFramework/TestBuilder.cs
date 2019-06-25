@@ -15,25 +15,26 @@ namespace IntelliTect.TestTools.TestFramework
         public TestBuilder AddTestBlock<T>() where T : ITestBlock
         {
             _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
+            _Services.AddTransient(typeof(T));
             return this;
         }
 
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
             _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
+            _Services.AddTransient(typeof(T));
             return this;
         }
 
-        public TestBuilder AddTestCaseService<T>(Func<IServiceProvider, object> serviceFactory)
+        public TestBuilder AddDependencyService<T>(Func<IServiceProvider, object> serviceFactory)
         {
             _Services.AddScoped(typeof(T), serviceFactory);
             return this;
         }
 
-        public TestBuilder AddTestCaseService<T>()
+        public TestBuilder AddDependencyService<T>()
         {
-            _ServiceTypes.Add(typeof(T));
-            //_Services.AddScoped(typeof(T));
+            _Services.AddScoped(typeof(T));
             return this;
         }
 
@@ -48,13 +49,6 @@ namespace IntelliTect.TestTools.TestFramework
             #region move to a Build() method and validate all dependencies are satisfied?
             var containerBuilder = new ContainerBuilder();
             containerBuilder.Populate(_Services);
-            // Can't figure out how to get property injection to work any other way...
-            // This really seems like I'm mixing MS and Autofac in weird ways...
-            foreach (var tb in _TestBlocksAndParams)
-            {
-                containerBuilder.RegisterType(tb.TestBlockType).PropertiesAutowired();
-            }
-            containerBuilder.RegisterTypes(_ServiceTypes.ToArray()).PropertiesAutowired();
             var container = containerBuilder.Build();
             var serviceProvider = new AutofacServiceProvider(container);
             #endregion
@@ -91,10 +85,12 @@ namespace IntelliTect.TestTools.TestFramework
                         break;
                     }
 
-                    // Log all of our inputs
+                    // Populate and log all of our inputs
                     var properties = testBlockInstance.GetType().GetProperties();
                     foreach (var prop in properties)
                     {
+                        var propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                        testBlockInstance.GetType().GetProperty(prop.Name).SetValue(testBlockInstance, propertyValue);
                         logger.Debug($"Using property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
                     }
 
@@ -177,6 +173,5 @@ namespace IntelliTect.TestTools.TestFramework
 
         private List<(Type TestBlockType, object[] TestBlockParameters)> _TestBlocksAndParams { get; set; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private IServiceCollection _Services { get; set; } = new ServiceCollection();
-        private HashSet<Type> _ServiceTypes { get; set; } = new HashSet<Type>();
     }
 }
