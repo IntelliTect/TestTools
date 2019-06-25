@@ -104,7 +104,7 @@ namespace IntelliTect.TestTools.Selenate
                 return wait.Until(d => element.Enabled);
             }
             catch(WebDriverException ex)
-                when (ex.InnerException.GetType() == typeof(ElementNotInteractableException))
+                when (ex.InnerException is ElementNotInteractableException)
             {
                 return false;
             }            
