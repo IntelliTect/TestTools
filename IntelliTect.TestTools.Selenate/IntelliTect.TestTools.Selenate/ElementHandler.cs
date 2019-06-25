@@ -79,7 +79,7 @@ namespace IntelliTect.TestTools.Selenate
             }
             catch (WebDriverException ex)
                 when (ex.InnerException is ElementNotVisibleException
-                        || ex.InnerException.GetType() == typeof(NoSuchElementException))
+                        || ex.InnerException is NoSuchElementException)
             {
                 return false;
             }
