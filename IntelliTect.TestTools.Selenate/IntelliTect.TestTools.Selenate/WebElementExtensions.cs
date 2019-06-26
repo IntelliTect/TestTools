@@ -60,11 +60,12 @@ namespace IntelliTect.TestTools.SelenateExtensions
         }
 
         /// <summary>
-        /// Clears the current text, 
-        /// uses SendKeys to send the specified value to the element, 
+        /// Replaces the current text in the element with the new value passed in.
+        /// Performs a clear then send keys.
         /// </summary>
+        /// <param name="element">The element to perform the action on</param>
         /// <param name="value">Value to send to the element</param>
-        public static void ClearAndSendKeys(this IWebElement element, string value)
+        public static void SendKeysReplace(this IWebElement element, string value)
         {
             element.Clear();
             element.SendKeys(value);
@@ -76,18 +77,6 @@ namespace IntelliTect.TestTools.SelenateExtensions
         }
 
         /// <summary>
-        /// Clears the current text, 
-        /// uses SendKeys to send the specified value to the element, 
-        /// then tabs out of the field
-        /// </summary>
-        /// <param name="value">Value to send to the element</param>
-        public static void ClearAndSendKeysAndTab(this IWebElement element, string value)
-        {
-            ClearAndSendKeys(element, value);
-            element.SendKeys(Keys.Tab);
-        }
-
-        /// <summary>
         /// Waits for the element to be in a valid state, then clears the current text, 
         /// uses SendKeys to send the specified value to the element, 
         /// then tabs out of the field or throws after a certain amount of time
@@ -96,7 +85,6 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="driver"></param>
         /// <param name="value">Value to send to the element</param>
         /// <param name="secondsToTry">Timeout, in seconds, to wait for.</param>
-        //[Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void SendKeysAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
             SendKeysWhenReady(element, driver, value, secondsToTry);
@@ -112,7 +100,6 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="driver"></param>
         /// <param name="value">Value to send to the element</param>
         /// <param name="secondsToTry">Timeout, in seconds, to wait for.</param>
-        //[Obsolete("Use ElementHandler.SendKeysWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void SendKeysWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
