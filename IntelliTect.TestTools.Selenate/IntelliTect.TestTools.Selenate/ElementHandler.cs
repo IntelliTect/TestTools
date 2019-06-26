@@ -6,8 +6,15 @@ using System.Text;
 
 namespace IntelliTect.TestTools.Selenate
 {
+    /// <summary>
+    /// Class for handling checking for state or polling specific elements utilizing common WebDriverWait implementations
+    /// </summary>
     public class ElementHandler
     {
+        /// <summary>
+        /// Constructor for handling the driver used to create WebDriverWaits
+        /// </summary>
+        /// <param name="driver">The driver to use for polling</param>
         public ElementHandler(IWebDriver driver)
         {
             this._Driver = driver;
