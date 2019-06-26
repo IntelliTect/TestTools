@@ -1,7 +1,4 @@
-﻿using Autofac;
-using Autofac.Core;
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -47,10 +44,7 @@ namespace IntelliTect.TestTools.TestFramework
         public void ExecuteTestCase()
         {
             #region move to a Build() method and validate all dependencies are satisfied?
-            var containerBuilder = new ContainerBuilder();
-            containerBuilder.Populate(_Services);
-            var container = containerBuilder.Build();
-            var serviceProvider = new AutofacServiceProvider(container);
+            var serviceProvider = _Services.BuildServiceProvider();
             #endregion
 
             var logger = serviceProvider.GetService<ILogger>() ?? new Log();
@@ -65,23 +59,14 @@ namespace IntelliTect.TestTools.TestFramework
 
                     try
                     {
-                        testBlockInstance = scope.ServiceProvider.GetService(tb.TestBlockType);
+                        testBlockInstance = scope.ServiceProvider.GetRequiredService(tb.TestBlockType);
                     }
-                    catch(DependencyResolutionException e)
+                    catch(InvalidOperationException ex)
                     {
-                        logger.Error($"Unable to find all dependencies necessary for test block {tb.TestBlockType}. " +
-                            $"Verify that all properties, constructors, and Execute method arguments for this test block " +
-                            $"have a resovable service, factory, or reference added with the AddTestCaseService or AddDependencyInstance methods");
-                        testBlockException = e;
-                        break;
-                    }
-
-                    if(testBlockInstance == null)
-                    {
-                        logger.Error($"Unable to find all dependencies necessary for test block {tb.TestBlockType}. " +
-                            $"Verify that all properties, constructors, and Execute method arguments for this test block " +
-                            $"have a resovable service, factory, or reference added with the AddTestCaseService or AddDependencyInstance methods");
-                        testBlockException = new DependencyResolutionException($"No registration found when trying to activate all dependencies for the test block {tb.TestBlockType}");
+                        // Probably worth moving these logs outside of the foreach so we don't have to duplicate the message
+                        logger.Error($"Unable to find the test block instance OR all dependencies necessary for test block {tb.TestBlockType}. " +
+                            $"See error: {ex.Message}");
+                        testBlockException = ex;
                         break;
                     }
 
@@ -89,7 +74,19 @@ namespace IntelliTect.TestTools.TestFramework
                     var properties = testBlockInstance.GetType().GetProperties();
                     foreach (var prop in properties)
                     {
-                        var propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                        object propertyValue;
+                        try
+                        {
+                            propertyValue = scope.ServiceProvider.GetRequiredService(prop.PropertyType);
+                        }
+                        catch(InvalidOperationException ex)
+                        {
+                            logger.Error($"Unable to find the test block instance OR all dependencies necessary for test block {tb.TestBlockType}. " +
+                            $"See error: {ex.Message}");
+                            testBlockException = ex;
+                            break;
+                        }
+                        
                         testBlockInstance.GetType().GetProperty(prop.Name).SetValue(testBlockInstance, propertyValue);
                         logger.Debug($"Using property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
                     }
