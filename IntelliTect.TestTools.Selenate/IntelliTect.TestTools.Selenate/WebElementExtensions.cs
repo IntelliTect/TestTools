@@ -60,6 +60,23 @@ namespace IntelliTect.TestTools.SelenateExtensions
         }
 
         /// <summary>
+        /// Replaces the current text in the element with the new value passed in.
+        /// Performs a clear then send keys.
+        /// </summary>
+        /// <param name="element">The element to perform the action on</param>
+        /// <param name="value">Value to send to the element</param>
+        public static void SendKeysReplace(this IWebElement element, string value)
+        {
+            element.Clear();
+            element.SendKeys(value);
+            if (element.GetAttribute("value") != value)
+            {
+                element.Clear();
+                element.SendKeys(value);
+            }
+        }
+
+        /// <summary>
         /// Waits for the element to be in a valid state, then clears the current text, 
         /// uses SendKeys to send the specified value to the element, 
         /// then tabs out of the field or throws after a certain amount of time
@@ -70,7 +87,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="secondsToTry">Timeout, in seconds, to wait for.</param>
         public static void SendKeysAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
-            SendKeysWhenReady(element, driver, value, secondsToTry );
+            SendKeysWhenReady(element, driver, value, secondsToTry);
             element.SendKeys(Keys.Tab);
         }
 
@@ -114,21 +131,24 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <summary>
         /// Waits for the element to be in a valid state, then clicks on it or throws after a certain amount of time
         /// </summary>
+        //[Obsolete("Use ElementHandler.ClickWhenReady for a common implementation of a SendKeys wrapped by a WebDriverWait implementation")]
         public static void ClickWhenReady(this IWebElement element, IWebDriver driver, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait( driver, TimeSpan.FromSeconds( secondsToTry ) );
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),
                 typeof(ElementNotInteractableException),
                 typeof(StaleElementReferenceException),
                 typeof(InvalidElementStateException),
-                typeof(ElementClickInterceptedException));
+                typeof(ElementClickInterceptedException),
+                typeof(NoSuchElementException));
 
-            wait.Until( c =>
+            // Worth wrapping in a try/catch and throwing inner exception?
+            wait.Until(c =>
             {
                 element.Click();
                 return true;
-            } );
+            });
         }
     }
 }

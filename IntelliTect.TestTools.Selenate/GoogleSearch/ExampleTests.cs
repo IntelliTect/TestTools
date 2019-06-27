@@ -12,7 +12,7 @@ namespace GoogleSearch
         public void Setup()
         {
             Browser = new GoogleBrowser(BrowserType.Chrome);
-            Google = new GoogleFunctions(Browser);
+            Google = new GoogleOperations(Browser);
             Harness = new GoogleHarness(Browser);
         }
 
@@ -50,7 +50,7 @@ namespace GoogleSearch
         }
 
         private GoogleBrowser Browser { get; set; }
-        private GoogleFunctions Google { get; set; }
+        private GoogleOperations Google { get; set; }
         private GoogleHarness Harness { get; set; }
     }
 }

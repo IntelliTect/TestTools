@@ -3,39 +3,42 @@ using OpenQA.Selenium;
 using System.Linq;
 using System.Threading.Tasks;
 using IntelliTect.TestTools.SelenateExtensions;
+using IntelliTect.TestTools.Selenate;
 
 namespace GoogleSearch
 {
-    public class GoogleFunctions
+    public class GoogleOperations
     {
-        public GoogleFunctions(GoogleBrowser browser)
+        public GoogleOperations(GoogleBrowser browser)
         {
             Browser = browser;
             Harness = new GoogleHarness(Browser);
+            Element = new ElementHandler(Browser.Driver);
         }
 
         public bool SearchForItem(string searchItem)
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
-            Harness.SearchInput.SendKeysWhenReady(Browser.Driver, searchItem);
+            Element.WaitForEnabledState(Harness.SearchInput);
+            Harness.SearchInput.SendKeys(searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
-            return Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed);
+            return Element.WaitForVisibleState(Harness.SearchResultsDiv);
         }
 
         public bool FindSearchResultItem(string result)
         {
-            // Don't need to await this since it would just be on one line
             var headers = Harness.SearchResultsHeadersList;
             return Browser.WaitUntil(() => headers.Any(h => h.Text == result), 5);
         }
 
         public bool GoToHomePage()
         {
-            Harness.GoHomeButton.ClickWhenReady(Browser.Driver);
-            return Browser.WaitUntil(() => Harness.GoogleSearchButton.Displayed);
+            Element.ClickElementWhenReady(Harness.GoHomeButton);
+            return Element.WaitForVisibleState(Harness.GoogleSearchButton);
         }
 
         private GoogleBrowser Browser { get; }
         private GoogleHarness Harness { get; }
+        private ElementHandler Element { get; }
     }
 }
