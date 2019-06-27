@@ -169,6 +169,6 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         private List<(Type TestBlockType, object[] TestBlockParameters)> _TestBlocksAndParams { get; set; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
-        private IServiceCollection _Services { get; set; } = new ServiceCollection();
+        private IServiceCollection Services { get; } = new ServiceCollection();
     }
 }
