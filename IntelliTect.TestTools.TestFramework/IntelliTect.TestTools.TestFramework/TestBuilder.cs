@@ -87,7 +87,7 @@ namespace IntelliTect.TestTools.TestFramework
                             break;
                         }
                         
-                        testBlockInstance.GetType().GetProperty(prop.Name).SetValue(testBlockInstance, propertyValue);
+                        prop.SetValue(testBlockInstance, propertyValue);
                         logger.Debug($"Using property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
                     }
 
