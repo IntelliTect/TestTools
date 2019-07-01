@@ -62,7 +62,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             TestBuilder builder = new TestBuilder();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
 
-            Assert.Throws<ArgumentNullException>(() => builder.ExecuteTestCase());
+            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
         }
 
         [Fact]
@@ -134,6 +134,51 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
                 .AddTestBlock<ExampleTestBlockForFactoryWithExecuteArg>()
                 .ExecuteTestCase();
+        }
+
+        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
+        [Fact]
+        public void AddTwoServicesOfSameTypeToServiceAndFetch()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyService<ExampleDataThing>()
+                .AddDependencyService<ExampleDataThing>()
+                .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
+                .ExecuteTestCase();
+        }
+
+        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
+        [Fact]
+        public void AddTwoInstancesOfSameTypeToServiceAndFetch()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyInstance(new ExampleDataThing { Testing = "Testing2" })
+                .AddDependencyInstance(new ExampleDataThing { Testing = "Testing" })
+                .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void TestBlockWithPropertyWithNoSetterDoesNotThrow()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyInstance("Testing")
+                .AddTestBlock<ExampleTestBlockWithPropertyWithNoSetter>()
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void TestBlockWithMultipleExecuteMethodsThrows()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyInstance("Testing")
+                .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>();
+
+            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
         }
     }
 
@@ -245,5 +290,28 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
 
         private ExampleDataThing _Input { get; }
+    }
+
+    public class ExampleTestBlockWithPropertyWithNoSetter : ITestBlock
+    {
+        public string Input { get; }
+
+        public void Execute()
+        {
+            Assert.Null(Input);
+        }
+    }
+
+    public class ExampleTestBlockWithMultipleExecuteMethods : ITestBlock
+    {
+        public void Execute()
+        {
+            Assert.True(true);
+        }
+
+        public void Execute(string input)
+        {
+            Assert.Equal("Tetsing", input);
+        }
     }
 }

@@ -11,40 +11,40 @@ namespace IntelliTect.TestTools.TestFramework
     {
         public TestBuilder AddTestBlock<T>() where T : ITestBlock
         {
-            _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
-            _Services.AddTransient(typeof(T));
+            TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
+            Services.AddTransient(typeof(T));
             return this;
         }
 
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
-            _TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
-            _Services.AddTransient(typeof(T));
+            TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
+            Services.AddTransient(typeof(T));
             return this;
         }
 
         public TestBuilder AddDependencyService<T>(Func<IServiceProvider, object> serviceFactory)
         {
-            _Services.AddScoped(typeof(T), serviceFactory);
+            Services.AddScoped(typeof(T), serviceFactory);
             return this;
         }
 
         public TestBuilder AddDependencyService<T>()
         {
-            _Services.AddScoped(typeof(T));
+            Services.AddScoped(typeof(T));
             return this;
         }
 
         public TestBuilder AddDependencyInstance(object objToAdd)
         {
-            _Services.AddSingleton(objToAdd.GetType(), objToAdd);
+            Services.AddSingleton(objToAdd.GetType(), objToAdd);
             return this;
         }
 
         public void ExecuteTestCase()
         {
             #region move to a Build() method and validate all dependencies are satisfied?
-            var serviceProvider = _Services.BuildServiceProvider();
+            var serviceProvider = Services.BuildServiceProvider();
             #endregion
 
             var logger = serviceProvider.GetService<ILogger>() ?? new Log();
@@ -52,7 +52,7 @@ namespace IntelliTect.TestTools.TestFramework
             using (var scope = serviceProvider.CreateScope())
             {
                 HashSet<object> testBlockResults = new HashSet<object>();
-                foreach (var tb in _TestBlocksAndParams)
+                foreach (var tb in TestBlocksAndParams)
                 {
                     logger.Info($"Starting test block {tb.TestBlockType}");
                     object testBlockInstance = null;
@@ -74,6 +74,11 @@ namespace IntelliTect.TestTools.TestFramework
                     var properties = testBlockInstance.GetType().GetProperties();
                     foreach (var prop in properties)
                     {
+                        if (!prop.CanWrite)
+                        {
+                            logger.Debug($"Unable to set property {prop}. No setter found.");
+                            continue;
+                        }
                         object propertyValue;
                         try
                         {
@@ -91,8 +96,17 @@ namespace IntelliTect.TestTools.TestFramework
                         logger.Debug($"Using property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
                     }
 
-                    MethodInfo execute = tb.TestBlockType.GetMethod("Execute");
+                    List<MethodInfo> methods = tb.TestBlockType.GetMethods().Where(m => m.Name.ToLower() == "execute").ToList();
+                    if(methods.Count != 1)
+                    {
+                        testBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
+                            $"Please review test block {tb.TestBlockType}.");
+                        break;
+                    }
+
+                    MethodInfo execute = methods[0];
                     var executeParams = execute.GetParameters();
+
                     object[] executeArgs = new object[executeParams.Length];
 
                     // Is this the right order of checking? Or should we prioritize test block results first?
@@ -101,6 +115,7 @@ namespace IntelliTect.TestTools.TestFramework
                     {
                         if(tb.TestBlockParameters != null && executeParams.Length == tb.TestBlockParameters.Length)
                         {
+                            // Eventually need to add more validation around making sure the types match here.
                             executeArgs = tb.TestBlockParameters;
                         }
                         else
@@ -108,9 +123,13 @@ namespace IntelliTect.TestTools.TestFramework
                             for (int i = 0; i < executeArgs.Length; i++)
                             {
                                 object foundResult =
-                                    testBlockResults?.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
-                                    ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType)
-                                    ?? throw new ArgumentNullException("Unable to resolve Execute method arguments");
+                                    testBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
+                                    ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
+                                if(foundResult == null)
+                                {
+                                    testBlockException = new InvalidOperationException("Unable to resolve Execute method arguments");
+                                    break;
+                                }
                                 executeArgs[i] = foundResult;
                             }
                         }
@@ -120,6 +139,10 @@ namespace IntelliTect.TestTools.TestFramework
                             logger.Debug($"Handing argument into Execute(): {GetObjectDataAsJsonString(arg)}");
                         }
                     }
+
+                    // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
+                    if (testBlockException != null)
+                        break;
 
                     try
                     {
