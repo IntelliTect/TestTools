@@ -9,6 +9,11 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
+        /// <summary>
+        /// Adds a test block (some related group of test actions) to the list of blocks to run for any given test case
+        /// </summary>
+        /// <typeparam name="T">The type of test block, as an ITestBlock, to run</typeparam>
+        /// <returns>This</returns>
         public TestBuilder AddTestBlock<T>() where T : ITestBlock
         {
             TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
@@ -16,6 +21,13 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        /// <summary>
+        /// Adds a test block (some related group of test actions) with a list of arguments 
+        /// that must match the associated TestBlock.Execute() method to the list of blocks to run for any given test case
+        /// </summary>
+        /// <typeparam name="T">The type of dependency a test block needs to execute</typeparam>
+        /// <param name="testBlockArgs">The list of arguments to fulfill a set of Execute(params object[]) parameters</param>
+        /// <returns>This</returns>
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
             TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
@@ -23,18 +35,34 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        /// <summary>
+        /// Adds a service as a factory a container that is used to fulfill TestBlock dependencies
+        /// </summary>
+        /// <typeparam name="T">The type of dependency a test block needs to execute</typeparam>
+        /// <param name="serviceFactory">The factory to provide an instance of the type needed for a test block to execute</param>
+        /// <returns></returns>
         public TestBuilder AddDependencyService<T>(Func<IServiceProvider, object> serviceFactory)
         {
             Services.AddScoped(typeof(T), serviceFactory);
             return this;
         }
 
+        /// <summary>
+        /// Adds a service as a Type to the container that is used to fulfill TestBlock dependencies
+        /// </summary>
+        /// <typeparam name="T">The type of test block, as an ITestBlock, to run</typeparam>
+        /// <returns>This</returns>
         public TestBuilder AddDependencyService<T>()
         {
             Services.AddScoped(typeof(T));
             return this;
         }
 
+        /// <summary>
+        /// Adds an instance of a Type to the container that is needed for a TestBlock to execute
+        /// </summary>
+        /// <param name="objToAdd">The instance of a Type that a TestBlock needs</param>
+        /// <returns>This</returns>
         public TestBuilder AddDependencyInstance(object objToAdd)
         {
             Services.AddSingleton(objToAdd.GetType(), objToAdd);
@@ -54,7 +82,7 @@ namespace IntelliTect.TestTools.TestFramework
                 HashSet<object> testBlockResults = new HashSet<object>();
                 foreach (var tb in TestBlocksAndParams)
                 {
-                    logger.Info($"Starting test block {tb.TestBlockType}");
+                    logger.Info($"---Starting test block {tb.TestBlockType}---");
                     object testBlockInstance = null;
 
                     try
@@ -149,29 +177,27 @@ namespace IntelliTect.TestTools.TestFramework
                         var result = execute.Invoke(testBlockInstance, executeArgs);
                         if (result != null)
                         {
-                            logger.Debug($"Test block returned... {GetObjectDataAsJsonString(result)}");
+                            logger.Debug($"Test block {tb.TestBlockType} returned... {GetObjectDataAsJsonString(result)}");
                             testBlockResults.Add(result);
+                            logger.Info($"---Test block {tb.TestBlockType} completed successfully.---");
                         }
 
                     }
                     catch (TargetInvocationException e)
                     {
-                        logger.Error($"Test block {tb.TestBlockType} failed with the exception: {e.InnerException}.");
+                        logger.Error($"---Test block {tb.TestBlockType} failed with the exception: {e.InnerException}.---");
                         testBlockException = e.InnerException;
                         break;
                     }
                     catch (ArgumentException e)
                     {
-                        logger.Error($"Test block {tb.TestBlockType} failed with the exception: {e}.");
+                        logger.Error($"---Test block {tb.TestBlockType} failed with the exception: {e}.---");
                         testBlockException = e;
                         break;
                     }
-
-                    // Log stuff here
                 }
             }
 
-            // After all logging is finished up and we're ready to finish the test...
             serviceProvider.Dispose();
 
             if (testBlockException != null)
