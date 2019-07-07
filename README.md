@@ -9,7 +9,7 @@ Console
 
 Console is a simple end-to-end test framework for .NET console applications.
 
-This currently has non-optimal nomenclature and is not guaranteed to be efficient, but it appears to work.
+This currently has non-optimal nomenclature and is not guaranteed to be efficient, but it appears to work. 
 
 Usage
 -----

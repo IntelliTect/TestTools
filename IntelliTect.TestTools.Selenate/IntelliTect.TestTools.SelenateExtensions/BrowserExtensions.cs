@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.TestTools.SelenateExtensions
 {
-    public static class BrowserExtensions
-    {
+    //public static class BrowserExtensions
+    //{
         
-    }
+    //}
 }

@@ -20,7 +20,7 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void IsLike_GivenLikeStringWithSpaces_ReturnsTrue()
         {
-            string output = @"*  3";
+            const string output = @"*  3";
 
             Assert.IsTrue(output.IsLike("*3"), "First");
             Assert.IsTrue(output.IsLike("* 3"), "Second");
@@ -29,7 +29,7 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void IsLike_GivenLikeStringWithEscape_ReturnsTrue()
         {
-            string output = @"*3";
+            const string output = @"*3";
 
             Assert.IsTrue(output.IsLike("\\*3", '\\'));
         }
@@ -37,7 +37,7 @@ namespace IntelliTect.TestTools.Console.Tests
         [TestMethod]
         public void IsLike_GivenLikeStringWithOverrideEscape_ReturnsTrue()
         {
-            string output = @"*3";
+            const string output = @"*3";
 
             Assert.IsTrue(output.IsLike("`*3",'`'));
         }
@@ -46,7 +46,7 @@ namespace IntelliTect.TestTools.Console.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void IsLike_GivenInvalideEscapeCharacter_Throws()
         {
-            string output = @"*3";
+            const string output = @"*3";
 
             Assert.IsTrue(output.IsLike(@"\3", '\\'));
         }

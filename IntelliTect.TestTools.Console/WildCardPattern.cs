@@ -1,6 +1,7 @@
-﻿/// This code was originally sourced from https://github.com/PowerShell/PowerShell/blob/master/src/System.Management.Automation/engine/regex.cs
-/// and then modified to remove of PowerShell specific elements.
+﻿// This code was originally sourced from https://github.com/PowerShell/PowerShell/blob/master/src/System.Management.Automation/engine/regex.cs
+// and then modified to remove of PowerShell specific elements.
 #pragma warning disable 1634, 1691
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 using System;
 using System.Collections.Generic;
@@ -111,11 +112,7 @@ namespace IntelliTect.TestTools.Console
         /// <remarks> if wildCardType == None, the pattern does not have wild cards  </remarks>
         public WildcardPattern(string pattern, WildcardOptions options)
         {
-            if (pattern == null)
-            {
-                throw new ArgumentNullException(nameof(pattern));
-            }
-            Pattern = pattern;
+            Pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
             Options = options;
         }
 
@@ -153,7 +150,6 @@ namespace IntelliTect.TestTools.Console
                         }
                     }
                     previousCharacterWasEscape = false;
-
                 }
             }
         }
@@ -237,7 +233,7 @@ namespace IntelliTect.TestTools.Console
                 throw new ArgumentNullException(nameof(charsNotToEscape));
             }
 
-            char[] temp = new char[pattern.Length * 2 + 1];
+            char[] temp = new char[(pattern.Length * 2) + 1];
             int tempIndex = 0;
 
             for (int i = 0; i < pattern.Length; i++)
@@ -255,18 +251,14 @@ namespace IntelliTect.TestTools.Console
                 temp[tempIndex++] = ch;
             }
 
-            string s = null;
-
             if (tempIndex > 0)
             {
-                s = new string(temp, 0, tempIndex);
+                return new string(temp, 0, tempIndex);
             }
             else
             {
-                s = String.Empty;
+                return String.Empty;
             }
-
-            return s;
 
 #pragma warning restore 56506
         }
@@ -294,8 +286,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="escapeCharacter">Allows for overriding the default escape character</param>
         /// <returns> true if the string has wild card chars, false otherwise. </returns>
         /// <remarks>
-        /// Currently { '*', '?', '[' } are considered wild card chars and
-        /// <see cref="DefaultEscapeCharacter"/> is the default escape character.
+        /// Currently { '*', '?', '[', and ']' }, are considered wild card chars.
         /// To override the default escape character, specify the <paramref name="escapeCharacter"/> value.
         /// </remarks>
         public static bool ContainsWildcardCharacters(string pattern,
@@ -392,18 +383,14 @@ namespace IntelliTect.TestTools.Console
                 prevCharWasEscapeChar = false;
             }
 
-            string s = null;
-
             if (tempIndex > 0)
             {
-                s = new string(temp, 0, tempIndex);
+                return new string(temp, 0, tempIndex);
             }
             else
             {
-                s = String.Empty;
+                return String.Empty;
             }
-
-            return s;
         } // Unescape
 
         public static bool IsWildcardChar(char ch)
@@ -413,8 +400,6 @@ namespace IntelliTect.TestTools.Console
 
         public const string WildCardCharacters = "*?[]";
     }
-
-    
 
     /// <summary>
     /// A base class for parsers of <see cref="WildcardPattern"/> patterns.
@@ -520,8 +505,8 @@ namespace IntelliTect.TestTools.Console
             int i = 0;
             while (i < brackedExpressionContents.Length)
             {
-                if (((i + 2) < brackedExpressionContents.Length) &&
-                                (bracketExpressionOperators[i + 1] == '-'))
+                if (((i + 2) < brackedExpressionContents.Length)
+                    && (bracketExpressionOperators[i + 1] == '-'))
                 {
                     char lowerBound = brackedExpressionContents[i];
                     char upperBound = brackedExpressionContents[i + 2];
@@ -655,6 +640,7 @@ namespace IntelliTect.TestTools.Console
         private RegexOptions _regexOptions;
 
         private const string regexChars = "()[.?*{}^$+|\\"; // ']' is missing on purpose
+
         private static bool IsRegexChar(char ch)
         {
             for (int i = 0; i < regexChars.Length; i++)
@@ -690,7 +676,7 @@ namespace IntelliTect.TestTools.Console
 
         protected override void BeginWildcardPattern(WildcardPattern pattern)
         {
-            _regexPattern = new StringBuilder(pattern.Pattern.Length * 2 + 2);
+            _regexPattern = new StringBuilder((pattern.Pattern.Length * 2) + 2);
             _regexPattern.Append('^');
 
             _regexOptions = TranslateWildcardOptionsIntoRegexOptions(pattern.Options);
@@ -769,6 +755,7 @@ namespace IntelliTect.TestTools.Console
                 AppendLiteralCharacter(regexPattern, c);
             }
         }
+
         protected override void AppendLiteralCharacterToBracketExpression(char c)
         {
             AppendLiteralCharacterToBracketExpression(_regexPattern, c);
@@ -862,8 +849,7 @@ namespace IntelliTect.TestTools.Console
                 patternPositionsForCurrentStringPosition.StringPosition = currentStringPosition;
                 patternPositionsForNextStringPosition.StringPosition = currentStringPosition + 1;
 
-                int patternPosition;
-                while (patternPositionsForCurrentStringPosition.MoveNext(out patternPosition))
+                while (patternPositionsForCurrentStringPosition.MoveNext(out int patternPosition))
                 {
                     _patternElements[patternPosition].ProcessStringCharacter(
                         currentStringCharacter,
@@ -879,8 +865,7 @@ namespace IntelliTect.TestTools.Console
                 patternPositionsForNextStringPosition = tmp;
             }
 
-            int patternPosition2;
-            while (patternPositionsForCurrentStringPosition.MoveNext(out patternPosition2))
+            while (patternPositionsForCurrentStringPosition.MoveNext(out int patternPosition2))
             {
                 _patternElements[patternPosition2].ProcessEndOfString(
                     patternPosition2,
@@ -1049,11 +1034,7 @@ namespace IntelliTect.TestTools.Console
 
             public BracketExpressionElement(Regex regex)
             {
-                if (regex == null)
-                {
-                    throw new ArgumentNullException(nameof(regex));
-                }
-                _Regex = regex;
+                _Regex = regex ?? throw new ArgumentNullException(nameof(regex));
             }
 
             public override void ProcessStringCharacter(
