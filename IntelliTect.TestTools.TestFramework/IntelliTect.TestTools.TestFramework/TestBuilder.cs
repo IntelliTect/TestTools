@@ -150,6 +150,7 @@ namespace IntelliTect.TestTools.TestFramework
                         {
                             for (int i = 0; i < executeArgs.Length; i++)
                             {
+                                // Might be worth changing this to GetRequiredService and wrapping in a try/catch instead of checking if foundResult is null
                                 object foundResult =
                                     testBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
                                     ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
