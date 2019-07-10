@@ -82,7 +82,8 @@ namespace IntelliTect.TestTools.TestFramework
                 HashSet<object> testBlockResults = new HashSet<object>();
                 foreach (var tb in TestBlocksAndParams)
                 {
-                    logger.Info($"---Starting test block {tb.TestBlockType}---");
+                    logger.Info($"---{tb.TestBlockType}---");
+                    logger.Debug($"Fetching dependencies.");
                     object testBlockInstance = null;
 
                     try
@@ -92,13 +93,12 @@ namespace IntelliTect.TestTools.TestFramework
                     catch(InvalidOperationException ex)
                     {
                         // Probably worth moving these logs outside of the foreach so we don't have to duplicate the message
-                        logger.Error($"Unable to find the test block instance OR all dependencies necessary for test block {tb.TestBlockType}. " +
-                            $"See error: {ex.Message}");
+                        logger.Error($"Unable to find the test block instance OR all dependencies necessary for test block {tb.TestBlockType}.");
                         testBlockException = ex;
                         break;
                     }
 
-                    // Populate and log all of our inputs
+                    // Populate and log all of our properties
                     var properties = testBlockInstance.GetType().GetProperties();
                     foreach (var prop in properties)
                     {
@@ -114,20 +114,19 @@ namespace IntelliTect.TestTools.TestFramework
                         }
                         catch(InvalidOperationException ex)
                         {
-                            logger.Error($"Unable to find the test block instance OR all dependencies necessary for test block {tb.TestBlockType}. " +
-                            $"See error: {ex.Message}");
+                            logger.Error($"Unable to find the test block instance OR all dependencies necessary for test block {tb.TestBlockType}.");
                             testBlockException = ex;
                             break;
                         }
                         
                         prop.SetValue(testBlockInstance, propertyValue);
-                        logger.Debug($"Using property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
+                        logger.Debug($"Populated property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
                     }
 
                     List<MethodInfo> methods = tb.TestBlockType.GetMethods().Where(m => m.Name.ToLower() == "execute").ToList();
                     if(methods.Count != 1)
                     {
-                        testBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
+                        testBlockException = new ArgumentException($"There can be one and only one Execute method on a test block. " +
                             $"Please review test block {tb.TestBlockType}.");
                         break;
                     }
@@ -139,6 +138,7 @@ namespace IntelliTect.TestTools.TestFramework
 
                     // Is this the right order of checking? Or should we prioritize test block results first?
                     // Initial thought is that if someone is passing in explicit arguments, they probably have a good reason, so we should start there
+                    // Populate and log all of our Execute arguments
                     if(executeArgs.Length > 0)
                     {
                         if(tb.TestBlockParameters != null && executeParams.Length == tb.TestBlockParameters.Length)
@@ -155,7 +155,7 @@ namespace IntelliTect.TestTools.TestFramework
                                     ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
                                 if(foundResult == null)
                                 {
-                                    testBlockException = new InvalidOperationException("Unable to resolve Execute method arguments");
+                                    testBlockException = new ArgumentException("Unable to resolve Execute method arguments");
                                     break;
                                 }
                                 executeArgs[i] = foundResult;
@@ -174,34 +174,39 @@ namespace IntelliTect.TestTools.TestFramework
 
                     try
                     {
+                        logger.Debug($"Running test block");
                         var result = execute.Invoke(testBlockInstance, executeArgs);
                         if (result != null)
                         {
                             logger.Debug($"Test block {tb.TestBlockType} returned... {GetObjectDataAsJsonString(result)}");
                             testBlockResults.Add(result);
-                            logger.Info($"---Test block {tb.TestBlockType} completed successfully.---");
                         }
 
                     }
-                    catch (TargetInvocationException e)
+                    catch (TargetInvocationException ex)
                     {
-                        logger.Error($"---Test block {tb.TestBlockType} failed with the exception: {e.InnerException}.---");
-                        testBlockException = e.InnerException;
+                        logger.Error($"---Test block {tb.TestBlockType} failed.---");
+                        testBlockException = ex.InnerException;
                         break;
                     }
-                    catch (ArgumentException e)
+                    catch (ArgumentException ex)
                     {
-                        logger.Error($"---Test block {tb.TestBlockType} failed with the exception: {e}.---");
-                        testBlockException = e;
+                        logger.Error($"---Test block {tb.TestBlockType} failed.---");
+                        testBlockException = ex;
                         break;
                     }
+
+                    logger.Info($"---Test block {tb.TestBlockType} completed successfully.---");
                 }
             }
 
             serviceProvider.Dispose();
 
             if (testBlockException != null)
+            {
                 throw testBlockException;
+            }
+                
         }
 
         private string GetObjectDataAsJsonString(object obj)
@@ -214,7 +219,6 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 return $"Unable to serialize to JSON. Mark the relevant property or constructor with the [JsonIgnore] attribute: {e.Message}";
             }
-            
         }
 
         private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
