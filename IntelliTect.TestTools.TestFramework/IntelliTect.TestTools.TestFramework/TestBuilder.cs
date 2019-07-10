@@ -126,7 +126,7 @@ namespace IntelliTect.TestTools.TestFramework
                     List<MethodInfo> methods = tb.TestBlockType.GetMethods().Where(m => m.Name.ToLower() == "execute").ToList();
                     if(methods.Count != 1)
                     {
-                        testBlockException = new ArgumentException($"There can be one and only one Execute method on a test block. " +
+                        testBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
                             $"Please review test block {tb.TestBlockType}.");
                         break;
                     }
@@ -155,22 +155,22 @@ namespace IntelliTect.TestTools.TestFramework
                                     ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
                                 if(foundResult == null)
                                 {
-                                    testBlockException = new ArgumentException("Unable to resolve Execute method arguments");
+                                    testBlockException = new InvalidOperationException("Unable to resolve Execute method arguments");
                                     break;
                                 }
                                 executeArgs[i] = foundResult;
                             }
                         }
 
+                        // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
+                        if (testBlockException != null)
+                            break;
+
                         foreach (var arg in executeArgs)
                         {
                             logger.Debug($"Handing argument into Execute(): {GetObjectDataAsJsonString(arg)}");
                         }
                     }
-
-                    // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
-                    if (testBlockException != null)
-                        break;
 
                     try
                     {
