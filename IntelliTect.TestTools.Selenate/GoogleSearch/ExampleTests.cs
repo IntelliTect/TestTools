@@ -46,7 +46,7 @@ namespace GoogleSearch
         public void Teardown()
         {
             Browser.TakeScreenshot();
-            Browser.Driver.Quit();
+            Browser.Dispose();
         }
 
         private GoogleBrowser Browser { get; set; }
