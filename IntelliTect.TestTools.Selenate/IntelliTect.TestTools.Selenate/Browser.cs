@@ -29,7 +29,7 @@ namespace IntelliTect.TestTools.Selenate
     /// Wrapper around a <see cref="IWebDriver"/> that provides numerous
     /// utilities for interacting with the underlying driver.
     /// </summary>
-    public class Browser
+    public class Browser : IDisposable
     {
         /// <summary>
         /// Initializes a Selenium webdriver in Chrome with some basic settings that work for many websites
@@ -187,6 +187,14 @@ namespace IntelliTect.TestTools.Selenate
                 IWebElement element = FindElement(by);
                 wait.Until(f => Driver.SwitchTo().Frame(element));
             }
+        }
+
+        /// <summary>
+        /// Disposes the current Selenium Driver
+        /// </summary>
+        public void Dispose()
+        {
+            Driver.Dispose();
         }
 
         /// <summary>
