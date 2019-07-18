@@ -194,8 +194,14 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         public void Dispose()
         {
-            Driver.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        /// <summary>
+        /// Has Selenium already been disposed?
+        /// </summary>
+        protected bool Disposed = false;
 
         /// <summary>
         /// Create a new driver for the given browser type.
@@ -259,6 +265,25 @@ namespace IntelliTect.TestTools.Selenate
             driver.Manage().Window.Maximize();
             driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(2);
             return driver;
+        }
+
+        /// <summary>
+        /// Disposes the current Selenium Driver
+        /// </summary>
+        /// <param name="disposing">Did the call come from Dispose()?</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if(Disposed)
+            {
+                return;
+            }
+
+            if(disposing)
+            {
+                Driver?.Dispose();
+            }
+
+            Disposed = true;
         }
     }
 }
