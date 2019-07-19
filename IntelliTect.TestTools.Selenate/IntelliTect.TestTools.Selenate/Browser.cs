@@ -283,7 +283,7 @@ namespace IntelliTect.TestTools.Selenate
                 Driver?.Dispose();
             }
 
-            Disposed = true;
+            _Disposed = true;
         }
     }
 }
