@@ -29,7 +29,7 @@ namespace IntelliTect.TestTools.Selenate
     /// Wrapper around a <see cref="IWebDriver"/> that provides numerous
     /// utilities for interacting with the underlying driver.
     /// </summary>
-    public class Browser
+    public class Browser : IDisposable
     {
         /// <summary>
         /// Initializes a Selenium webdriver in Chrome with some basic settings that work for many websites
@@ -190,6 +190,20 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
+        /// Disposes the current Selenium Driver
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Has Selenium already been disposed?
+        /// </summary>
+        private bool _Disposed;
+
+        /// <summary>
         /// Create a new driver for the given browser type.
         /// </summary>
         /// <param name="browser">The browser to create a driver for.</param>
@@ -251,6 +265,32 @@ namespace IntelliTect.TestTools.Selenate
             driver.Manage().Window.Maximize();
             driver.Manage().Timeouts().PageLoad = TimeSpan.FromMinutes(2);
             return driver;
+        }
+
+        /// <summary>
+        /// Disposes the current Selenium Driver
+        /// </summary>
+        /// <param name="disposing">Did the call come from Dispose()?</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if(_Disposed)
+            {
+                return;
+            }
+
+            if(disposing)
+            {
+                Driver?.Dispose();
+            }
+
+            _Disposed = true;
+        }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        ~Browser()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+        {
+            Dispose(false);
         }
     }
 }
