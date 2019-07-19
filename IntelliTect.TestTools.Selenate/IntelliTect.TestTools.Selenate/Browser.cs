@@ -201,7 +201,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Has Selenium already been disposed?
         /// </summary>
-        protected bool Disposed = false;
+        private bool _Disposed;
 
         /// <summary>
         /// Create a new driver for the given browser type.
