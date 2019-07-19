@@ -197,7 +197,10 @@ namespace IntelliTect.TestTools.Selenate
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
+   ~Browser()
+   {
+      Dispose(false);
+   }
         /// <summary>
         /// Has Selenium already been disposed?
         /// </summary>
