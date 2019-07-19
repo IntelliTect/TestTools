@@ -197,10 +197,7 @@ namespace IntelliTect.TestTools.Selenate
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-   ~Browser()
-   {
-      Dispose(false);
-   }
+
         /// <summary>
         /// Has Selenium already been disposed?
         /// </summary>
@@ -276,7 +273,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="disposing">Did the call come from Dispose()?</param>
         protected virtual void Dispose(bool disposing)
         {
-            if(Disposed)
+            if(_Disposed)
             {
                 return;
             }
@@ -287,6 +284,13 @@ namespace IntelliTect.TestTools.Selenate
             }
 
             _Disposed = true;
+        }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        ~Browser()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+        {
+            Dispose(false);
         }
     }
 }
