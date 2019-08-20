@@ -5,11 +5,15 @@
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <Version>1.2.2</Version>
+    <Version>1.3.0-2019.20.08-alpha</Version>
 
-    <PackageReleaseNotes>Implementing IDisposable in Browser</PackageReleaseNotes>
+    <PackageReleaseNotes>Adding override to Browser.TakeScreenshot to hand in your own preferred path</PackageReleaseNotes>
 
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+
+    <FileVersion>1.3.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
