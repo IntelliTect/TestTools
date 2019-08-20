@@ -131,8 +131,20 @@ namespace IntelliTect.TestTools.Selenate
         public void TakeScreenshot()
         {
             string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
-            Console.WriteLine($"Saving screenshot to location: {fullPath}");
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
+            TakeScreenshot(fullPath);
+        }
+
+        /// <summary>
+        /// Take a screenshot of the browser and save it to the passed in fully qualified path.
+        /// Does NOT validate that the path exists.
+        /// </summary>
+        /// <param name="fullPath">The fully qualified path to save the screenshot to</param>
+        public void TakeScreenshot(string fullPath)
+        {
+            if (string.IsNullOrWhiteSpace(fullPath))
+                fullPath = Path.Combine(Directory.GetCurrentDirectory(), $"{DateTime.Now:yyyy.MM.dd_hh.mm.ss}_screenshot.png");
+            Console.WriteLine($"Saving screenshot to location: {fullPath}");
             if (Driver is ITakesScreenshot takeScreenshot)
             {
                 Screenshot screenshot = takeScreenshot.GetScreenshot();
