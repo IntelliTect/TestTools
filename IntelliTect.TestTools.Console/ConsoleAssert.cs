@@ -17,7 +17,7 @@ namespace IntelliTect.TestTools.Console
         /// <summary>
         /// Performs a unit test on a console-based method. A "view" of
         /// what a user would see in their console is provided as a string,
-        /// where their input (including line-breaks) is surrounded by double
+        /// where their input (including line-breaks) is surrounded by double 
         /// less-than/greater-than signs, like so: "Input please: &lt;&lt;Input&gt;&gt;"
         /// </summary>
         /// <param name="expected">Expected "view" to be seen on the console,
@@ -138,7 +138,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="comparisonOperator"></param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        /// <param name="equivalentOperatorErrorMessage">A textual desciption of the message if the result of <paramref name="action"/> does not match the <paramref name="expected"/> value</param>
+        /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the result of <paramref name="action"/> does not match the <paramref name="expected"/> value</param>
         private static string Expect(
             string expected, Action action, Func<string, string, bool> comparisonOperator,
             bool normalizeLineEndings = true, string equivalentOperatorErrorMessage= "Values are not equal")
@@ -214,7 +214,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Action to be tested</param>
         /// <param name="areEquivalentOperator">delegate for comparing the expected from actual output.</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        /// <param name="equivalentOperatorErrorMessage">A textual desciption of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
+        /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
         private static string Execute(string givenInput, string expectedOutput, Action action,
             Func<string, string, bool> areEquivalentOperator, 
             bool normalizeLineEndings = true, string equivalentOperatorErrorMessage = "Values are not equal"
@@ -238,7 +238,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expectedOutput">The expected value of the output.</param>
         /// <param name="output">The actual value output.</param>
         /// <param name="areEquivalentOperator">The operator used to compare equivalency.</param>
-        /// <param name="equivalentOperatorErrorMessage">A textual desciption of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
+        /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
         private static void AssertExpectation(string expectedOutput, string output, Func<string, string, bool> areEquivalentOperator,
             string equivalentOperatorErrorMessage = null)
         {
