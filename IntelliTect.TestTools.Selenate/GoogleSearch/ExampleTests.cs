@@ -33,7 +33,7 @@ namespace GoogleSearch
                 "Found a specific search result for Selenium - Web Browser Automation when none was expected");
         }
 
-        [TestMethod, Ignore]
+        [TestMethod]
         public void ReturnToHomepage()
         {
             Google.SearchForItem("selenium automation");
