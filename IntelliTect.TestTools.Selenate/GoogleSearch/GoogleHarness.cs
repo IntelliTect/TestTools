@@ -2,6 +2,7 @@
 using IntelliTect.TestTools.Selenate;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace GoogleSearch
 {
@@ -13,7 +14,9 @@ namespace GoogleSearch
         }
 
         public string URL => "https://www.google.com";
-        public IWebElement GoogleSearchButton => Browser.FindElement(By.Name("btnK"));
+
+        // Below selector works as of 9/16/2019. Monitor to see if the first div selector changes when the doodle changes
+        public IWebElement GoogleSearchButton => Browser.FindElement(By.CssSelector("div[class='FPdoLc VlcLAe'] input[aria-label='Google Search']"));
         public IWebElement SearchInput => Browser.FindElement(By.CssSelector("input[title='Search']"));
         public IWebElement SearchResultsDiv =>
                 Browser.FindElement(By.CssSelector("div[data-async-context^='query:']"));
