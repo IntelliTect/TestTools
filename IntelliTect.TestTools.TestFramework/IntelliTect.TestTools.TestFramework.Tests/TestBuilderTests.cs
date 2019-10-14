@@ -62,7 +62,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             TestBuilder builder = new TestBuilder();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
 
-            Assert.Throws<ArgumentException>(() => builder.ExecuteTestCase());
+            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
         }
 
         [Fact]
@@ -178,7 +178,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>();
 
-            Assert.Throws<ArgumentException>(() => builder.ExecuteTestCase());
+            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
         }
     }
 

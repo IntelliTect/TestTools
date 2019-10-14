@@ -9,6 +9,17 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
+        public TestBuilder()
+        {
+            TestCaseName = "NoNameGiven";
+        }
+
+        public TestBuilder(string testCaseName)
+        {
+            // Probably eventually need to add a Build method and return an object that stores this info
+            TestCaseName = testCaseName;
+        }
+
         /// <summary>
         /// Adds a test block (some related group of test actions) to the list of blocks to run for any given test case
         /// </summary>
@@ -76,14 +87,16 @@ namespace IntelliTect.TestTools.TestFramework
             #endregion
 
             var logger = serviceProvider.GetService<ILogger>() ?? new Log();
+            logger.Info(TestCaseName, "NA", "Starting test case.");
             Exception testBlockException = null;
             using (var scope = serviceProvider.CreateScope())
             {
                 HashSet<object> testBlockResults = new HashSet<object>();
                 foreach (var tb in TestBlocksAndParams)
                 {
-                    logger.Info($"---{tb.TestBlockType}---");
-                    logger.Debug($"Fetching dependencies.");
+                    logger.Info(TestCaseName, tb.TestBlockType.ToString(), "Starting test block.");
+                    logger.Debug(TestCaseName, tb.TestBlockType.ToString(), "Fetching test block dependencies.");
+
                     object testBlockInstance = null;
 
                     try
@@ -93,7 +106,7 @@ namespace IntelliTect.TestTools.TestFramework
                     catch(InvalidOperationException ex)
                     {
                         // Probably worth moving these logs outside of the foreach so we don't have to duplicate the message
-                        logger.Error($"Unable to find the test block instance OR all dependencies necessary for test block {tb.TestBlockType}.");
+                        logger.Error(TestCaseName, tb.TestBlockType.ToString(), "Unable to find the test block instance OR all dependencies necessary.");
                         testBlockException = ex;
                         break;
                     }
@@ -104,7 +117,7 @@ namespace IntelliTect.TestTools.TestFramework
                     {
                         if (!prop.CanWrite)
                         {
-                            logger.Debug($"Unable to set property {prop}. No setter found.");
+                            logger.Debug(TestCaseName, tb.TestBlockType.ToString(), $"Unable to set property {prop}. No setter found.");
                             continue;
                         }
                         object propertyValue;
@@ -114,14 +127,17 @@ namespace IntelliTect.TestTools.TestFramework
                         }
                         catch(InvalidOperationException ex)
                         {
-                            logger.Error($"Unable to find the test block instance OR all dependencies necessary for test block {tb.TestBlockType}.");
+                            logger.Error(TestCaseName, tb.TestBlockType.ToString(), $"Unable to find all properties necessary.");
                             testBlockException = ex;
                             break;
                         }
                         
                         prop.SetValue(testBlockInstance, propertyValue);
-                        logger.Debug($"Populated property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
+                        logger.Debug(TestCaseName, tb.TestBlockType.ToString(), $"Populated property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
                     }
+
+                    if (testBlockException != null)
+                        break;
 
                     List<MethodInfo> methods = tb.TestBlockType.GetMethods().Where(m => m.Name.ToLower() == "execute").ToList();
                     if(methods.Count != 1)
@@ -169,35 +185,35 @@ namespace IntelliTect.TestTools.TestFramework
 
                         foreach (var arg in executeArgs)
                         {
-                            logger.Debug($"Handing argument into Execute(): {GetObjectDataAsJsonString(arg)}");
+                            logger.TestBlockInput(TestCaseName, tb.TestBlockType.ToString(), $"Input parameters: {GetObjectDataAsJsonString(arg)}");
                         }
                     }
 
                     try
                     {
-                        logger.Debug($"Running test block");
+                        logger.Debug(TestCaseName, tb.TestBlockType.ToString(), $"Executing test block");
                         var result = execute.Invoke(testBlockInstance, executeArgs);
                         if (result != null)
                         {
-                            logger.Debug($"Test block {tb.TestBlockType} returned... {GetObjectDataAsJsonString(result)}");
+                            logger.TestBlockOutput(TestCaseName, tb.TestBlockType.ToString(), $"Output parameters: {GetObjectDataAsJsonString(result)}");
                             testBlockResults.Add(result);
                         }
 
                     }
                     catch (TargetInvocationException ex)
                     {
-                        logger.Error($"---Test block {tb.TestBlockType} failed.---");
+                        logger.Error(TestCaseName, tb.TestBlockType.ToString(), $"---Test block failed.---");
                         testBlockException = ex.InnerException;
                         break;
                     }
                     catch (ArgumentException ex)
                     {
-                        logger.Error($"---Test block {tb.TestBlockType} failed.---");
+                        logger.Error(TestCaseName, tb.TestBlockType.ToString(), $"---Test block failed.---");
                         testBlockException = ex;
                         break;
                     }
 
-                    logger.Info($"---Test block {tb.TestBlockType} completed successfully.---");
+                    logger.Info(TestCaseName, tb.TestBlockType.ToString(), $"---Test block completed successfully.---");
                 }
             }
 
@@ -224,5 +240,6 @@ namespace IntelliTect.TestTools.TestFramework
 
         private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private IServiceCollection Services { get; } = new ServiceCollection();
+        private string TestCaseName { get; set; }
     }
 }
