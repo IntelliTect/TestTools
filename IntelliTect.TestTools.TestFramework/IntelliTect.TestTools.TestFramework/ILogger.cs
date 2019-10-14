@@ -2,6 +2,8 @@
 {
     public interface ILogger
     {
+        // Probably need to handle this differently
+        // Maybe a constructor sets the test case name?
         void Debug(string testCase, string testBlock, string message);
         void Info(string testCase, string testBlock, string message);
         void Error(string testCase, string testBlock, string message);
