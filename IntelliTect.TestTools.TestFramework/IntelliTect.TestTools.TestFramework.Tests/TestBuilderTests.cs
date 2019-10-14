@@ -180,6 +180,17 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 
             Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
         }
+
+        [Fact]
+        public void AddLoggerReturnsCorrectLogger()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddLogger<ExampleLogger>()
+                .AddTestBlock<ExampleLoggerUsage>();
+
+            Assert.Throws<NotImplementedException>(() => builder.ExecuteTestCase());
+        }
     }
 
     public class ExampleTestBlockWithExecuteArg : ITestBlock
@@ -312,6 +323,42 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         public void Execute(string input)
         {
             Assert.Equal("Tetsing", input);
+        }
+    }
+
+    public class ExampleLoggerUsage : ITestBlock
+    {
+        public void Execute(ILogger log)
+        {
+            log.Debug("", "ExampleLoggerUsage", "This should throw");
+        }
+    }
+
+    public class ExampleLogger : ILogger
+    {
+        public void Debug(string testCase, string testBlock, string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Error(string testCase, string testBlock, string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Info(string testCase, string testBlock, string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void TestBlockInput(string testCase, string testBlock, string input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void TestBlockOutput(string testCase, string testBlock, string output)
+        {
+            throw new NotImplementedException();
         }
     }
 }

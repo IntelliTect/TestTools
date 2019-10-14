@@ -80,6 +80,14 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        // Are there other cases where we'll need to add something at this level?
+        // If so, this shouldn't be called "AddLogger".
+        public TestBuilder AddLogger<T>()
+        {
+            Services.AddSingleton(typeof(ILogger), typeof(T));
+            return this;
+        }
+
         public void ExecuteTestCase()
         {
             #region move to a Build() method and validate all dependencies are satisfied?
