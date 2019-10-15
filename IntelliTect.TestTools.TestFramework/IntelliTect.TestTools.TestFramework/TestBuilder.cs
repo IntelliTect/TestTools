@@ -103,58 +103,64 @@ namespace IntelliTect.TestTools.TestFramework
             var serviceProvider = Services.BuildServiceProvider();
             #endregion
 
-            var logger = serviceProvider.GetService<ILogger>() ?? new Log();
-            logger.Info(TestCaseName, "NA", "Starting test case.");
+            
             //Exception testBlockException = null;
-            using (var scope = serviceProvider.CreateScope())
+            using (var testCaseScope = serviceProvider.CreateScope())
             {
-                HashSet<object> testBlockResults = new HashSet<object>();
-                foreach (var tb in TestBlocksAndParams)
+                var logger = testCaseScope.ServiceProvider.GetService<ILogger>() ?? new Log();
+                logger.Info(TestCaseName, "NA", "Starting test case.");
+
+                using (var testBlockScope = serviceProvider.CreateScope())
                 {
-                    // Might be more concise to have these as out method parameters instead of if statements after every one
-                    var testBlockInstance = GetTestBlock(scope, tb.TestBlockType, logger);
-                    if (TestBlockException != null) break;
+                    HashSet<object> testBlockResults = new HashSet<object>();
+                    foreach (var tb in TestBlocksAndParams)
+                    {
+                        // Might be more concise to have these as out method parameters instead of if statements after every one
+                        var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType, logger);
+                        if (TestBlockException != null) break;
 
-                    SetTestBlockProperties(scope, ref testBlockInstance, logger);
-                    if (TestBlockException != null) break;
+                        SetTestBlockProperties(testBlockScope, ref testBlockInstance, logger);
+                        if (TestBlockException != null) break;
 
-                    MethodInfo execute = GetExecuteMethod(scope, testBlockInstance);
-                    if (TestBlockException != null) break;
+                        MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
+                        if (TestBlockException != null) break;
 
-                    var executeArgs = GatherTestBlockArguments(scope, execute, tb, logger);
-                    if (TestBlockException != null) break;
+                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, tb, logger);
+                        if (TestBlockException != null) break;
 
-                    RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
-                    if (TestBlockException != null) break;
+                        RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
+                        if (TestBlockException != null) break;
+                    }
+
+                    // Need a much better way to handle Finally exceptions...
+                    Exception tempException = TestBlockException;
+                    // Finally blocks here
+                    // Extract loop above since it's basically the same
+                    foreach (var fb in FinallyBlocksAndParams)
+                    {
+                        TestBlockException = null;
+                        // Might be more concise to have these as out method parameters instead of if statements after every one
+                        // Also these specific ones should not be overwriting TestBlockException
+                        var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType, logger);
+                        //if (TestBlockException != null) break;
+
+                        SetTestBlockProperties(testBlockScope, ref testBlockInstance, logger);
+                        //if (TestBlockException != null) break;
+
+                        MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
+                        //if (TestBlockException != null) break;
+
+                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb, logger);
+                        //if (TestBlockException != null) break;
+
+                        RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
+                        //if (TestBlockException != null) break;
+
+                    }
+                    TestBlockException = tempException;
                 }
-
-                // Need a much better way to handle Finally exceptions...
-                Exception tempException = TestBlockException;
-                // Finally blocks here
-                // Extract loop above since it's basically the same
-                foreach (var fb in FinallyBlocksAndParams)
-                {
-                    TestBlockException = null;
-                    // Might be more concise to have these as out method parameters instead of if statements after every one
-                    // Also these specific ones should not be overwriting TestBlockException
-                    var testBlockInstance = GetTestBlock(scope, fb.TestBlockType, logger);
-                    //if (TestBlockException != null) break;
-
-                    SetTestBlockProperties(scope, ref testBlockInstance, logger);
-                    //if (TestBlockException != null) break;
-
-                    MethodInfo execute = GetExecuteMethod(scope, testBlockInstance);
-                    //if (TestBlockException != null) break;
-
-                    var executeArgs = GatherTestBlockArguments(scope, execute, fb, logger);
-                    //if (TestBlockException != null) break;
-
-                    RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
-                    //if (TestBlockException != null) break;
-
-                }
-                TestBlockException = tempException;
             }
+            
 
             serviceProvider.Dispose();
 
