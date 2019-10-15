@@ -46,6 +46,13 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        public TestBuilder AddFinallyBlock<T>(params object[] testBlockArgs) where T : ITestBlock
+        {
+            FinallyBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
+            Services.AddTransient(typeof(T));
+            return this;
+        }
+
         /// <summary>
         /// Adds a service as a factory a container that is used to fulfill TestBlock dependencies
         /// </summary>
@@ -82,7 +89,9 @@ namespace IntelliTect.TestTools.TestFramework
 
         // Are there other cases where we'll need to add something at this level?
         // If so, this shouldn't be called "AddLogger".
-        public TestBuilder AddLogger<T>()
+        // Might need to make this scoped. It's behaving oddly when running tests in parallel
+        // But only on the "Starting test case" call
+        public TestBuilder AddLogger<T>() where T : ILogger
         {
             Services.AddSingleton(typeof(ILogger), typeof(T));
             return this;
@@ -102,60 +111,20 @@ namespace IntelliTect.TestTools.TestFramework
                 HashSet<object> testBlockResults = new HashSet<object>();
                 foreach (var tb in TestBlocksAndParams)
                 {
-                    logger.Info(TestCaseName, tb.TestBlockType.ToString(), "Starting test block.");
-                    logger.Debug(TestCaseName, tb.TestBlockType.ToString(), "Fetching test block dependencies.");
+                    var testBlockInstance = GetTestBlock(scope, tb.TestBlockType, logger);
+                    if (TestBlockException != null) break;
 
-                    object testBlockInstance = null;
+                    SetTestBlockProperties(scope, ref testBlockInstance, logger);
+                    if (TestBlockException != null) break;
 
-                    try
-                    {
-                        testBlockInstance = scope.ServiceProvider.GetRequiredService(tb.TestBlockType);
-                    }
-                    catch(InvalidOperationException ex)
-                    {
-                        // Probably worth moving these logs outside of the foreach so we don't have to duplicate the message
-                        logger.Error(TestCaseName, tb.TestBlockType.ToString(), "Unable to find the test block instance OR all dependencies necessary.");
-                        testBlockException = ex;
-                        break;
-                    }
+                    MethodInfo execute = GetExecuteMethod(scope, testBlockInstance);
+                    if (TestBlockException != null) break;
 
-                    // Populate and log all of our properties
-                    var properties = testBlockInstance.GetType().GetProperties();
-                    foreach (var prop in properties)
-                    {
-                        if (!prop.CanWrite)
-                        {
-                            logger.Debug(TestCaseName, tb.TestBlockType.ToString(), $"Unable to set property {prop}. No setter found.");
-                            continue;
-                        }
-                        object propertyValue;
-                        try
-                        {
-                            propertyValue = scope.ServiceProvider.GetRequiredService(prop.PropertyType);
-                        }
-                        catch(InvalidOperationException ex)
-                        {
-                            logger.Error(TestCaseName, tb.TestBlockType.ToString(), $"Unable to find all properties necessary.");
-                            testBlockException = ex;
-                            break;
-                        }
-                        
-                        prop.SetValue(testBlockInstance, propertyValue);
-                        logger.Debug(TestCaseName, tb.TestBlockType.ToString(), $"Populated property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
-                    }
+                    var executeArgs1 = GatherTestBlockArguments(scope, tb.TestBlockType, testBlockInstance, logger);
 
-                    if (testBlockException != null)
-                        break;
 
-                    List<MethodInfo> methods = tb.TestBlockType.GetMethods().Where(m => m.Name.ToLower() == "execute").ToList();
-                    if(methods.Count != 1)
-                    {
-                        testBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
-                            $"Please review test block {tb.TestBlockType}.");
-                        break;
-                    }
 
-                    MethodInfo execute = methods[0];
+                    
                     var executeParams = execute.GetParameters();
 
                     object[] executeArgs = new object[executeParams.Length];
@@ -223,6 +192,13 @@ namespace IntelliTect.TestTools.TestFramework
 
                     logger.Info(TestCaseName, tb.TestBlockType.ToString(), $"---Test block completed successfully.---");
                 }
+
+                // Finally blocks here
+                // Extract loop above since it's basically the same
+                foreach(var fb in FinallyBlocksAndParams)
+                {
+
+                }
             }
 
             serviceProvider.Dispose();
@@ -246,8 +222,79 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
+        private object GetTestBlock(IServiceScope scope, Type tbType, ILogger logger)
+        {
+            logger.Info(TestCaseName, tbType.ToString(), "Starting test block.");
+
+            try
+            {
+                return scope.ServiceProvider.GetRequiredService(tbType);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Probably worth moving these logs outside of the foreach so we don't have to duplicate the message
+                logger.Error(TestCaseName, tbType.ToString(), "Unable to find the test block instance OR all dependencies necessary.");
+                TestBlockException = ex;
+                return null;
+            }
+
+        }
+
+        private void SetTestBlockProperties(IServiceScope scope, ref object testBlockInstance, ILogger logger)
+        {
+            // Populate and log all of our properties
+            var properties = testBlockInstance.GetType().GetProperties();
+            foreach (var prop in properties)
+            {
+                if (!prop.CanWrite)
+                {
+                    logger.Debug(TestCaseName, testBlockInstance.GetType().ToString(), $"Unable to set property {prop}. No setter found.");
+                    continue;
+                }
+                object propertyValue;
+                try
+                {
+                    propertyValue = scope.ServiceProvider.GetRequiredService(prop.PropertyType);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    logger.Error(TestCaseName, testBlockInstance.GetType().ToString(), $"Unable to find all properties necessary.");
+                    TestBlockException = ex;
+                    break;
+                }
+
+                prop.SetValue(testBlockInstance, propertyValue);
+                logger.Debug(TestCaseName, testBlockInstance.GetType().ToString(), $"Populated property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
+            }
+        }
+
+        private MethodInfo GetExecuteMethod(IServiceScope scope, object testBlockInstance)
+        {
+            List<MethodInfo> methods = testBlockInstance.GetType().GetMethods().Where(m => m.Name.ToLower() == "execute").ToList();
+            if (methods.Count != 1)
+            {
+                TestBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
+                    $"Please review test block {testBlockInstance.GetType().ToString()}.");
+                return null;
+            }
+
+            return methods[0];
+        }
+
+        private object[] GatherTestBlockArguments(IServiceScope scope, Type tbType, object testBlockInstance, ILogger logger)
+        {
+            return null;
+        }
+
+        private void RunTestBlocks()
+        {
+
+        }
+
         private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
+        private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private IServiceCollection Services { get; } = new ServiceCollection();
         private string TestCaseName { get; set; }
+        private Exception TestBlockException { get; set; }
     }
 }

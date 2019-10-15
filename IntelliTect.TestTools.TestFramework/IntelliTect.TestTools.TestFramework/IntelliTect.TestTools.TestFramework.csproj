@@ -6,6 +6,7 @@
     <PackageReleaseNotes>Add logging override
 Fix bug in TestBuilder causing it to not throw when expected</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Mike Curn</Authors>
   </PropertyGroup>
 
   <ItemGroup>
