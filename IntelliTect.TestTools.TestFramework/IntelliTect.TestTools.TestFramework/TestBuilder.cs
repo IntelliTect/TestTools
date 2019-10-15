@@ -83,6 +83,7 @@ namespace IntelliTect.TestTools.TestFramework
         /// <returns>This</returns>
         public TestBuilder AddDependencyInstance(object objToAdd)
         {
+            // Need to add some testing around this to see if it behaves in a similarly odd fashion as AddLogger when running tests in parallel
             Services.AddSingleton(objToAdd.GetType(), objToAdd);
             return this;
         }
@@ -134,11 +135,9 @@ namespace IntelliTect.TestTools.TestFramework
 
                     // Need a much better way to handle Finally exceptions...
                     Exception tempException = TestBlockException;
-                    // Finally blocks here
-                    // Extract loop above since it's basically the same
+                    // Extract loop above since it's basically the same for finally blocks?
                     foreach (var fb in FinallyBlocksAndParams)
                     {
-                        TestBlockException = null;
                         // Might be more concise to have these as out method parameters instead of if statements after every one
                         // Also these specific ones should not be overwriting TestBlockException
                         var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType, logger);
