@@ -111,6 +111,7 @@ namespace IntelliTect.TestTools.TestFramework
                 HashSet<object> testBlockResults = new HashSet<object>();
                 foreach (var tb in TestBlocksAndParams)
                 {
+                    // Might be more concise to have these as out method parameters instead of if statements after every one
                     var testBlockInstance = GetTestBlock(scope, tb.TestBlockType, logger);
                     if (TestBlockException != null) break;
 
@@ -120,85 +121,39 @@ namespace IntelliTect.TestTools.TestFramework
                     MethodInfo execute = GetExecuteMethod(scope, testBlockInstance);
                     if (TestBlockException != null) break;
 
-                    var executeArgs1 = GatherTestBlockArguments(scope, tb.TestBlockType, testBlockInstance, logger);
+                    var executeArgs = GatherTestBlockArguments(scope, execute, tb, logger);
+                    if (TestBlockException != null) break;
 
-
-
-                    
-                    var executeParams = execute.GetParameters();
-
-                    object[] executeArgs = new object[executeParams.Length];
-
-                    // Is this the right order of checking? Or should we prioritize test block results first?
-                    // Initial thought is that if someone is passing in explicit arguments, they probably have a good reason, so we should start there
-                    // Populate and log all of our Execute arguments
-                    if(executeArgs.Length > 0)
-                    {
-                        if(tb.TestBlockParameters != null && executeParams.Length == tb.TestBlockParameters.Length)
-                        {
-                            // Eventually need to add more validation around making sure the types match here.
-                            executeArgs = tb.TestBlockParameters;
-                        }
-                        else
-                        {
-                            for (int i = 0; i < executeArgs.Length; i++)
-                            {
-                                // Might be worth changing this to GetRequiredService and wrapping in a try/catch instead of checking if foundResult is null
-                                object foundResult =
-                                    testBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
-                                    ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
-                                if(foundResult == null)
-                                {
-                                    TestBlockException = new InvalidOperationException("Unable to resolve Execute method arguments");
-                                    break;
-                                }
-                                executeArgs[i] = foundResult;
-                            }
-                        }
-
-                        // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
-                        if (TestBlockException != null)
-                            break;
-
-                        foreach (var arg in executeArgs)
-                        {
-                            logger.TestBlockInput(TestCaseName, tb.TestBlockType.ToString(), $"Input parameters: {GetObjectDataAsJsonString(arg)}");
-                        }
-                    }
-
-                    try
-                    {
-                        logger.Debug(TestCaseName, tb.TestBlockType.ToString(), $"Executing test block");
-                        var result = execute.Invoke(testBlockInstance, executeArgs);
-                        if (result != null)
-                        {
-                            logger.TestBlockOutput(TestCaseName, tb.TestBlockType.ToString(), $"Output parameters: {GetObjectDataAsJsonString(result)}");
-                            testBlockResults.Add(result);
-                        }
-
-                    }
-                    catch (TargetInvocationException ex)
-                    {
-                        logger.Error(TestCaseName, tb.TestBlockType.ToString(), $"---Test block failed.---");
-                        TestBlockException = ex.InnerException;
-                        break;
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        logger.Error(TestCaseName, tb.TestBlockType.ToString(), $"---Test block failed.---");
-                        TestBlockException = ex;
-                        break;
-                    }
-
-                    logger.Info(TestCaseName, tb.TestBlockType.ToString(), $"---Test block completed successfully.---");
+                    RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
+                    if (TestBlockException != null) break;
                 }
 
+                // Need a much better way to handle Finally exceptions...
+                Exception tempException = TestBlockException;
                 // Finally blocks here
                 // Extract loop above since it's basically the same
-                foreach(var fb in FinallyBlocksAndParams)
+                foreach (var fb in FinallyBlocksAndParams)
                 {
+                    TestBlockException = null;
+                    // Might be more concise to have these as out method parameters instead of if statements after every one
+                    // Also these specific ones should not be overwriting TestBlockException
+                    var testBlockInstance = GetTestBlock(scope, fb.TestBlockType, logger);
+                    //if (TestBlockException != null) break;
+
+                    SetTestBlockProperties(scope, ref testBlockInstance, logger);
+                    //if (TestBlockException != null) break;
+
+                    MethodInfo execute = GetExecuteMethod(scope, testBlockInstance);
+                    //if (TestBlockException != null) break;
+
+                    var executeArgs = GatherTestBlockArguments(scope, execute, fb, logger);
+                    //if (TestBlockException != null) break;
+
+                    RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
+                    //if (TestBlockException != null) break;
 
                 }
+                TestBlockException = tempException;
             }
 
             serviceProvider.Dispose();
@@ -281,19 +236,90 @@ namespace IntelliTect.TestTools.TestFramework
             return methods[0];
         }
 
-        private object[] GatherTestBlockArguments(IServiceScope scope, Type tbType, object testBlockInstance, ILogger logger)
+        private object[] GatherTestBlockArguments(IServiceScope scope, MethodInfo execute, (Type TestBlockType, object[] TestBlockParameters) tb, ILogger logger)
         {
-            return null;
+            var executeParams = execute.GetParameters();
+
+            object[] executeArgs = new object[executeParams.Length];
+
+            // Is this the right order of checking? Or should we prioritize test block results first?
+            // Initial thought is that if someone is passing in explicit arguments, they probably have a good reason, so we should start there
+            // Populate and log all of our Execute arguments
+            if (executeArgs.Length > 0)
+            {
+                if (tb.TestBlockParameters != null && executeParams.Length == tb.TestBlockParameters.Length)
+                {
+                    // Eventually need to add more validation around making sure the types match here.
+                    executeArgs = tb.TestBlockParameters;
+                }
+                else
+                {
+                    for (int i = 0; i < executeArgs.Length; i++)
+                    {
+                        // Might be worth changing this to GetRequiredService and wrapping in a try/catch instead of checking if foundResult is null
+                        object foundResult =
+                            TestBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
+                            ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
+                        if (foundResult == null)
+                        {
+                            TestBlockException = new InvalidOperationException("Unable to resolve Execute method arguments");
+                            break;
+                        }
+                        executeArgs[i] = foundResult;
+                    }
+                }
+
+                // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
+                if (TestBlockException != null)
+                    return null;
+
+                foreach (var arg in executeArgs)
+                {
+                    logger.TestBlockInput(TestCaseName, tb.TestBlockType.ToString(), $"Input parameters: {GetObjectDataAsJsonString(arg)}");
+                }
+            }
+            return executeArgs;
         }
 
-        private void RunTestBlocks()
+        private void RunTestBlocks(object testBlockInstance, MethodInfo execute, object[] executeArgs, ILogger logger)
         {
+            try
+            {
+                logger.Debug(TestCaseName, testBlockInstance.GetType().ToString(), $"Executing test block");
+                var result = execute.Invoke(testBlockInstance, executeArgs);
+                if (result != null)
+                {
+                    logger.TestBlockOutput(TestCaseName, testBlockInstance.GetType().ToString(), $"Output parameters: {GetObjectDataAsJsonString(result)}");
+                    TestBlockResults.Add(result);
+                }
 
+            }
+            catch (TargetInvocationException ex)
+            {
+                logger.Error(TestCaseName, testBlockInstance.GetType().ToString(), $"---Test block failed.---");
+                TestBlockException = ex.InnerException;
+                return;
+            }
+            catch (ArgumentException ex)
+            {
+                logger.Error(TestCaseName, testBlockInstance.GetType().ToString(), $"---Test block failed.---");
+                TestBlockException = ex;
+                return;
+            }
+            catch(TargetParameterCountException ex)
+            {
+                logger.Error(TestCaseName, testBlockInstance.GetType().ToString(), $"---Test block failed.---");
+                TestBlockException = ex;
+                return;
+            }
+
+            logger.Info(TestCaseName, testBlockInstance.GetType().ToString(), $"---Test block completed successfully.---");
         }
 
         private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private IServiceCollection Services { get; } = new ServiceCollection();
+        private HashSet<object> TestBlockResults = new HashSet<object>();
         private string TestCaseName { get; set; }
         private Exception TestBlockException { get; set; }
     }

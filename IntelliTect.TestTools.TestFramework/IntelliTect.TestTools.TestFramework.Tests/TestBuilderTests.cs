@@ -74,7 +74,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             Assert.Throws<ArgumentException>(() => builder.ExecuteTestCase());
         }
 
-        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
+        // This test probably isn't necessary. This is MS DI out-of-the-box functionality
         [Fact]
         public void FetchByServiceForConstructor()
         {
@@ -190,6 +190,42 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddTestBlock<ExampleLoggerUsage>();
 
             Assert.Throws<NotImplementedException>(() => builder.ExecuteTestCase());
+        }
+
+        [Fact]
+        public void AddFinallyBlockExecutesCorrectly()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddTestBlock<ExampleTestBlockWithReturn>(false)
+                .AddFinallyBlock<ExampleFinallyBlock>()
+                .ExecuteTestCase();
+        }
+
+        // Actually... this probably shouldn't throw since it's a "finally" block meant to clean stuff up
+        // Figure out the right behavior and fix test before moving further with finally blocks
+        [Fact]
+        public void AddFinallyBlockExecutesCorrectlyWithNegativeCondition()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddTestBlock<ExampleTestBlockWithReturn>(true)
+                .AddFinallyBlock<ExampleFinallyBlock>();
+
+            Assert.Throws<TrueException>(() => builder.ExecuteTestCase());
+        }
+
+        // How do we verify this is working correctly?
+        [Fact]
+        public void AddFinallyBlockExecutesAfterException()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyInstance(true)
+                .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>()
+                .AddFinallyBlock<ExampleFinallyBlock>();
+
+            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
         }
     }
 
@@ -331,6 +367,22 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         public void Execute(ILogger log)
         {
             log.Debug("", "ExampleLoggerUsage", "This should throw");
+        }
+    }
+
+    public class ExampleTestBlockWithReturn : ITestBlock
+    {
+        public bool Execute(bool valueToReturn)
+        {
+            return !valueToReturn;
+        }
+    }
+
+    public class ExampleFinallyBlock : ITestBlock
+    {
+        public void Execute(bool result)
+        {
+            Assert.True(result, "Finally block did not receive correct input");
         }
     }
 
