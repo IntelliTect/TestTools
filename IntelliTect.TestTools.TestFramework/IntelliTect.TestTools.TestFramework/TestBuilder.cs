@@ -105,7 +105,7 @@ namespace IntelliTect.TestTools.TestFramework
 
             var logger = serviceProvider.GetService<ILogger>() ?? new Log();
             logger.Info(TestCaseName, "NA", "Starting test case.");
-            Exception testBlockException = null;
+            //Exception testBlockException = null;
             using (var scope = serviceProvider.CreateScope())
             {
                 HashSet<object> testBlockResults = new HashSet<object>();
@@ -149,7 +149,7 @@ namespace IntelliTect.TestTools.TestFramework
                                     ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
                                 if(foundResult == null)
                                 {
-                                    testBlockException = new InvalidOperationException("Unable to resolve Execute method arguments");
+                                    TestBlockException = new InvalidOperationException("Unable to resolve Execute method arguments");
                                     break;
                                 }
                                 executeArgs[i] = foundResult;
@@ -157,7 +157,7 @@ namespace IntelliTect.TestTools.TestFramework
                         }
 
                         // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
-                        if (testBlockException != null)
+                        if (TestBlockException != null)
                             break;
 
                         foreach (var arg in executeArgs)
@@ -180,13 +180,13 @@ namespace IntelliTect.TestTools.TestFramework
                     catch (TargetInvocationException ex)
                     {
                         logger.Error(TestCaseName, tb.TestBlockType.ToString(), $"---Test block failed.---");
-                        testBlockException = ex.InnerException;
+                        TestBlockException = ex.InnerException;
                         break;
                     }
                     catch (ArgumentException ex)
                     {
                         logger.Error(TestCaseName, tb.TestBlockType.ToString(), $"---Test block failed.---");
-                        testBlockException = ex;
+                        TestBlockException = ex;
                         break;
                     }
 
@@ -203,9 +203,9 @@ namespace IntelliTect.TestTools.TestFramework
 
             serviceProvider.Dispose();
 
-            if (testBlockException != null)
+            if (TestBlockException != null)
             {
-                throw testBlockException;
+                throw TestBlockException;
             }
                 
         }
