@@ -414,7 +414,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public void Execute(ILogger log)
         {
-            log.Debug("", "ExampleLoggerUsage", "This should throw");
+            log.Debug("This should throw");
         }
     }
 
