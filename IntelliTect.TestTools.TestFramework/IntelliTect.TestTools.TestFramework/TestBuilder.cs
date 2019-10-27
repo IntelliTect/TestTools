@@ -144,19 +144,14 @@ namespace IntelliTect.TestTools.TestFramework
                         // Might be more concise to have these as out method parameters instead of if statements after every one
                         // Also these specific ones should not be overwriting TestBlockException
                         var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType, logger);
-                        //if (TestBlockException != null) break;
 
                         SetTestBlockProperties(testBlockScope, ref testBlockInstance, logger);
-                        //if (TestBlockException != null) break;
 
                         MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
-                        //if (TestBlockException != null) break;
 
                         var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb, logger);
-                        //if (TestBlockException != null) break;
 
                         RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
-                        //if (TestBlockException != null) break;
 
                     }
                     TestBlockException = tempException;
@@ -168,7 +163,9 @@ namespace IntelliTect.TestTools.TestFramework
 
             if (TestBlockException != null)
             {
-                throw TestBlockException;
+                throw new InvalidOperationException("Test case failed.", TestBlockException);
+                //throw TestBlockException;
+
             }
                 
         }
@@ -211,7 +208,7 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 if (!prop.CanWrite)
                 {
-                    logger?.Debug(TestCaseName, testBlockInstance.GetType().ToString(), $"Unable to set property {prop}. No setter found.");
+                    logger?.Debug(TestCaseName, testBlockInstance.GetType().ToString(), $"Skipping property {prop}. No setter found.");
                     continue;
                 }
                 object propertyValue;

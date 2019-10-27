@@ -182,6 +182,17 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
 
         [Fact]
+        public void TestBlockThatFailsThrowsCorrectException()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Bad Value")
+                .ExecuteTestCase();
+
+            //Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
+        }
+
+        [Fact]
         public void AddLoggerReturnsCorrectLogger()
         {
             TestBuilder builder = new TestBuilder();
