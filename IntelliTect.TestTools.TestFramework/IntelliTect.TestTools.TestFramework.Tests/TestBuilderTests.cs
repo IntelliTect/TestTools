@@ -62,7 +62,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             TestBuilder builder = new TestBuilder();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
 
-            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
+            Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             TestBuilder builder = new TestBuilder();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1234);
 
-            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
+            Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
         }
 
         // This test probably isn't necessary. This is MS DI out-of-the-box functionality
@@ -178,7 +178,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>();
 
-            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
+            Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
         }
 
         [Fact]
@@ -192,7 +192,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             {
                 builder.ExecuteTestCase();
             }
-            catch (InvalidOperationException ex)
+            catch (TestCaseException ex)
             {
                 Assert.Equal(typeof(EqualException), ex.InnerException.GetType());
             }
@@ -241,7 +241,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>()
                 .AddFinallyBlock<ExampleFinallyBlock>();
 
-            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
+            Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
         }
 
         [Fact]
@@ -260,6 +260,17 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             TestBuilder builder = new TestBuilder();
             builder
                 .RemoveLogger()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void AddingLoggerThanRemovingDoesNotThrow()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddLogger<ExampleLogger>()
                 .RemoveLogger()
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
                 .ExecuteTestCase();
@@ -425,27 +436,30 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 
     public class ExampleLogger : ILogger
     {
-        public void Debug(string testCase, string testBlock, string message)
+        public string TestCaseKey { get; set; }
+        public string CurrentTestBlock { get; set; }
+
+        public void Debug(string message)
         {
             throw new NotImplementedException();
         }
 
-        public void Error(string testCase, string testBlock, string message)
+        public void Error(string message)
         {
             throw new NotImplementedException();
         }
 
-        public void Info(string testCase, string testBlock, string message)
+        public void Info(string message)
         {
             throw new NotImplementedException();
         }
 
-        public void TestBlockInput(string testCase, string testBlock, string input)
+        public void TestBlockInput(string input)
         {
             throw new NotImplementedException();
         }
 
-        public void TestBlockOutput(string testCase, string testBlock, string output)
+        public void TestBlockOutput(string output)
         {
             throw new NotImplementedException();
         }

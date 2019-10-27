@@ -4,10 +4,12 @@
     {
         // Probably need to handle this differently
         // Maybe a constructor sets the test case name?
-        void Debug(string testCase, string testBlock, string message);
-        void Info(string testCase, string testBlock, string message);
-        void Error(string testCase, string testBlock, string message);
-        void TestBlockInput(string testCase, string testBlock, string input);
-        void TestBlockOutput(string testCase, string testBlock, string output);
+        string TestCaseKey { get; set; }
+        string CurrentTestBlock { get; set; }
+        void Debug(string message);
+        void Info(string message);
+        void Error(string message);
+        void TestBlockInput(string input);
+        void TestBlockOutput(string output);
     }
 }

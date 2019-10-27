@@ -2,6 +2,8 @@
 {
     public class Log : ILogger
     {
+        public string TestCaseKey { get; set; }
+
         public void Debug(string testCase, string testBlock, string message)
         {
             LogToDebug($"{testCase} - {testBlock} - Debug: {message}");

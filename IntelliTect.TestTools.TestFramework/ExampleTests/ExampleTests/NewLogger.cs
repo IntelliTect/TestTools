@@ -7,29 +7,32 @@ namespace ExampleTests
 {
     class NewLogger : ILogger
     {
-        public void Debug(string testCase, string testBlock, string message)
+        public string TestCaseKey { get; set; }
+        public string CurrentTestBlock { get; set; }
+
+        public void Debug(string message)
         {
-            Log($"{testCase} - {testBlock} - Debug: {message}");
+            Log($"{TestCaseKey} - {CurrentTestBlock} - Debug: {message}");
         }
 
-        public void Error(string testCase, string testBlock, string message)
+        public void Error(string message)
         {
-            Log($"{testCase} - {testBlock} - Error: {message}");
+            Log($"{TestCaseKey} - {CurrentTestBlock} - Error: {message}");
         }
 
-        public void Info(string testCase, string testBlock, string message)
+        public void Info(string message)
         {
-            Log($"{testCase} - {testBlock} - Info: {message}");
+            Log($"{TestCaseKey} - {CurrentTestBlock} - Info: {message}");
         }
 
-        public void TestBlockInput(string testCase, string testBlock, string input)
+        public void TestBlockInput(string input)
         {
-            Log($"{testCase} - {testBlock} - Input: {input}");
+            Log($"{TestCaseKey} - {CurrentTestBlock} - Input: {input}");
         }
 
-        public void TestBlockOutput(string testCase, string testBlock, string output)
+        public void TestBlockOutput(string output)
         {
-            Log($"{testCase} - {testBlock} - Output: {output}");
+            Log($"{TestCaseKey} - {CurrentTestBlock} - Output: {output}");
         }
 
         private void Log(string message)
