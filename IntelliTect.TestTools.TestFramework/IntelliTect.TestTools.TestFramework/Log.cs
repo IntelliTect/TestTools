@@ -3,30 +3,31 @@
     public class Log : ILogger
     {
         public string TestCaseKey { get; set; }
+        public string CurrentTestBlock { get; set; }
 
-        public void Debug(string testCase, string testBlock, string message)
+        public void Debug(string message)
         {
-            LogToDebug($"{testCase} - {testBlock} - Debug: {message}");
+            LogToDebug($"{TestCaseKey} - {CurrentTestBlock} - Debug: {message}");
         }
 
-        public void Error(string testCase, string testBlock, string message)
+        public void Error(string message)
         {
-            LogToDebug($"{testCase} - {testBlock} - Error: {message}");
+            LogToDebug($"{TestCaseKey} - {CurrentTestBlock} - Error: {message}");
         }
 
-        public void Info(string testCase, string testBlock, string message)
+        public void Info(string message)
         {
-            LogToDebug($"{testCase} - {testBlock} - Info: {message}");
+            LogToDebug($"{TestCaseKey} - {CurrentTestBlock} - Info: {message}");
         }
 
-        public void TestBlockInput(string testCase, string testBlock, string input)
+        public void TestBlockInput(string input)
         {
-            LogToDebug($"{testCase} - {testBlock} - Input arguments: {input}");
+            LogToDebug($"{TestCaseKey} - {CurrentTestBlock} - Input arguments: {input}");
         }
 
-        public void TestBlockOutput(string testCase, string testBlock, string output)
+        public void TestBlockOutput(string output)
         {
-            LogToDebug($"{testCase} - {testBlock} - Output returns: {output}");
+            LogToDebug($"{TestCaseKey} - {CurrentTestBlock} - Output returns: {output}");
         }
 
         private void LogToDebug(string message)
