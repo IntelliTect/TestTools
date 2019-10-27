@@ -193,7 +193,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
 
         [Fact]
-        public void AddFinallyBlockExecutesCorrectly()
+        public void AddFinallyBlockThrowsExpectedException()
         {
             TestBuilder builder = new TestBuilder();
             builder
@@ -205,14 +205,13 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         // Actually... this probably shouldn't throw since it's a "finally" block meant to clean stuff up
         // Figure out the right behavior and fix test before moving further with finally blocks
         [Fact]
-        public void AddFinallyBlockExecutesCorrectlyWithNegativeCondition()
+        public void AddFinallyBlockDoesNotThrowIfExceptionOccursInFinally()
         {
             TestBuilder builder = new TestBuilder();
             builder
                 .AddTestBlock<ExampleTestBlockWithReturn>(true)
-                .AddFinallyBlock<ExampleFinallyBlock>();
-
-            Assert.Throws<TrueException>(() => builder.ExecuteTestCase());
+                .AddFinallyBlock<ExampleFinallyBlock>()
+                .ExecuteTestCase();
         }
 
         // How do we verify this is working correctly?
@@ -226,6 +225,27 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddFinallyBlock<ExampleFinallyBlock>();
 
             Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
+        }
+
+        [Fact]
+        public void OverridingLoggerDoesNotThrow()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void OverridingLoggerTwiceDoesNotThrow()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .RemoveLogger()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
         }
     }
 
