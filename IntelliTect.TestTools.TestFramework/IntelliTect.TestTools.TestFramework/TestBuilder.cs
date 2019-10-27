@@ -230,7 +230,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         private MethodInfo GetExecuteMethod(IServiceScope scope, object testBlockInstance)
         {
-            List<MethodInfo> methods = testBlockInstance.GetType().GetMethods().Where(m => m.Name.ToLower() == "execute").ToList();
+            List<MethodInfo> methods = testBlockInstance.GetType().GetMethods().Where(m => m.Name.ToUpperInvariant() == "EXECUTE").ToList();
             if (methods.Count != 1)
             {
                 TestBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
