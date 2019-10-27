@@ -324,7 +324,7 @@ namespace IntelliTect.TestTools.TestFramework
         private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private IServiceCollection Services { get; } = new ServiceCollection();
-        private HashSet<object> TestBlockResults = new HashSet<object>();
+        private HashSet<object> TestBlockResults { get; } = new HashSet<object>();
         private string TestCaseName { get; }
         private Exception TestBlockException { get; set; }
     }
