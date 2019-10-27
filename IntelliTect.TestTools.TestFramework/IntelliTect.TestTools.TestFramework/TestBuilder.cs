@@ -123,7 +123,7 @@ namespace IntelliTect.TestTools.TestFramework
                         var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType, logger);
                         if (TestBlockException != null) break;
 
-                        SetTestBlockProperties(testBlockScope, ref testBlockInstance, logger);
+                        SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
                         if (TestBlockException != null) break;
 
                         MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
@@ -145,7 +145,7 @@ namespace IntelliTect.TestTools.TestFramework
                         // Also these specific ones should not be overwriting TestBlockException
                         var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType, logger);
 
-                        SetTestBlockProperties(testBlockScope, ref testBlockInstance, logger);
+                        SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
 
                         MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
 
@@ -200,7 +200,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         }
 
-        private void SetTestBlockProperties(IServiceScope scope, ref object testBlockInstance, ILogger logger)
+        private void SetTestBlockProperties(IServiceScope scope, object testBlockInstance, ILogger logger)
         {
             // Populate and log all of our properties
             var properties = testBlockInstance.GetType().GetProperties();

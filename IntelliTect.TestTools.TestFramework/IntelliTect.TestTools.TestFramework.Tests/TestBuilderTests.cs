@@ -71,7 +71,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             TestBuilder builder = new TestBuilder();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1234);
 
-            Assert.Throws<ArgumentException>(() => builder.ExecuteTestCase());
+            Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
         }
 
         // This test probably isn't necessary. This is MS DI out-of-the-box functionality
@@ -186,10 +186,16 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new TestBuilder();
             builder
-                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Bad Value")
-                .ExecuteTestCase();
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Bad Value");
 
-            //Assert.Throws<InvalidOperationException>(() => builder.ExecuteTestCase());
+            try
+            {
+                builder.ExecuteTestCase();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Assert.Equal(typeof(EqualException), ex.InnerException.GetType());
+            }
         }
 
         [Fact]
