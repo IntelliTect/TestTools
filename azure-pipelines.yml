@@ -2,8 +2,9 @@
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
-    packagesToPack: '**/IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate.csproj'
-    versioningScheme: 'byBuildNumber'
+    packagesToPack: '**/IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\*.csproj'
+    versioningScheme: 'off'
+    includeReferencedProjects: true
     includeSymbols: true
 # Build and run tests for .NET Desktop or Windows classic desktop solutions.
 # Add steps that publish symbols, save build artifacts, and more:
