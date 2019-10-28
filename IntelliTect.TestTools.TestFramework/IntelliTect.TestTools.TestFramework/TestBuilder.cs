@@ -153,21 +153,27 @@ namespace IntelliTect.TestTools.TestFramework
 
                     // Need a much better way to handle Finally exceptions...
                     Exception tempException = TestBlockException;
+                    TestBlockException = null;
                     // Extract loop above since it's basically the same for finally blocks?
                     foreach (var fb in FinallyBlocksAndParams)
                     {
+                        if (logger != null) logger.CurrentTestBlock = fb.TestBlockType.ToString();
                         // Might be more concise to have these as out method parameters instead of if statements after every one
                         // Also these specific ones should not be overwriting TestBlockException
                         var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType, logger);
+                        if (TestBlockException != null) break;
 
                         SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
+                        if (TestBlockException != null) break;
 
                         MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
+                        if (TestBlockException != null) break;
 
                         var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb, logger);
+                        if (TestBlockException != null) break;
 
                         RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
-
+                        if (TestBlockException != null) break;
                     }
                     TestBlockException = tempException;
                 }
@@ -325,7 +331,7 @@ namespace IntelliTect.TestTools.TestFramework
             }
             catch (TargetParameterCountException ex)
             {
-                logger?.Error($"---Test block failed.---");
+                logger?.Error($"---Mismatched count between Execute method arguments and supplied dependencies. Test block failed.---");
                 TestBlockException = ex;
                 return;
             }
