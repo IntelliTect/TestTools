@@ -275,6 +275,41 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
                 .ExecuteTestCase();
         }
+
+        [Fact]
+        public void OverrideTestCaseNameWithConstructor()
+        {
+            TestBuilder builder = new TestBuilder("Testing");
+            builder
+                .AddLogger<ExampleLogger>()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void OverrideTestCaseNameWithMethod()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .OverrideTestCaseKey()
+                .AddLogger<ExampleLogger>()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void OverrideTestCaseNameWithMethodOverride()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .OverrideTestCaseKey("Testing")
+                .AddLogger<ExampleLogger>()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
     }
 
     public class ExampleTestBlockWithExecuteArg : ITestBlock

@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -14,6 +15,12 @@ namespace IntelliTect.TestTools.TestFramework
         {
             TestCaseName = testCaseKey;
             AddLogger<Log>();
+        }
+
+        public TestBuilder OverrideTestCaseKey([CallerMemberName]string testCaseKey = null)
+        {
+            TestCaseName = testCaseKey;
+            return this;
         }
 
         /// <summary>
@@ -126,7 +133,7 @@ namespace IntelliTect.TestTools.TestFramework
                     HashSet<object> testBlockResults = new HashSet<object>();
                     foreach (var tb in TestBlocksAndParams)
                     {
-                        if (logger != null) logger.CurrentTestBlock = tb.GetType().ToString();
+                        if (logger != null) logger.CurrentTestBlock = tb.TestBlockType.ToString();
                         // Might be more concise to have these as out method parameters instead of if statements after every one
                         var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType, logger);
                         if (TestBlockException != null) break;
@@ -330,7 +337,7 @@ namespace IntelliTect.TestTools.TestFramework
         private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
         private IServiceCollection Services { get; } = new ServiceCollection();
         private HashSet<object> TestBlockResults { get; } = new HashSet<object>();
-        private string TestCaseName { get; }
+        private string TestCaseName { get; set; }
         private Exception TestBlockException { get; set; }
     }
 }
