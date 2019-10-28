@@ -36,9 +36,6 @@ steps:
   inputs:
     command: 'pack'
     versioningScheme: byPrereleaseNumber
-    majorVersion: '$(Major)'
-    minorVersion: '$(Minor)'
-    patchVersion: '$(Patch)'      
     packagesToPack: '**/IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\*.csproj'
     includeSymbols: true
     toolPackage: true
