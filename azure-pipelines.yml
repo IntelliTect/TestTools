@@ -13,6 +13,9 @@ variables:
   solution: '**/IntelliTect.TestTools.Selenate.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  Major: '1'
+  Minor: '0'
+  Patch: '0'
 
 steps:
 - task: NuGetToolInstaller@1
@@ -36,6 +39,9 @@ steps:
   inputs:
     command: 'pack'
     versioningScheme: byPrereleaseNumber
+    majorVersion: '$(Major)'
+    minorVersion: '$(Minor)'
+    patchVersion: '$(Patch)'    
     packagesToPack: '**/IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\*.csproj'
     includeSymbols: true
     toolPackage: true
