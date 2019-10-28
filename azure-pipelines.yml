@@ -31,10 +31,6 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-variables:
-  Major: '1'
-  Minor: '0'
-  Patch: '0'
 
 - task: NuGetCommand@2
   inputs:
@@ -44,6 +40,5 @@ variables:
     minorVersion: '$(Minor)'
     patchVersion: '$(Patch)'      
     packagesToPack: '**/IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\*.csproj'
-    versioningScheme: 'off'
     includeSymbols: true
     toolPackage: true
