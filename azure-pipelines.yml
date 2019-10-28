@@ -2,7 +2,7 @@
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
-    packagesToPack: '**/IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\IntelliTect. TestTools.Selenate.csproj'
+    packagesToPack: '**/IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate.csproj'
     versioningScheme: 'byBuildNumber'
     includeSymbols: true
 # Build and run tests for .NET Desktop or Windows classic desktop solutions.
