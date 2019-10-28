@@ -31,3 +31,11 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\*.csproj'
+    versioningScheme: 'off'
+    includeSymbols: true
+    toolPackage: true
