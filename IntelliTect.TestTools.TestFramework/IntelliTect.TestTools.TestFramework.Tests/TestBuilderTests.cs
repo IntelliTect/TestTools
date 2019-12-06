@@ -255,7 +255,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
 
         [Fact]
-        public void OverridingLoggerTwiceDoesNotThrow()
+        public void RemovingLoggerTwiceDoesNotThrow()
         {
             TestBuilder builder = new TestBuilder();
             builder
