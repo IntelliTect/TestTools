@@ -27,6 +27,7 @@ namespace ExampleTests
 
             TestBuilder builder = new TestBuilder();
             builder
+                .AddLogger<NewLogger>()
                 .AddDependencyService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
                 .AddDependencyService<Harness.IntelliTectWebpage>()
                 .AddTestBlock<TestBlocks.NavigateToWebsite>()
