@@ -130,28 +130,37 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         public void TakeScreenshot()
         {
-            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
-            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
-            TakeScreenshot(fullPath);
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "screenshot");
+            Directory.CreateDirectory(path);
+            TakeScreenshot(path, $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
         }
 
         /// <summary>
         /// Take a screenshot of the browser and save it to the passed in fully qualified path.
         /// Will not throw if the path does not exist.
         /// </summary>
-        /// <param name="fullPath">The fully qualified path to save the screenshot to</param>
-        public void TakeScreenshot(string fullPath)
+        /// <param name="path">The fully qualified path to save the screenshot to</param>
+        /// <param name="fileName">The name for the screenshot file</param>
+        public void TakeScreenshot(string path, string fileName)
         {
-            if (string.IsNullOrWhiteSpace(fullPath) || !Directory.Exists(fullPath))
+            if (string.IsNullOrWhiteSpace(path) || string.IsNullOrWhiteSpace(fileName))
             {
-                System.Diagnostics.Debug.WriteLine($"Skipping TakeScreenshot. Path does not exist: {fullPath}");
+                Console.WriteLine($"Skipping TakeScreenshot. No path or filename handed into method.");
                 return;
             }
-            Console.WriteLine($"Saving screenshot to location: {fullPath}");
+
+            if (!Directory.Exists(path))
+            {
+                Console.WriteLine($"Skipping TakeScreenshot. Path does not exist: {path}");
+                return;
+            }
+
+            Console.WriteLine($"Saving screenshot to location: {path}");
             if (Driver is ITakesScreenshot takeScreenshot)
             {
                 Screenshot screenshot = takeScreenshot.GetScreenshot();
-                screenshot?.SaveAsFile(fullPath, ScreenshotImageFormat.Png);
+                string combinedPath = Path.Combine(path, fileName);
+                screenshot?.SaveAsFile(combinedPath, ScreenshotImageFormat.Png);
             }
         }
 
