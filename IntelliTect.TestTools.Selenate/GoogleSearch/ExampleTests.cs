@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IntelliTect.TestTools.Selenate;
+using System.IO;
+using OpenQA.Selenium.Remote;
 
 namespace GoogleSearch
 {
@@ -19,9 +21,9 @@ namespace GoogleSearch
         [TestMethod]
         public void SearchForSeleniumOnGoogle()
         {
-            Assert.IsTrue(Google.SearchForItem("selenium automation"), 
+            Assert.IsTrue(Google.SearchForItem("selenium browser automation"), 
                 "No search results displayed when they were expected");
-            Assert.IsTrue(Google.FindSearchResultItem("Selenium - Web Browser Automation"),
+            Assert.IsTrue(Google.FindSearchResultItem("SeleniumHQ Browser Automation"),
                 "Did not find a specific search result for Selenium - Web Browser Automation");
         }
 
@@ -45,7 +47,11 @@ namespace GoogleSearch
         [TestCleanup]
         public void Teardown()
         {
+            // Two ways to take screenshots.
             Browser.TakeScreenshot();
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "screenshot");
+            string filename = $"{((RemoteWebDriver)Browser.Driver).Capabilities.BrowserName}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png";
+            Browser.TakeScreenshot(path, filename);
             Browser.Dispose();
         }
 
