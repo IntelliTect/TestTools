@@ -62,7 +62,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             TestBuilder builder = new TestBuilder();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
 
-            Assert.Throws<ArgumentException>(() => builder.ExecuteTestCase());
+            Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
         }
 
         [Fact]
@@ -71,10 +71,10 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             TestBuilder builder = new TestBuilder();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1234);
 
-            Assert.Throws<ArgumentException>(() => builder.ExecuteTestCase());
+            Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
         }
 
-        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
+        // This test probably isn't necessary. This is MS DI out-of-the-box functionality
         [Fact]
         public void FetchByServiceForConstructor()
         {
@@ -178,7 +178,137 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>();
 
-            Assert.Throws<ArgumentException>(() => builder.ExecuteTestCase());
+            Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
+        }
+
+        [Fact]
+        public void TestBlockThatFailsThrowsCorrectException()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Bad Value");
+
+            try
+            {
+                builder.ExecuteTestCase();
+            }
+            catch (TestCaseException ex)
+            {
+                Assert.Equal(typeof(EqualException), ex.InnerException.GetType());
+            }
+        }
+
+        [Fact]
+        public void AddLoggerReturnsCorrectLogger()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddLogger<ExampleLogger>()
+                .AddTestBlock<ExampleLoggerUsage>();
+
+            Assert.Throws<NotImplementedException>(() => builder.ExecuteTestCase());
+        }
+
+        [Fact]
+        public void AddFinallyBlockThrowsExpectedException()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddTestBlock<ExampleTestBlockWithReturn>(false)
+                .AddFinallyBlock<ExampleFinallyBlock>()
+                .ExecuteTestCase();
+        }
+
+        // Actually... this probably shouldn't throw since it's a "finally" block meant to clean stuff up
+        // Figure out the right behavior and fix test before moving further with finally blocks
+        [Fact]
+        public void AddFinallyBlockDoesNotThrowIfExceptionOccursInFinally()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddTestBlock<ExampleTestBlockWithReturn>(true)
+                .AddFinallyBlock<ExampleFinallyBlock>()
+                .ExecuteTestCase();
+        }
+
+        // How do we verify this is working correctly?
+        [Fact]
+        public void AddFinallyBlockExecutesAfterException()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyInstance(true)
+                .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>()
+                .AddFinallyBlock<ExampleFinallyBlock>();
+
+            Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
+        }
+
+        [Fact]
+        public void OverridingLoggerDoesNotThrow()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void RemovingLoggerTwiceDoesNotThrow()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .RemoveLogger()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void AddingLoggerThanRemovingDoesNotThrow()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddLogger<ExampleLogger>()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void OverrideTestCaseNameWithConstructor()
+        {
+            TestBuilder builder = new TestBuilder("Testing");
+            builder
+                .AddLogger<ExampleLogger>()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void OverrideTestCaseNameWithMethod()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .OverrideTestCaseKey()
+                .AddLogger<ExampleLogger>()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void OverrideTestCaseNameWithMethodOverride()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .OverrideTestCaseKey("Testing")
+                .AddLogger<ExampleLogger>()
+                .RemoveLogger()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
+                .ExecuteTestCase();
         }
     }
 
@@ -312,6 +442,61 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         public void Execute(string input)
         {
             Assert.Equal("Tetsing", input);
+        }
+    }
+
+    public class ExampleLoggerUsage : ITestBlock
+    {
+        public void Execute(ILogger log)
+        {
+            log.Debug("This should throw");
+        }
+    }
+
+    public class ExampleTestBlockWithReturn : ITestBlock
+    {
+        public bool Execute(bool valueToReturn)
+        {
+            return !valueToReturn;
+        }
+    }
+
+    public class ExampleFinallyBlock : ITestBlock
+    {
+        public void Execute(bool result)
+        {
+            Assert.True(result, "Finally block did not receive correct input");
+        }
+    }
+
+    public class ExampleLogger : ILogger
+    {
+        public string TestCaseKey { get; set; }
+        public string CurrentTestBlock { get; set; }
+
+        public void Debug(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Error(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Info(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void TestBlockInput(string input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void TestBlockOutput(string output)
+        {
+            throw new NotImplementedException();
         }
     }
 }
