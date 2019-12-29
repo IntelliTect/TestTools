@@ -137,13 +137,16 @@ namespace IntelliTect.TestTools.Selenate
 
         /// <summary>
         /// Take a screenshot of the browser and save it to the passed in fully qualified path.
-        /// Does NOT validate that the path exists.
+        /// Will not throw if the path does not exist.
         /// </summary>
         /// <param name="fullPath">The fully qualified path to save the screenshot to</param>
         public void TakeScreenshot(string fullPath)
         {
-            if (string.IsNullOrWhiteSpace(fullPath))
-                fullPath = Path.Combine(Directory.GetCurrentDirectory(), $"{DateTime.Now:yyyy.MM.dd_hh.mm.ss}_screenshot.png");
+            if (string.IsNullOrWhiteSpace(fullPath) || !Directory.Exists(fullPath))
+            {
+                System.Diagnostics.Debug.WriteLine($"Skipping TakeScreenshot. Path does not exist: {fullPath}");
+                return;
+            }
             Console.WriteLine($"Saving screenshot to location: {fullPath}");
             if (Driver is ITakesScreenshot takeScreenshot)
             {
