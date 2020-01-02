@@ -132,7 +132,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             string path = Path.Combine(Directory.GetCurrentDirectory(), "screenshot");
             Directory.CreateDirectory(path);
-            TakeScreenshot(path, $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
+            TakeScreenshot(path, $"{((RemoteWebDriver)Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
         }
 
         /// <summary>
