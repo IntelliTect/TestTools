@@ -145,11 +145,11 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="file">The fully qualified or relative name of the file to save the screenshot.</param>
         public void TakeScreenshot(FileInfo file)
         {
-            //if (string.IsNullOrWhiteSpace(file) || string.IsNullOrWhiteSpace(fileName))
-            //{
-            //    Console.WriteLine($"Skipping TakeScreenshot. No path or filename handed into method.");
-            //    return;
-            //}
+            if (string.IsNullOrWhiteSpace(file.FullName))
+            {
+                Console.WriteLine($"Skipping TakeScreenshot. FileInfo handed into method had no valid full name.");
+                return;
+            }
 
             if (!file.Directory.Exists)
             {
