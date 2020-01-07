@@ -49,9 +49,12 @@ namespace GoogleSearch
         {
             // Two ways to take screenshots.
             Browser.TakeScreenshot();
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "screenshot");
-            string filename = $"{((RemoteWebDriver)Browser.Driver).Capabilities.BrowserName}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png";
-            Browser.TakeScreenshot(path, filename);
+            FileInfo file = new FileInfo(
+                Path.Combine(Directory.GetCurrentDirectory(), 
+                "screenshot", 
+                $"{((RemoteWebDriver)Browser.Driver).Capabilities.BrowserName}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
+            Directory.CreateDirectory(file.DirectoryName);
+            Browser.TakeScreenshot(file);
             Browser.Dispose();
         }
 
