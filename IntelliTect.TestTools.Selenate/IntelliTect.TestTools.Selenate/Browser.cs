@@ -130,13 +130,38 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         public void TakeScreenshot()
         {
-            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), "screenshot", $"{((RemoteWebDriver)this.Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png");
-            Console.WriteLine($"Saving screenshot to location: {fullPath}");
-            Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "screenshot"));
+            FileInfo file = new FileInfo(
+                Path.Combine("C:\\Temp", 
+                "screenshots", 
+                $"{((RemoteWebDriver)Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
+            Directory.CreateDirectory(file.DirectoryName);
+            TakeScreenshot(file);
+        }
+
+        /// <summary>
+        /// Take a screenshot of the browser and save it to the passed in fully qualified path.
+        /// Will not throw if the path does not exist.
+        /// </summary>
+        /// <param name="file">The fully qualified or relative name of the file to save the screenshot.</param>
+        public void TakeScreenshot(FileInfo file)
+        {
+            if (string.IsNullOrWhiteSpace(file.FullName))
+            {
+                Console.WriteLine($"Skipping TakeScreenshot. FileInfo handed into method had no valid full name.");
+                return;
+            }
+
+            if (!file.Directory.Exists)
+            {
+                Console.WriteLine($"Skipping TakeScreenshot. Path does not exist: {file.FullName}");
+                return;
+            }
+
             if (Driver is ITakesScreenshot takeScreenshot)
             {
                 Screenshot screenshot = takeScreenshot.GetScreenshot();
-                screenshot?.SaveAsFile(fullPath, ScreenshotImageFormat.Png);
+                Console.WriteLine($"Saving screenshot to location: {file.FullName}");
+                screenshot?.SaveAsFile(file.FullName, ScreenshotImageFormat.Png);
             }
         }
 

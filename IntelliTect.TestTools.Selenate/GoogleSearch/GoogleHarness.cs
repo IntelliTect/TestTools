@@ -16,7 +16,7 @@ namespace GoogleSearch
         public string URL => "https://www.google.com";
 
         // Below selector works as of 9/16/2019. Monitor to see if the first div selector changes when the doodle changes
-        public IWebElement GoogleSearchButton => Browser.FindElement(By.CssSelector("div[class='FPdoLc VlcLAe'] input[aria-label='Google Search']"));
+        public IWebElement GoogleSearchButton => Browser.FindElement(By.CssSelector("div[class^='FPdoLc'] input[aria-label='Google Search']"));
         public IWebElement SearchInput => Browser.FindElement(By.CssSelector("input[title='Search']"));
         public IWebElement SearchResultsDiv =>
                 Browser.FindElement(By.CssSelector("div[data-async-context^='query:']"));
