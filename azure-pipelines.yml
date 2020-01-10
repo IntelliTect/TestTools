@@ -32,3 +32,20 @@ steps:
     solution: '$(solution)'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: NuGetCommand@2
+  displayName: 'Pack Selenate Project'
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/IntelliTect.TestTools.Selenate.csproj'
+    versioningScheme: 'byPrereleaseNumber'
+    majorVersion: '1'
+    minorVersion: '3'
+    patchVersion: '0'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Stage Package'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'Selenate'
+    publishLocation: 'Container'
