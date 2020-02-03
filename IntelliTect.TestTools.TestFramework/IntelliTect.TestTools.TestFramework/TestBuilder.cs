@@ -192,7 +192,7 @@ namespace IntelliTect.TestTools.TestFramework
         {
             try
             {
-                return JsonConvert.SerializeObject(obj, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
+                return JsonConvert.SerializeObject(obj, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
             }
             catch (JsonSerializationException e)
             {
@@ -220,7 +220,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         private void SetTestBlockProperties(IServiceScope scope, object testBlockInstance, ILogger logger)
         {
-            // Populate and log all of our properties
+            // Populate all of our properties
             var properties = testBlockInstance.GetType().GetProperties();
             foreach (var prop in properties)
             {
@@ -242,7 +242,6 @@ namespace IntelliTect.TestTools.TestFramework
                 }
 
                 prop.SetValue(testBlockInstance, propertyValue);
-                logger?.Debug($"Populated property {prop.Name} with data: {GetObjectDataAsJsonString(prop.GetValue(testBlockInstance))}");
             }
         }
 
@@ -295,24 +294,35 @@ namespace IntelliTect.TestTools.TestFramework
                 // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
                 if (TestBlockException != null)
                     return null;
-
-                foreach (var arg in executeArgs)
-                {
-                    logger?.TestBlockInput($"Input parameters: {GetObjectDataAsJsonString(arg)}");
-                }
             }
             return executeArgs;
         }
 
         private void RunTestBlocks(object testBlockInstance, MethodInfo execute, object[] executeArgs, ILogger logger)
         {
+            // Log ALL inputs
+            // Is it worth distinguishing between Properties and Execute args?
+            PropertyInfo[] props = testBlockInstance.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
+            object[] allArgs = new object[props.Length + executeArgs.Length];
+
+            for(int i = 0; i < props.Length; i++)
+            {
+                allArgs[i] = props[i].GetValue(testBlockInstance);
+            }
+            
+            executeArgs.CopyTo(allArgs, props.Length);
+            foreach (var arg in allArgs)
+            {
+                logger?.TestBlockInput(GetObjectDataAsJsonString(arg));
+            }
+
             try
             {
                 logger?.Debug($"Executing test block");
                 var result = execute.Invoke(testBlockInstance, executeArgs);
                 if (result != null)
                 {
-                    logger?.TestBlockOutput($"Output parameters: {GetObjectDataAsJsonString(result)}");
+                    logger?.TestBlockOutput(GetObjectDataAsJsonString(result));
                     TestBlockResults.Add(result);
                 }
 

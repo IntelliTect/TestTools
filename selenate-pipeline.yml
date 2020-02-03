@@ -1,8 +1,3 @@
-# .NET Desktop
-# Build and run tests for .NET Desktop or Windows classic desktop solutions.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
-
 trigger:
 - master
 
@@ -13,6 +8,7 @@ variables:
   solution: '**/IntelliTect.TestTools.Selenate.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  version: '1.3.0'
 
 steps:
 - task: NuGetToolInstaller@0
@@ -32,16 +28,15 @@ steps:
     solution: '$(solution)'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+    msbuildArgs: '/p:Version=$(version)'
 
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   displayName: 'Pack Selenate Project'
   inputs:
-    command: 'pack'
-    packagesToPack: '**/IntelliTect.TestTools.Selenate.csproj'
-    versioningScheme: 'byPrereleaseNumber'
-    majorVersion: '1'
-    minorVersion: '3'
-    patchVersion: '0'
+    command: 'custom'
+    projects: '**/IntelliTect.TestTools.Selenate.csproj'
+    custom: 'pack'
+    arguments: '-p:Version="$(version)-ci-$(Build.BuildId)" -c Release -o $(Build.ArtifactStagingDirectory)'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Stage Package'

@@ -105,7 +105,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .ExecuteTestCase();
         }
 
-        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
+        // This test probably isn't necessary. This is MS DI out-of-the-box functionality
         [Fact]
         public void FetchByFactoryForConstructor()
         {
@@ -136,7 +136,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .ExecuteTestCase();
         }
 
-        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
+        // This test probably isn't necessary. This is MS DI out-of-the-box functionality
         [Fact]
         public void AddTwoServicesOfSameTypeToServiceAndFetch()
         {
@@ -148,7 +148,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .ExecuteTestCase();
         }
 
-        // This test probably isn't necessary. This is Autofac out-of-the-box functionality
+        // This test probably isn't necessary. This is MS DI out-of-the-box functionality
         [Fact]
         public void AddTwoInstancesOfSameTypeToServiceAndFetch()
         {
