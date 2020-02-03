@@ -36,7 +36,7 @@ steps:
     command: 'custom'
     projects: '**/IntelliTect.TestTools.Selenate.csproj'
     custom: 'pack'
-    arguments: '-p:Version="$(version)-ci-$(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)'
+    arguments: '-p:Version="$(version)-ci-$(Build.BuildId)" -c Release -o $(Build.ArtifactStagingDirectory)'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Stage Package'
