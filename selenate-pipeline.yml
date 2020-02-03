@@ -30,14 +30,6 @@ steps:
     configuration: '$(buildConfiguration)'
     msbuildArgs: '/p:Version=$(version)'
 
-- task: NuGetCommand@2
-  displayName: 'Pack Selenate Project'
-  inputs:
-    command: 'pack'
-    packagesToPack: '**/IntelliTect.TestTools.Selenate.csproj'
-    versioningScheme: 'byEnvVar'
-    versionEnvVar: '$(version)-ci-$(Build.BuildId)'
-
 - task: DotNetCoreCLI@2
   displayName: 'Pack Selenate Project'
   inputs:
