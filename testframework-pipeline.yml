@@ -31,16 +31,16 @@ steps:
     msbuildArgs: '/p:Version=$(version)'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Pack Selenate Project'
+  displayName: 'Pack TestFramework Project'
   inputs:
     command: 'custom'
     projects: '**/IntelliTect.TestTools.TestFramework.csproj'
-    custom: 'dotnet pack'
-    arguments: '-p:Version="$(version)-ci-(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)'
+    custom: 'pack'
+    arguments: '-p:Version="$(version)-ci-$(Build.BuildId)" -c Release -o $(Build.ArtifactStagingDirectory)'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Stage Package'
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'Selenate'
+    ArtifactName: 'TestFramework'
     publishLocation: 'Container'
