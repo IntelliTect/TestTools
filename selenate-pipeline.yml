@@ -38,6 +38,13 @@ steps:
     versioningScheme: 'byEnvVar'
     versionEnvVar: '$(version)-ci-$(Build.BuildId)'
 
+- task: DotNetCoreCLI@2
+  displayName: 'Pack Selenate Project'
+  inputs:
+    command: 'custom'
+    custom: 'dotnet pack'
+    arguments: '-p:Version="$(version)-ci-(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)'
+
 - task: PublishBuildArtifacts@1
   displayName: 'Stage Package'
   inputs:
