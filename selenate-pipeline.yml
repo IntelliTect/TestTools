@@ -34,6 +34,7 @@ steps:
   displayName: 'Pack Selenate Project'
   inputs:
     command: 'custom'
+    projects: '**/IntelliTect.TestTools.Selenate.csproj'
     custom: 'dotnet pack'
     arguments: '-p:Version="$(version)-ci-(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)'
 
