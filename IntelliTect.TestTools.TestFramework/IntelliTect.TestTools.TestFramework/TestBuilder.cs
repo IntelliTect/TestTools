@@ -182,8 +182,7 @@ namespace IntelliTect.TestTools.TestFramework
                 }
                 else
                 {
-                    logger?.Error($"Test case failed: {TestBlockException.Message}");
-                    logger?.Error($"Stacktrace: {TestBlockException.StackTrace}");
+                    logger?.Error($"Test case failed: {TestBlockException.ToString()}");
                 }
             }
             
