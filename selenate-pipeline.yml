@@ -2,9 +2,9 @@ trigger:
   branches:
     include:
       - master
-    paths:
-      include:
-        - Selenate
+  paths:
+    include:
+      - Selenate
 
 pool:
   vmImage: 'windows-latest'

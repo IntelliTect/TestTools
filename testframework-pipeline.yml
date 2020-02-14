@@ -2,9 +2,9 @@ trigger:
   branches:
     include:
       - master
-    paths:
-      include:
-        - TestFramework
+  paths:
+    include:
+      - TestFramework
 
 pool:
   vmImage: 'windows-latest'
