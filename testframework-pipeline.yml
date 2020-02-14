@@ -8,7 +8,7 @@ variables:
   solution: '**/IntelliTect.TestTools.TestFramework.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  version: '1.1.0'
+  version: '1.1.1'
 
 steps:
 - task: NuGetToolInstaller@0
@@ -29,6 +29,12 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     msbuildArgs: '/p:Version=$(version)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Unit Test'
+  inputs:
+    command: 'test'
+    projects: '**/IntelliTect.TestTools.TestFramework.Tests'
 
 - task: DotNetCoreCLI@2
   displayName: 'Pack TestFramework Project'
