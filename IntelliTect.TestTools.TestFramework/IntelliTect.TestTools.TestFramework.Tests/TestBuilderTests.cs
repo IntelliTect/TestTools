@@ -310,6 +310,16 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
                 .ExecuteTestCase();
         }
+
+        [Fact]
+        public void PropertyWithNoMatchingTypeInDiThrowsInvalidOperation()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder.AddTestBlock<ExampleTestBlockWithProperty>();
+
+            Exception ex = Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
+            Assert.Equal(typeof(InvalidOperationException), ex.InnerException.GetType());
+        }
     }
 
     public class ExampleTestBlockWithExecuteArg : ITestBlock

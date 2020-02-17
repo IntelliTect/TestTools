@@ -133,7 +133,7 @@ namespace IntelliTect.TestTools.TestFramework
                     {
                         if (logger != null) logger.CurrentTestBlock = tb.TestBlockType.ToString();
                         // Might be more concise to have these as out method parameters instead of if statements after every one
-                        var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType, logger);
+                        var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType);
                         if (TestBlockException != null) break;
 
                         SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
@@ -142,7 +142,7 @@ namespace IntelliTect.TestTools.TestFramework
                         MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
                         if (TestBlockException != null) break;
 
-                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, tb, logger);
+                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, tb);
                         if (TestBlockException != null) break;
 
                         RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
@@ -158,7 +158,7 @@ namespace IntelliTect.TestTools.TestFramework
                         if (logger != null) logger.CurrentTestBlock = fb.TestBlockType.ToString();
                         // Might be more concise to have these as out method parameters instead of if statements after every one
                         // Also these specific ones should not be overwriting TestBlockException
-                        var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType, logger);
+                        var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType);
                         if (TestBlockException != null) break;
 
                         SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
@@ -167,7 +167,7 @@ namespace IntelliTect.TestTools.TestFramework
                         MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
                         if (TestBlockException != null) break;
 
-                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb, logger);
+                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb);
                         if (TestBlockException != null) break;
 
                         RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
@@ -206,18 +206,15 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        private object GetTestBlock(IServiceScope scope, Type tbType, ILogger logger)
+        private object GetTestBlock(IServiceScope scope, Type tbType)
         {
-            try
+            var tb = scope.ServiceProvider.GetService(tbType);
+            if(tb == null)
             {
-                return scope.ServiceProvider.GetRequiredService(tbType);
+                TestBlockException = new InvalidOperationException($"Unable to find test block: {tbType.FullName}.");
             }
-            catch (InvalidOperationException ex)
-            {
-                TestBlockException = ex;
-                return null;
-            }
-
+            
+            return tb;
         }
 
         private void SetTestBlockProperties(IServiceScope scope, object testBlockInstance, ILogger logger)
@@ -231,14 +228,10 @@ namespace IntelliTect.TestTools.TestFramework
                     logger?.Debug($"Skipping property {prop}. No setter found.");
                     continue;
                 }
-                object propertyValue;
-                try
+                object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                if(propertyValue == null)
                 {
-                    propertyValue = scope.ServiceProvider.GetRequiredService(prop.PropertyType);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    TestBlockException = ex;
+                    TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop} on test block {testBlockInstance.GetType()}.");
                     break;
                 }
 
@@ -259,7 +252,7 @@ namespace IntelliTect.TestTools.TestFramework
             return methods[0];
         }
 
-        private object[] GatherTestBlockArguments(IServiceScope scope, MethodInfo execute, (Type TestBlockType, object[] TestBlockParameters) tb, ILogger logger)
+        private object[] GatherTestBlockArguments(IServiceScope scope, MethodInfo execute, (Type TestBlockType, object[] TestBlockParameters) tb)
         {
             var executeParams = execute.GetParameters();
 
@@ -279,18 +272,14 @@ namespace IntelliTect.TestTools.TestFramework
                 {
                     for (int i = 0; i < executeArgs.Length; i++)
                     {
-                        object foundResult = null;
-                        try
+                        object foundResult = TestBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
+                            ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
+                        if(foundResult == null)
                         {
-                            foundResult =
-                            TestBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
-                            ?? scope.ServiceProvider.GetRequiredService(executeParams[i].ParameterType);
-                        }
-                        catch(InvalidOperationException ex)
-                        {
-                            TestBlockException = ex;
+                            TestBlockException = new InvalidOperationException($"Unable to find an object or service for Execute parameter {executeParams[i]} on test block {tb.TestBlockType.FullName}.");
                             break;
                         }
+
                         executeArgs[i] = foundResult;
                     }
                 }
