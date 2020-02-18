@@ -115,8 +115,6 @@ namespace IntelliTect.TestTools.TestFramework
             var serviceProvider = Services.BuildServiceProvider();
             #endregion
 
-
-            //Exception testBlockException = null;
             using (var testCaseScope = serviceProvider.CreateScope())
             {
                 var logger = testCaseScope.ServiceProvider.GetService<ILogger>();
@@ -135,7 +133,7 @@ namespace IntelliTect.TestTools.TestFramework
                     {
                         if (logger != null) logger.CurrentTestBlock = tb.TestBlockType.ToString();
                         // Might be more concise to have these as out method parameters instead of if statements after every one
-                        var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType, logger);
+                        var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType);
                         if (TestBlockException != null) break;
 
                         SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
@@ -144,7 +142,7 @@ namespace IntelliTect.TestTools.TestFramework
                         MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
                         if (TestBlockException != null) break;
 
-                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, tb, logger);
+                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, tb);
                         if (TestBlockException != null) break;
 
                         RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
@@ -160,7 +158,7 @@ namespace IntelliTect.TestTools.TestFramework
                         if (logger != null) logger.CurrentTestBlock = fb.TestBlockType.ToString();
                         // Might be more concise to have these as out method parameters instead of if statements after every one
                         // Also these specific ones should not be overwriting TestBlockException
-                        var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType, logger);
+                        var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType);
                         if (TestBlockException != null) break;
 
                         SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
@@ -169,7 +167,7 @@ namespace IntelliTect.TestTools.TestFramework
                         MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
                         if (TestBlockException != null) break;
 
-                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb, logger);
+                        var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb);
                         if (TestBlockException != null) break;
 
                         RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
@@ -177,15 +175,23 @@ namespace IntelliTect.TestTools.TestFramework
                     }
                     TestBlockException = tempException;
                 }
-            }
 
+                if(TestBlockException == null)
+                {
+                    logger?.Info("Test case finished successfully.");
+                }
+                else
+                {
+                    logger?.Error($"Test case failed: {TestBlockException.ToString()}");
+                }
+            }
+            
             serviceProvider.Dispose();
 
             if (TestBlockException != null)
             {
                 throw new TestCaseException("Test case failed.", TestBlockException);
             }
-
         }
 
         private string GetObjectDataAsJsonString(object obj)
@@ -200,22 +206,15 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        private object GetTestBlock(IServiceScope scope, Type tbType, ILogger logger)
+        private object GetTestBlock(IServiceScope scope, Type tbType)
         {
-            logger?.Info("Starting test block.");
-
-            try
+            var tb = scope.ServiceProvider.GetService(tbType);
+            if(tb == null)
             {
-                return scope.ServiceProvider.GetRequiredService(tbType);
+                TestBlockException = new InvalidOperationException($"Unable to find test block: {tbType.FullName}.");
             }
-            catch (InvalidOperationException ex)
-            {
-                // Probably worth moving these logs outside of the foreach so we don't have to duplicate the message
-                logger?.Error("Unable to find the test block instance OR all dependencies necessary.");
-                TestBlockException = ex;
-                return null;
-            }
-
+            
+            return tb;
         }
 
         private void SetTestBlockProperties(IServiceScope scope, object testBlockInstance, ILogger logger)
@@ -229,15 +228,10 @@ namespace IntelliTect.TestTools.TestFramework
                     logger?.Debug($"Skipping property {prop}. No setter found.");
                     continue;
                 }
-                object propertyValue;
-                try
+                object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                if(propertyValue == null)
                 {
-                    propertyValue = scope.ServiceProvider.GetRequiredService(prop.PropertyType);
-                }
-                catch (InvalidOperationException ex)
-                {
-                    logger?.Error($"Unable to find all properties necessary.");
-                    TestBlockException = ex;
+                    TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
                     break;
                 }
 
@@ -258,7 +252,7 @@ namespace IntelliTect.TestTools.TestFramework
             return methods[0];
         }
 
-        private object[] GatherTestBlockArguments(IServiceScope scope, MethodInfo execute, (Type TestBlockType, object[] TestBlockParameters) tb, ILogger logger)
+        private object[] GatherTestBlockArguments(IServiceScope scope, MethodInfo execute, (Type TestBlockType, object[] TestBlockParameters) tb)
         {
             var executeParams = execute.GetParameters();
 
@@ -278,28 +272,27 @@ namespace IntelliTect.TestTools.TestFramework
                 {
                     for (int i = 0; i < executeArgs.Length; i++)
                     {
-                        // Might be worth changing this to GetRequiredService and wrapping in a try/catch instead of checking if foundResult is null
-                        object foundResult =
-                            TestBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
+                        object foundResult = TestBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
                             ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
-                        if (foundResult == null)
+                        if(foundResult == null)
                         {
-                            TestBlockException = new InvalidOperationException("Unable to resolve Execute method arguments");
+                            TestBlockException = new InvalidOperationException($"Unable to find an object or service for Execute parameter {executeParams[i].Name} of type {executeParams[i].ParameterType.FullName} on test block {tb.TestBlockType.FullName}.");
                             break;
                         }
+
                         executeArgs[i] = foundResult;
                     }
                 }
 
                 // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
-                if (TestBlockException != null)
-                    return null;
+                if (TestBlockException != null) return null;
             }
             return executeArgs;
         }
 
         private void RunTestBlocks(object testBlockInstance, MethodInfo execute, object[] executeArgs, ILogger logger)
         {
+            logger?.Debug($"Starting test block.");
             // Log ALL inputs
             // Is it worth distinguishing between Properties and Execute args?
             PropertyInfo[] props = testBlockInstance.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
@@ -318,7 +311,6 @@ namespace IntelliTect.TestTools.TestFramework
 
             try
             {
-                logger?.Debug($"Executing test block");
                 var result = execute.Invoke(testBlockInstance, executeArgs);
                 if (result != null)
                 {
@@ -329,24 +321,22 @@ namespace IntelliTect.TestTools.TestFramework
             }
             catch (TargetInvocationException ex)
             {
-                logger?.Error($"---Test block failed.---");
                 TestBlockException = ex.InnerException;
                 return;
             }
             catch (ArgumentException ex)
             {
-                logger?.Error($"---Test block failed.---");
                 TestBlockException = ex;
                 return;
             }
             catch (TargetParameterCountException ex)
             {
-                logger?.Error($"---Mismatched count between Execute method arguments and supplied dependencies. Test block failed.---");
+                ex.Data.Add("AdditionalInfo", "Test block failed: Mismatched count between Execute method arguments and supplied dependencies.");
                 TestBlockException = ex;
                 return;
             }
 
-            logger?.Info($"---Test block completed successfully.---");
+            logger?.Debug($"Test block completed successfully.");
         }
 
         private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
