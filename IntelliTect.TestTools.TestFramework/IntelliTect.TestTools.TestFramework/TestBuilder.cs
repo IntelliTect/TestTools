@@ -231,7 +231,7 @@ namespace IntelliTect.TestTools.TestFramework
                 object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
                 if(propertyValue == null)
                 {
-                    TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop} on test block {testBlockInstance.GetType()}.");
+                    TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
                     break;
                 }
 
@@ -276,7 +276,7 @@ namespace IntelliTect.TestTools.TestFramework
                             ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
                         if(foundResult == null)
                         {
-                            TestBlockException = new InvalidOperationException($"Unable to find an object or service for Execute parameter {executeParams[i]} on test block {tb.TestBlockType.FullName}.");
+                            TestBlockException = new InvalidOperationException($"Unable to find an object or service for Execute parameter {executeParams[i].Name} of type {executeParams[i].ParameterType.FullName} on test block {tb.TestBlockType.FullName}.");
                             break;
                         }
 
