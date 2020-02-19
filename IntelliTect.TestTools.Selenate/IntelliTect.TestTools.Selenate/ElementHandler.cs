@@ -3,6 +3,7 @@ using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -61,8 +62,9 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(NoSuchElementException));
 
             wait.Until(sk => {
+                element.Clear();
                 element.SendKeys(textToSend);
-                return true;
+                return element.GetAttribute("value") == textToSend;
             });
         }
 

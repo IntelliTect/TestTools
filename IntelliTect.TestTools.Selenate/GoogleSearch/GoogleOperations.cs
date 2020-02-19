@@ -20,7 +20,7 @@ namespace GoogleSearch
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
             Element.WaitForEnabledState(Harness.SearchInput);
-            Harness.SearchInput.SendKeys(searchItem);
+            Element.SendKeysWhenReady(Harness.SearchInput, searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
             return Element.WaitForVisibleState(Harness.SearchResultsDiv);
         }
