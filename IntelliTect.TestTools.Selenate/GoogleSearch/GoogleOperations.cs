@@ -1,8 +1,5 @@
-﻿using System;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using System.Linq;
-using System.Threading.Tasks;
-using IntelliTect.TestTools.SelenateExtensions;
 using IntelliTect.TestTools.Selenate;
 
 namespace GoogleSearch
