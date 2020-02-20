@@ -1,8 +1,5 @@
-﻿using System;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using System.Linq;
-using System.Threading.Tasks;
-using IntelliTect.TestTools.SelenateExtensions;
 using IntelliTect.TestTools.Selenate;
 
 namespace GoogleSearch
@@ -20,7 +17,7 @@ namespace GoogleSearch
         {
             Browser.Driver.Navigate().GoToUrl(Harness.URL);
             Element.WaitForEnabledState(Harness.SearchInput);
-            Harness.SearchInput.SendKeys(searchItem);
+            Element.SendKeysWhenReady(Harness.SearchInput, searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
             return Element.WaitForVisibleState(Harness.SearchResultsDiv);
         }
