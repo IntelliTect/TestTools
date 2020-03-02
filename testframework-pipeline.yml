@@ -4,7 +4,7 @@ trigger:
       - master
   paths:
     include:
-      - TestFramework
+      - IntelliTect.TestTools.TestFramework/*
 
 pool:
   vmImage: 'windows-latest'
