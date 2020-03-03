@@ -1,9 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -64,6 +61,7 @@ namespace IntelliTect.TestTools.Selenate
             wait.Until(sk => {
                 element.Clear();
                 element.SendKeys(textToSend);
+                System.Threading.Tasks.Task.Delay(250).Wait();
                 return element.GetAttribute("value") == textToSend;
             });
         }
