@@ -91,29 +91,22 @@ End";
         [TestMethod]
         public void ExecuteProcess_PingLocalhost_Success()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Assert.Inconclusive("Platforms other than windows have not been tested.");
 
-                /* Try the following:
-                 * Command: ping.exe -c 4 localhost                 (the '-c 4' limits the ping to 4 times)
-                 * PING localhost (104.24.0.68) 56(84) bytes of data.
-                 *  64 bytes from 104.24.0.68: icmp_seq=1 ttl=58 time=47.3 ms
-                 *  64 bytes from 104.24.0.68: icmp_seq=2 ttl=58 time=51.9 ms
-                 *  64 bytes from 104.24.0.68: icmp_seq=3 ttl=58 time=57.4 ms
-                 *  64 bytes from 104.24.0.68: icmp_seq=4 ttl=58 time=57.4 ms
-                 */
-
-            }
-            else
-            {
-                ConsoleAssert.ExecuteProcess(
-$@"
+            string expected = $@"*
 Pinging * ?::1? with 32 bytes of data:
-Reply from ::1: time*",
+Reply from ::1: time*";
+//            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+//            {
+//                expected = $@"
+
+//Pinging * ?::1? with 32 bytes of data:
+//Reply from ::1: time*";
+//            }
+
+            ConsoleAssert.ExecuteProcess(
+                expected,
                 "ping.exe", "-n 4 localhost", out string standardOutput, out _);
-                Assert.IsTrue(standardOutput.ToLower().IsLike($"*{ Environment.MachineName.ToLower()}*"));
-            }
+            Assert.IsTrue(standardOutput.ToLower().IsLike($"*{ Environment.MachineName.ToLower()}*"));
         }
 
         [TestMethod]
