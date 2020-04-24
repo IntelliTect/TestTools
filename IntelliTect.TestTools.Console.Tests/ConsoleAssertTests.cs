@@ -26,7 +26,7 @@ namespace IntelliTect.TestTools.Console.Tests
                 string lname = System.Console.ReadLine();
 
                 System.Console.Write("Hello, {0} {1}.", fname, lname);
-            });
+            }, NormalizeOptions.None);
         }
 
         [TestMethod]
@@ -37,7 +37,7 @@ namespace IntelliTect.TestTools.Console.Tests
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.Write("Hello World");
-            });
+            }, NormalizeOptions.None);
         }
 
         [TestMethod]
@@ -48,7 +48,7 @@ namespace IntelliTect.TestTools.Console.Tests
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.WriteLine("Hello World");
-            }, true);
+            }, NormalizeOptions.NormalizeLineEndings);
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace IntelliTect.TestTools.Console.Tests
             ConsoleAssert.Expect(expected, () =>
             {
                 System.Console.WriteLine(input);
-            }, stripVT100: stripVT100);
+            }, NormalizeOptions.StripVt100 | NormalizeOptions.NormalizeLineEndings);
         }
 
         [TestMethod]
@@ -79,7 +79,7 @@ End";
                 System.Console.WriteLine("Begin");
                 System.Console.WriteLine("Middle");
                 System.Console.WriteLine("End");
-            }, true);
+            }, NormalizeOptions.NormalizeLineEndings);
         }
 
         [TestMethod]
@@ -90,7 +90,7 @@ End";
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.Write("Hello World");
-            }, true);
+            }, NormalizeOptions.NormalizeLineEndings);
         }
 
         [TestMethod]
@@ -102,7 +102,7 @@ End";
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.WriteLine("Hello World");
-            });
+            }, NormalizeOptions.None);
         }
 
         [TestMethod]

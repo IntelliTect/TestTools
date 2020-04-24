@@ -23,11 +23,33 @@ namespace IntelliTect.TestTools.Console
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
-        public static string Expect(string expected, Action action, bool normalizeLineEndings = true, 
-            bool stripVT100 = true)
+        [Obsolete]
+        public static string Expect(string expected, Action action, bool normalizeLineEndings = true)
         {
-            return Expect(expected, action, (left, right) => left == right, normalizeLineEndings);
+            return Expect(expected, 
+                action, 
+                (left, right) => left == right, 
+                normalizeLineEndings ? NormalizeOptions.NormalizeLineEndings : NormalizeOptions.None);
+        }
+        
+        /// <summary>
+        /// Performs a unit test on a console-based method. A "view" of
+        /// what a user would see in their console is provided as a string,
+        /// where their input (including line-breaks) is surrounded by double 
+        /// less-than/greater-than signs, like so: "Input please: &lt;&lt;Input&gt;&gt;"
+        /// </summary>
+        /// <param name="expected">Expected "view" to be seen on the console,
+        /// including both input and output</param>
+        /// <param name="action">Method to be run</param>
+        /// <param name="normalizeOptions">Options to normalize input and expected output</param>
+        public static string Expect(string expected, 
+            Action action, 
+            NormalizeOptions normalizeOptions)
+        {
+            return Expect(expected, 
+                action, 
+                (left, right) => left == right, 
+                normalizeOptions);
         }
 
         /// <summary>
@@ -43,12 +65,40 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="args">Args to pass to the function.</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
-        public static string Expect(string expected, Action<string[]> action, 
-            bool normalizeLineEndings = true, bool stripVT100 = true,
+        [Obsolete]
+        public static string Expect(string expected, 
+            Action<string[]> action, 
+            bool normalizeLineEndings = true, 
             params string[] args)
         {
-            return Expect(expected, ()=>action(args), (left, right) => left == right, normalizeLineEndings);
+            return Expect(expected, 
+                ()=>action(args), 
+                (left, right) => left == right, 
+                normalizeLineEndings ? NormalizeOptions.NormalizeLineEndings : NormalizeOptions.None);
+        }
+        
+        /// <summary>
+        /// <para>
+        /// Performs a unit test on a console-based method. A "view" of
+        /// what a user would see in their console is provided as a string,
+        /// where their input (including line-breaks) is surrounded by double
+        /// less-than/greater-than signs, like so: "Input please: &lt;&lt;Input&gt;&gt;"
+        /// </para>
+        /// </summary>
+        /// <param name="expected">Expected "view" to be seen on the console,
+        /// including both input and output</param>
+        /// <param name="action">Method to be run</param>
+        /// <param name="args">Args to pass to the function.</param>
+        /// <param name="normalizeOptions">Options to normalize input and expected output</param>
+        public static string Expect(string expected, 
+            Action<string[]> action, 
+            NormalizeOptions normalizeOptions, 
+            params string[] args)
+        {
+            return Expect(expected, 
+                ()=>action(args), 
+                (left, right) => left == right, 
+                normalizeOptions);
         }
 
         /// <summary>
@@ -71,14 +121,14 @@ namespace IntelliTect.TestTools.Console
         public static void Expect<T>(string expected, Func<string[], T> func, T expectedReturn = default, params string[] args)
         {
             T @return = default;
-            Expect(expected, () => @return = func(args));
+            Expect(expected, () => @return = func(args), NormalizeOptions.None);
 
             if (!expectedReturn.Equals(@return))
             {
                 throw new Exception($"The value returned from {nameof(func)} ({@return}) was not the { nameof(expectedReturn) }({expectedReturn}) value.");
             }
         }
-        
+
         /// <summary>
         /// <para>
         /// Performs a unit test on a console-based method. A "view" of
@@ -94,7 +144,9 @@ namespace IntelliTect.TestTools.Console
         [Obsolete]
         public static string ExpectNoTrimOutput(string expected, Action action)
         {
-            return Expect(expected, action, (left, right) => left == right, false);
+            return Expect(expected, 
+                action, 
+                (left, right) => left == right);
         }
         
         /// <summary>
@@ -129,7 +181,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="func">Method to be run</param>
         /// <param name="args">Args to pass to the function.</param>
         public static void Expect(string expected, Action<string[]> func, params string[] args) =>
-            Expect(expected, () => func(args));
+            Expect(expected, () => func(args), NormalizeOptions.None);
 
         /// <summary>
         /// Performs a unit test on a console-based method. A "view" of
@@ -141,20 +193,18 @@ namespace IntelliTect.TestTools.Console
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
         /// <param name="comparisonOperator"></param>
-        /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
+        /// <param name="normalizeOptions">Options to normalize input and expected output</param>
         /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the result of <paramref name="action"/> does not match the <paramref name="expected"/> value</param>
-        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
         private static string Expect(
             string expected, Action action, Func<string, string, bool> comparisonOperator,
-            bool normalizeLineEndings = true, 
-            bool stripVT100 = true,
-            string equivalentOperatorErrorMessage = "Values are not equal")
+            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeLineEndings, 
+            string equivalentOperatorErrorMessage= "Values are not equal")
         {
             (string input, string output) = Parse(expected);
 
             return Execute(input, output, action, 
                 (left, right)=>comparisonOperator(left,right), 
-                normalizeLineEndings, stripVT100, equivalentOperatorErrorMessage);
+                normalizeOptions, equivalentOperatorErrorMessage);
         }
 
         private static readonly Func<string, string, bool> LikeOperator =
@@ -187,12 +237,13 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
         /// <param name="escapeCharacter">The escape character for the wildcard caracters.  Default is '\'.</param>
-        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
         public static string ExpectLike(string expected, Action action, 
-            bool normalizeLineEndings = true, bool stripVT100 = true, char escapeCharacter = '\\')
+            bool normalizeLineEndings = true, char escapeCharacter = '\\')
         {
-            return Expect(expected, action, (pattern, output) => output.IsLike(pattern, escapeCharacter),
-                normalizeLineEndings, stripVT100, 
+            return Expect(expected, 
+                action, 
+                (pattern, output) => output.IsLike(pattern, escapeCharacter),
+                normalizeLineEndings ? NormalizeOptions.NormalizeLineEndings : NormalizeOptions.None, 
                 "The values are not like (using wildcards) each other");
         }
 
@@ -232,24 +283,22 @@ namespace IntelliTect.TestTools.Console
         /// <param name="expectedOutput">The expected output</param>
         /// <param name="action">Action to be tested</param>
         /// <param name="areEquivalentOperator">delegate for comparing the expected from actual output.</param>
-        /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
+        /// <param name="normalizeOptions">Options to normalize input and expected output</param>
         /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
-        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
         private static string Execute(string givenInput, string expectedOutput, Action action,
             Func<string, string, bool> areEquivalentOperator, 
-            bool normalizeLineEndings = true, bool stripVT100 = true,
-            string equivalentOperatorErrorMessage = "Values are not equal"
+            NormalizeOptions normalizeOptions, string equivalentOperatorErrorMessage = "Values are not equal"
             )
         {
             string output = Execute(givenInput, action);
 
-            if (normalizeLineEndings)
+            if ((normalizeOptions & NormalizeOptions.NormalizeLineEndings) != 0)
             {
                 output = NormalizeLineEndings(output, true);
                 expectedOutput = NormalizeLineEndings(expectedOutput, true);
             }
 
-            if (stripVT100)
+            if ((normalizeOptions & NormalizeOptions.StripVt100) != 0)
             {
                 output = StripVT100(output);
                 expectedOutput = StripVT100(expectedOutput);
