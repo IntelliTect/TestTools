@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.CodeDom.Compiler;
 using System.CodeDom;
-using System.Linq.Expressions;
 
 namespace IntelliTect.TestTools.Console
 {
@@ -24,7 +23,9 @@ namespace IntelliTect.TestTools.Console
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        public static string Expect(string expected, Action action, bool normalizeLineEndings = true)
+        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
+        public static string Expect(string expected, Action action, bool normalizeLineEndings = true, 
+            bool stripVT100 = true)
         {
             return Expect(expected, action, (left, right) => left == right, normalizeLineEndings);
         }
@@ -42,7 +43,10 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="args">Args to pass to the function.</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        public static string Expect(string expected, Action<string[]> action, bool normalizeLineEndings = true, params string[] args)
+        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
+        public static string Expect(string expected, Action<string[]> action, 
+            bool normalizeLineEndings = true, bool stripVT100 = true,
+            params string[] args)
         {
             return Expect(expected, ()=>action(args), (left, right) => left == right, normalizeLineEndings);
         }
@@ -139,15 +143,18 @@ namespace IntelliTect.TestTools.Console
         /// <param name="comparisonOperator"></param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
         /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the result of <paramref name="action"/> does not match the <paramref name="expected"/> value</param>
+        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
         private static string Expect(
             string expected, Action action, Func<string, string, bool> comparisonOperator,
-            bool normalizeLineEndings = true, string equivalentOperatorErrorMessage= "Values are not equal")
+            bool normalizeLineEndings = true, 
+            bool stripVT100 = true,
+            string equivalentOperatorErrorMessage= "Values are not equal")
         {
             (string input, string output) = Parse(expected);
 
             return Execute(input, output, action, 
                 (left, right)=>comparisonOperator(left,right), 
-                normalizeLineEndings, equivalentOperatorErrorMessage);
+                normalizeLineEndings, stripVT100, equivalentOperatorErrorMessage);
         }
 
         private static readonly Func<string, string, bool> LikeOperator =
@@ -180,11 +187,13 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
         /// <param name="escapeCharacter">The escape character for the wildcard caracters.  Default is '\'.</param>
+        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
         public static string ExpectLike(string expected, Action action, 
-            bool normalizeLineEndings = true, char escapeCharacter = '\\')
+            bool normalizeLineEndings = true, bool stripVT100 = true, char escapeCharacter = '\\')
         {
             return Expect(expected, action, (pattern, output) => output.IsLike(pattern, escapeCharacter),
-                normalizeLineEndings, "The values are not like (using wildcards) each other");
+                normalizeLineEndings, stripVT100, 
+                "The values are not like (using wildcards) each other");
         }
 
         /// <summary>
@@ -205,6 +214,16 @@ namespace IntelliTect.TestTools.Console
 
             return input;
         }
+        
+        /// <summary>
+        /// Strips VT100 color characters from the input string
+        /// </summary>
+        /// <param name="input">The input to strip</param>
+        /// <returns>The stripped input.</returns>
+        public static string StripVT100(string input)
+        {
+            return Regex.Replace(input, @"\u001b\[\d{1,3}m", "");
+        }
 
         /// <summary>
         /// Executes the unit test while providing console input.
@@ -215,9 +234,11 @@ namespace IntelliTect.TestTools.Console
         /// <param name="areEquivalentOperator">delegate for comparing the expected from actual output.</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
         /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
+        /// <param name="stripVT100">Whether VT100 color code characters should be ignored.</param>
         private static string Execute(string givenInput, string expectedOutput, Action action,
             Func<string, string, bool> areEquivalentOperator, 
-            bool normalizeLineEndings = true, string equivalentOperatorErrorMessage = "Values are not equal"
+            bool normalizeLineEndings = true, bool stripVT100 = true,
+            string equivalentOperatorErrorMessage = "Values are not equal"
             )
         {
             string output = Execute(givenInput, action);
@@ -226,6 +247,12 @@ namespace IntelliTect.TestTools.Console
             {
                 output = NormalizeLineEndings(output, true);
                 expectedOutput = NormalizeLineEndings(expectedOutput, true);
+            }
+
+            if (stripVT100)
+            {
+                output = StripVT100(output);
+                expectedOutput = StripVT100(expectedOutput);
             }
 
             AssertExpectation(expectedOutput, output, areEquivalentOperator, equivalentOperatorErrorMessage);

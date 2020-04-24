@@ -52,6 +52,20 @@ namespace IntelliTect.TestTools.Console.Tests
         }
 
         [TestMethod]
+        [DataRow(@"[49mMontoya", "Montoya")]
+        [DataRow("Inigo[49mMontoya", "InigoMontoya")]
+        [DataRow("Inigo[49m", "Inigo")]
+        [DataRow("[49m", "")]
+        [DataRow("[101mMontoya", "Montoya")]
+        public void ConsoleTester_StringWithVT100Characters_VT100Stripped(string input, string expected)
+        {
+            ConsoleAssert.Expect(expected, () =>
+            {
+                System.Console.WriteLine(input);
+            }, stripVT100: true);
+        }
+
+        [TestMethod]
         public void GivenStringLiteral_ExpectedOutputNormalized_OutputMatches()
         {
             const string view = @"Begin
