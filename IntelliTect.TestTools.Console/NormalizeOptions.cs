@@ -9,7 +9,7 @@ namespace IntelliTect.TestTools.Console
     public enum NormalizeOptions
     {
         /// <summary>
-        /// Whether VT100 color code characters should be ignored.
+        /// No normalization.
         /// </summary>
         None = 0,
         
@@ -19,8 +19,8 @@ namespace IntelliTect.TestTools.Console
         NormalizeLineEndings = 1,
         
         /// <summary>
-        /// No normalization
+        /// Whether ansi color code characters should be ignored.
         /// </summary>
-        StripVt100 = 2,
+        StripAnsiEscapeCodes = 2,
     }
 }

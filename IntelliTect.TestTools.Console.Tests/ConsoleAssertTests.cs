@@ -65,7 +65,7 @@ namespace IntelliTect.TestTools.Console.Tests
             ConsoleAssert.Expect(expected, () =>
             {
                 System.Console.WriteLine(input);
-            }, NormalizeOptions.StripVt100 | NormalizeOptions.NormalizeLineEndings);
+            }, NormalizeOptions.StripAnsiEscapeCodes | NormalizeOptions.NormalizeLineEndings);
         }
 
         [TestMethod]

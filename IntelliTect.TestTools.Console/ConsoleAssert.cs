@@ -9,7 +9,7 @@ using System.CodeDom;
 namespace IntelliTect.TestTools.Console
 {
     /// <summary>
-    /// Provides assertion methods for tests that 
+    /// Provides assertion methods for tests that use Console Output
     /// </summary>
     public static class ConsoleAssert
     {
@@ -23,7 +23,7 @@ namespace IntelliTect.TestTools.Console
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        [Obsolete]
+        [Obsolete("Use Expect with " + nameof(NormalizeOptions))]
         public static string Expect(string expected, Action action, bool normalizeLineEndings = true)
         {
             return Expect(expected, 
@@ -42,7 +42,7 @@ namespace IntelliTect.TestTools.Console
         /// including both input and output</param>
         /// <param name="action">Method to be run</param>
         /// <param name="normalizeOptions">Options to normalize input and expected output</param>
-        public static string Expect(string expected, 
+        public static string Expect(string expected,
             Action action, 
             NormalizeOptions normalizeOptions)
         {
@@ -65,7 +65,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="args">Args to pass to the function.</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
-        [Obsolete]
+        [Obsolete("Use Expect with " + nameof(NormalizeOptions))]
         public static string Expect(string expected, 
             Action<string[]> action, 
             bool normalizeLineEndings = true, 
@@ -181,7 +181,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="func">Method to be run</param>
         /// <param name="args">Args to pass to the function.</param>
         public static void Expect(string expected, Action<string[]> func, params string[] args) =>
-            Expect(expected, () => func(args), NormalizeOptions.None);
+            Expect(expected, () => func(args), NormalizeOptions.NormalizeLineEndings);
 
         /// <summary>
         /// Performs a unit test on a console-based method. A "view" of
@@ -271,7 +271,7 @@ namespace IntelliTect.TestTools.Console
         /// </summary>
         /// <param name="input">The input to strip</param>
         /// <returns>The stripped input.</returns>
-        public static string StripVT100(string input)
+        private static string StripAnsiEscapeCodes(string input)
         {
             return Regex.Replace(input, @"\u001b\[\d{1,3}m", "");
         }
@@ -298,10 +298,10 @@ namespace IntelliTect.TestTools.Console
                 expectedOutput = NormalizeLineEndings(expectedOutput, true);
             }
 
-            if ((normalizeOptions & NormalizeOptions.StripVt100) != 0)
+            if ((normalizeOptions & NormalizeOptions.StripAnsiEscapeCodes) != 0)
             {
-                output = StripVT100(output);
-                expectedOutput = StripVT100(expectedOutput);
+                output = StripAnsiEscapeCodes(output);
+                expectedOutput = StripAnsiEscapeCodes(expectedOutput);
             }
 
             AssertExpectation(expectedOutput, output, areEquivalentOperator, equivalentOperatorErrorMessage);
