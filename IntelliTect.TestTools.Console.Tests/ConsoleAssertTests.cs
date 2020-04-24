@@ -52,17 +52,20 @@ namespace IntelliTect.TestTools.Console.Tests
         }
 
         [TestMethod]
-        [DataRow(@"[49mMontoya", "Montoya")]
-        [DataRow("Inigo[49mMontoya", "InigoMontoya")]
-        [DataRow("Inigo[49m", "Inigo")]
-        [DataRow("[49m", "")]
-        [DataRow("[101mMontoya", "Montoya")]
-        public void ConsoleTester_StringWithVT100Characters_VT100Stripped(string input, string expected)
+        [DataRow("\u001b[49mMontoya", "Montoya", true)]
+        [DataRow("Inigo\u001b[49mMontoya", "InigoMontoya", true)]
+        [DataRow("Inigo\u001b[49m", "Inigo", true)]
+        [DataRow("\u001b[49m", "", true)]
+        [DataRow("\u001b[101mMontoya", "Montoya", true)]
+        [DataRow("\u001b[101mMontoya", "\u001b[101mMontoya", false)]
+        public void ConsoleTester_StringWithVT100Characters_VT100Stripped(string input, 
+            string expected, 
+            bool stripVT100)
         {
             ConsoleAssert.Expect(expected, () =>
             {
                 System.Console.WriteLine(input);
-            }, stripVT100: true);
+            }, stripVT100: stripVT100);
         }
 
         [TestMethod]
