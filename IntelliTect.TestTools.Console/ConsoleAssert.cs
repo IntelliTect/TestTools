@@ -148,7 +148,7 @@ namespace IntelliTect.TestTools.Console
             string expected, Action action, Func<string, string, bool> comparisonOperator,
             bool normalizeLineEndings = true, 
             bool stripVT100 = true,
-            string equivalentOperatorErrorMessage= "Values are not equal")
+            string equivalentOperatorErrorMessage = "Values are not equal")
         {
             (string input, string output) = Parse(expected);
 
