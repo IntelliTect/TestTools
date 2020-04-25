@@ -24,7 +24,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
         [Obsolete("Use Expect with " + nameof(NormalizeOptions))]
-        public static string Expect(string expected, Action action, bool normalizeLineEndings = true)
+        public static string Expect(string expected, Action action, bool normalizeLineEndings)
         {
             return Expect(expected, 
                 action, 
@@ -44,7 +44,8 @@ namespace IntelliTect.TestTools.Console
         /// <param name="normalizeOptions">Options to normalize input and expected output</param>
         public static string Expect(string expected,
             Action action, 
-            NormalizeOptions normalizeOptions)
+            NormalizeOptions normalizeOptions 
+                = NormalizeOptions.NormalizeLineEndings | NormalizeOptions.StripAnsiEscapeCodes)
         {
             return Expect(expected, 
                 action, 

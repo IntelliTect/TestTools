@@ -26,7 +26,7 @@ namespace IntelliTect.TestTools.Console.Tests
                 string lname = System.Console.ReadLine();
 
                 System.Console.Write("Hello, {0} {1}.", fname, lname);
-            }, NormalizeOptions.None);
+            });
         }
 
         [TestMethod]
@@ -48,7 +48,7 @@ namespace IntelliTect.TestTools.Console.Tests
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.WriteLine("Hello World");
-            }, NormalizeOptions.NormalizeLineEndings);
+            });
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace IntelliTect.TestTools.Console.Tests
             ConsoleAssert.Expect(expected, () =>
             {
                 System.Console.WriteLine(input);
-            }, NormalizeOptions.StripAnsiEscapeCodes | NormalizeOptions.NormalizeLineEndings);
+            });
         }
 
         [TestMethod]
@@ -79,7 +79,7 @@ End";
                 System.Console.WriteLine("Begin");
                 System.Console.WriteLine("Middle");
                 System.Console.WriteLine("End");
-            }, NormalizeOptions.NormalizeLineEndings);
+            });
         }
 
         [TestMethod]
@@ -90,7 +90,21 @@ End";
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.Write("Hello World");
-            }, NormalizeOptions.NormalizeLineEndings);
+            });
+        }
+        
+        [TestMethod]
+        public void ConsoleTester_HelloWorld_DontNormalizeCRLF()
+        {
+            const string view = "Hello World\r\n";
+            
+            Assert.ThrowsException<Exception>(() =>
+            {
+                ConsoleAssert.Expect(view, () =>
+                {
+                    System.Console.Write("Hello World\r");
+                }, NormalizeOptions.None);
+            });
         }
 
         [TestMethod]
