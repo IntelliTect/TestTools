@@ -3,6 +3,7 @@ using IntelliTect.TestTools.Selenate;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System;
 
 namespace GoogleSearch
 {
@@ -13,7 +14,7 @@ namespace GoogleSearch
             Browser = browser;
         }
 
-        public string URL => "https://www.google.com";
+        public static Uri URL => new Uri("https://www.google.com");
 
         // Below selector works as of 9/16/2019. Monitor to see if the first div selector changes when the doodle changes
         public IWebElement GoogleSearchButton => Browser.FindElement(By.CssSelector("div[class^='FPdoLc'] input[aria-label='Google Search']"));

@@ -8,6 +8,7 @@ using System.IO;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Edge;
+using System.Diagnostics;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -145,22 +146,33 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="file">The fully qualified or relative name of the file to save the screenshot.</param>
         public void TakeScreenshot(FileInfo file)
         {
+            if(file == null)
+            {
+                Debug.WriteLine($"Skipping TakeScreenshot. Argument {nameof(file)} was null.");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(file.FullName))
             {
-                Console.WriteLine($"Skipping TakeScreenshot. FileInfo handed into method had no valid full name.");
+                Debug.WriteLine("Skipping TakeScreenshot. FileInfo handed into method had no valid full name.");
                 return;
             }
 
             if (!file.Directory.Exists)
             {
-                Console.WriteLine($"Skipping TakeScreenshot. Path does not exist: {file.FullName}");
+                Debug.WriteLine($"Skipping TakeScreenshot. Path does not exist: {file.FullName}");
                 return;
+            }
+
+            if(file.Exists)
+            {
+                file.Delete();
             }
 
             if (Driver is ITakesScreenshot takeScreenshot)
             {
                 Screenshot screenshot = takeScreenshot.GetScreenshot();
-                Console.WriteLine($"Saving screenshot to location: {file.FullName}");
+                Debug.WriteLine($"Saving screenshot to location: {file.FullName}");
                 screenshot?.SaveAsFile(file.FullName, ScreenshotImageFormat.Png);
             }
         }
@@ -237,8 +249,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             Driver?.Quit();
 
-            IWebDriver driver = null;
-
+            IWebDriver driver;
             switch (browser)
             {
                 case BrowserType.Chrome:
@@ -268,9 +279,11 @@ namespace IntelliTect.TestTools.Selenate
                     driver = new FirefoxDriver(Directory.GetCurrentDirectory(), ffOptions);
                     break;
                 case BrowserType.Edge:
-                    EdgeOptions edgeOptions = new EdgeOptions();
-                    edgeOptions.UseInPrivateBrowsing = true;
-                    edgeOptions.UnhandledPromptBehavior = UnhandledPromptBehavior.Accept;
+                    EdgeOptions edgeOptions = new EdgeOptions
+                    {
+                        UseInPrivateBrowsing = true,
+                        UnhandledPromptBehavior = UnhandledPromptBehavior.Accept
+                    };
                     driver = new EdgeDriver(Directory.GetCurrentDirectory(), edgeOptions);
                     break;
                 case BrowserType.HeadlessChrome:

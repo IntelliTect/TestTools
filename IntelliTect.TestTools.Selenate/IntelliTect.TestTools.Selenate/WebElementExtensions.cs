@@ -54,6 +54,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="pixelsFromTopOfScreen">The number of pixels to scroll from the top of the screen. More will put the element farther down on the screen</param>
         public static void ScrollIntoView(this IWebElement element, IWebDriver driver, int pixelsFromTopOfScreen = 200)
         {
+            if (element == null) throw new ArgumentNullException(nameof(element));
+            if (driver == null) throw new ArgumentNullException(nameof(driver));
+
             int position = element.Location.Y - pixelsFromTopOfScreen;
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
             js.ExecuteScript($"window.scrollTo(0,{position})");
@@ -67,6 +70,8 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="value">Value to send to the element</param>
         public static void SendKeysReplace(this IWebElement element, string value)
         {
+            if (element == null) throw new ArgumentNullException(nameof(element));
+
             element.Clear();
             element.SendKeys(value);
             if (element.GetAttribute("value") != value)
@@ -87,6 +92,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="secondsToTry">Timeout, in seconds, to wait for.</param>
         public static void SendKeysAndTabWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
+            if (element == null) throw new ArgumentNullException(nameof(element));
+            if (driver == null) throw new ArgumentNullException(nameof(driver));
+
             SendKeysWhenReady(element, driver, value, secondsToTry);
             element.SendKeys(Keys.Tab);
         }
@@ -102,6 +110,9 @@ namespace IntelliTect.TestTools.SelenateExtensions
         /// <param name="secondsToTry">Timeout, in seconds, to wait for.</param>
         public static void SendKeysWhenReady(this IWebElement element, IWebDriver driver, string value, int secondsToTry = 5)
         {
+            if (element == null) throw new ArgumentNullException(nameof(element));
+            if (driver == null) throw new ArgumentNullException(nameof(driver));
+
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),

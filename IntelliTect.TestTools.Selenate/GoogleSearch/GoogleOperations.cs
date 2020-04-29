@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using System.Linq;
 using IntelliTect.TestTools.Selenate;
+using System;
 
 namespace GoogleSearch
 {
@@ -8,14 +9,14 @@ namespace GoogleSearch
     {
         public GoogleOperations(GoogleBrowser browser)
         {
-            Browser = browser;
+            Browser = browser ?? throw new ArgumentNullException(nameof(browser));
             Harness = new GoogleHarness(Browser);
             Element = new ElementHandler(Browser.Driver);
         }
 
         public bool SearchForItem(string searchItem)
         {
-            Browser.Driver.Navigate().GoToUrl(Harness.URL);
+            Browser.Driver.Navigate().GoToUrl(GoogleHarness.URL);
             Element.WaitForEnabledState(Harness.SearchInput);
             Element.SendKeysWhenReady(Harness.SearchInput, searchItem);
             Harness.SearchInput.SendKeys(Keys.Return);
