@@ -69,6 +69,18 @@ namespace IntelliTect.TestTools.Console.Tests
         }
 
         [TestMethod]
+        public void ConsoleTester_ExplicitStrippingExplicitly_VT100Stripped()
+        {
+            string input = "\u001b[49mMontoya";
+            string expected = "Montoya";
+
+            ConsoleAssert.Expect(expected, () =>
+            {
+                System.Console.Write(input);
+            }, NormalizeOptions.StripAnsiEscapeCodes);
+        }
+
+        [TestMethod]
         public void GivenStringLiteral_ExpectedOutputNormalized_OutputMatches()
         {
             const string view = @"Begin

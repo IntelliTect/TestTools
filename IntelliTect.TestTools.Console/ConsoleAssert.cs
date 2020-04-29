@@ -44,8 +44,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="normalizeOptions">Options to normalize input and expected output</param>
         public static string Expect(string expected,
             Action action, 
-            NormalizeOptions normalizeOptions 
-                = NormalizeOptions.NormalizeLineEndings | NormalizeOptions.StripAnsiEscapeCodes)
+            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeAll)
         {
             return Expect(expected, 
                 action, 
@@ -93,7 +92,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="normalizeOptions">Options to normalize input and expected output</param>
         public static string Expect(string expected, 
             Action<string[]> action, 
-            NormalizeOptions normalizeOptions, 
+            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeAll, 
             params string[] args)
         {
             return Expect(expected, 
@@ -122,7 +121,7 @@ namespace IntelliTect.TestTools.Console
         public static void Expect<T>(string expected, Func<string[], T> func, T expectedReturn = default, params string[] args)
         {
             T @return = default;
-            Expect(expected, () => @return = func(args), NormalizeOptions.None);
+            Expect(expected, () => @return = func(args));
 
             if (!expectedReturn.Equals(@return))
             {
@@ -182,7 +181,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="func">Method to be run</param>
         /// <param name="args">Args to pass to the function.</param>
         public static void Expect(string expected, Action<string[]> func, params string[] args) =>
-            Expect(expected, () => func(args), NormalizeOptions.NormalizeLineEndings);
+            Expect(expected, () => func(args));
 
         /// <summary>
         /// Performs a unit test on a console-based method. A "view" of
@@ -198,7 +197,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the result of <paramref name="action"/> does not match the <paramref name="expected"/> value</param>
         private static string Expect(
             string expected, Action action, Func<string, string, bool> comparisonOperator,
-            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeLineEndings, 
+            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeAll, 
             string equivalentOperatorErrorMessage= "Values are not equal")
         {
             (string input, string output) = Parse(expected);
@@ -238,13 +237,37 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">Method to be run</param>
         /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
         /// <param name="escapeCharacter">The escape character for the wildcard caracters.  Default is '\'.</param>
+        [Obsolete]
         public static string ExpectLike(string expected, Action action, 
-            bool normalizeLineEndings = true, char escapeCharacter = '\\')
+            bool normalizeLineEndings, char escapeCharacter = '\\')
         {
             return Expect(expected, 
                 action, 
                 (pattern, output) => output.IsLike(pattern, escapeCharacter),
                 normalizeLineEndings ? NormalizeOptions.NormalizeLineEndings : NormalizeOptions.None, 
+                "The values are not like (using wildcards) each other");
+        }
+        
+        /// <summary>
+        /// Performs a unit test on a console-based method. A "view" of
+        /// what a user would see in their console is provided as a string,
+        /// where their input (including line-breaks) is surrounded by double
+        /// less-than/greater-than signs, like so: "Input please: &lt;&lt;Input&gt;&gt;"
+        /// </summary>
+        /// <param name="expected">Expected "view" to be seen on the console,
+        /// including both input and output</param>
+        /// <param name="action">Method to be run</param>
+        /// <param name="normalizeLineEndings">Whether differences in line ending styles should be ignored.</param>
+        /// <param name="escapeCharacter">The escape character for the wildcard caracters.  Default is '\'.</param>
+        public static string ExpectLike(string expected, 
+            Action action, 
+            NormalizeOptions normalizeLineEndings = NormalizeOptions.NormalizeAll, 
+            char escapeCharacter = '\\')
+        {
+            return Expect(expected, 
+                action, 
+                (pattern, output) => output.IsLike(pattern, escapeCharacter),
+                normalizeLineEndings, 
                 "The values are not like (using wildcards) each other");
         }
 
@@ -286,10 +309,13 @@ namespace IntelliTect.TestTools.Console
         /// <param name="areEquivalentOperator">delegate for comparing the expected from actual output.</param>
         /// <param name="normalizeOptions">Options to normalize input and expected output</param>
         /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the <paramref name="areEquivalentOperator"/> returns false</param>
-        private static string Execute(string givenInput, string expectedOutput, Action action,
-            Func<string, string, bool> areEquivalentOperator, 
-            NormalizeOptions normalizeOptions, string equivalentOperatorErrorMessage = "Values are not equal"
-            )
+        private static string Execute(string givenInput,
+            string expectedOutput,
+            Action action,
+            Func<string, string, bool> areEquivalentOperator,
+            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeAll,
+            string equivalentOperatorErrorMessage = "Values are not equal"
+        )
         {
             string output = Execute(givenInput, action);
 
