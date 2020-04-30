@@ -44,7 +44,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="normalizeOptions">Options to normalize input and expected output</param>
         public static string Expect(string expected,
             Action action, 
-            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeAll)
+            NormalizeOptions normalizeOptions = NormalizeOptions.Default)
         {
             return Expect(expected, 
                 action, 
@@ -92,7 +92,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="normalizeOptions">Options to normalize input and expected output</param>
         public static string Expect(string expected, 
             Action<string[]> action, 
-            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeAll, 
+            NormalizeOptions normalizeOptions = NormalizeOptions.Default, 
             params string[] args)
         {
             return Expect(expected, 
@@ -197,7 +197,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="equivalentOperatorErrorMessage">A textual description of the message if the result of <paramref name="action"/> does not match the <paramref name="expected"/> value</param>
         private static string Expect(
             string expected, Action action, Func<string, string, bool> comparisonOperator,
-            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeAll, 
+            NormalizeOptions normalizeOptions = NormalizeOptions.Default, 
             string equivalentOperatorErrorMessage= "Values are not equal")
         {
             (string input, string output) = Parse(expected);
@@ -261,7 +261,7 @@ namespace IntelliTect.TestTools.Console
         /// <param name="escapeCharacter">The escape character for the wildcard caracters.  Default is '\'.</param>
         public static string ExpectLike(string expected, 
             Action action, 
-            NormalizeOptions normalizeLineEndings = NormalizeOptions.NormalizeAll, 
+            NormalizeOptions normalizeLineEndings = NormalizeOptions.Default, 
             char escapeCharacter = '\\')
         {
             return Expect(expected, 
@@ -313,7 +313,7 @@ namespace IntelliTect.TestTools.Console
             string expectedOutput,
             Action action,
             Func<string, string, bool> areEquivalentOperator,
-            NormalizeOptions normalizeOptions = NormalizeOptions.NormalizeAll,
+            NormalizeOptions normalizeOptions = NormalizeOptions.Default,
             string equivalentOperatorErrorMessage = "Values are not equal"
         )
         {

@@ -16,7 +16,7 @@ namespace IntelliTect.TestTools.Console
         /// <summary>
         /// Apply all available normalization (currently NormalizeLineEndings and StripAnsiEscapeCodes).
         /// </summary>
-        NormalizeAll = NormalizeLineEndings | StripAnsiEscapeCodes,
+        Default = NormalizeLineEndings | StripAnsiEscapeCodes,
 
         /// <summary>
         /// Whether differences in line ending styles should be ignored.
