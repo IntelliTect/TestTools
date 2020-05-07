@@ -95,17 +95,16 @@ End";
             string expected = $@"*
 Pinging * ?::1? with 32 bytes of data:
 Reply from ::1: time*";
-//            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-//            {
-//                expected = $@"
 
-//Pinging * ?::1? with 32 bytes of data:
-//Reply from ::1: time*";
-//            }
+            string pingArgs = "-c 4 localhost";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                pingArgs = pingArgs.Replace("-c ", "-n ");
+            }
 
             ConsoleAssert.ExecuteProcess(
                 expected,
-                "ping.exe", "-n 4 localhost", out string standardOutput, out _);
+                "ping.exe", pingArgs, out string standardOutput, out _);
             Assert.IsTrue(standardOutput.ToLower().IsLike($"*{ Environment.MachineName.ToLower()}*"));
         }
 
