@@ -122,7 +122,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
 
             for ( int i = 0; i < 5; i++ )
             {
-                wait.Until( c =>
+                wait.Until( _ =>
                 {
                     element.Clear();
                     return true;
