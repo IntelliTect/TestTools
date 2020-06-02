@@ -25,8 +25,7 @@ namespace GoogleSearch
 
         public bool FindSearchResultItem(string result)
         {
-            var headers = Harness.SearchResultsHeadersList;
-            return Browser.WaitUntil(() => headers.Any(h => h.Text == result), 5);
+            return Browser.WaitUntil(() => Harness.SearchResultsHeadersList.Any(h => h.Text == result), 5);
         }
 
         public bool GoToHomePage()

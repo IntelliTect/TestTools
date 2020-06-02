@@ -73,7 +73,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
-            return wait.Until(f => Driver.FindElement(by));
+            return wait.Until(f => f.FindElement(by));
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace IntelliTect.TestTools.Selenate
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
             try
             {
-                return wait.Until(f => Driver.FindElements(by));
+                return wait.Until(f => f.FindElements(by));
             }
             catch (WebDriverTimeoutException)
             {
@@ -112,7 +112,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(InvalidElementStateException));
             try
             {
-                if ( wait.Until( f => func() ) )
+                if ( wait.Until( _ => func() ) )
                 {
                     return true;
                 }
@@ -187,7 +187,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.IgnoreExceptionTypes(typeof(NoSuchWindowException));
-            wait.Until(w => Driver.SwitchTo().Window(title));
+            wait.Until(w => w.SwitchTo().Window(title));
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.IgnoreExceptionTypes(typeof(NoAlertPresentException), typeof(UnhandledAlertException));
-            return wait.Until( a => Driver.SwitchTo().Alert() );
+            return wait.Until( a => a.SwitchTo().Alert() );
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace IntelliTect.TestTools.Selenate
             foreach (By by in bys)
             {
                 IWebElement element = FindElement(by);
-                wait.Until(f => Driver.SwitchTo().Frame(element));
+                wait.Until(f => f.SwitchTo().Frame(element));
             }
         }
 

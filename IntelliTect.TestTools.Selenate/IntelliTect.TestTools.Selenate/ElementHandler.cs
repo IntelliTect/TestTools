@@ -35,7 +35,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(NoSuchElementException));
 
             // Worth wrapping in a try/catch and throwing inner exception?
-            wait.Until(c =>
+            wait.Until(_ =>
             {
                 element.Click();
                 return true;
@@ -58,7 +58,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(InvalidElementStateException),
                 typeof(NoSuchElementException));
 
-            wait.Until(sk => {
+            wait.Until(_ => {
                 element.Clear();
                 element.SendKeys(textToSend);
                 System.Threading.Tasks.Task.Delay(250).Wait();
@@ -82,7 +82,7 @@ namespace IntelliTect.TestTools.Selenate
 
             try
             {
-                return wait.Until(d => element.Displayed);
+                return wait.Until(_ => element.Displayed);
             }
             catch (WebDriverException ex)
                 when (ex.InnerException is ElementNotVisibleException
@@ -108,13 +108,13 @@ namespace IntelliTect.TestTools.Selenate
 
             try
             {
-                return wait.Until(d => element.Enabled);
+                return wait.Until(_ => element.Enabled);
             }
             catch(WebDriverException ex)
                 when (ex.InnerException is ElementNotInteractableException)
             {
                 return false;
-            }            
+            }
         }
 
         private IWebDriver Driver { get; set; }
