@@ -117,6 +117,6 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
-        private IWebDriver Driver { get; set; }
+        private IWebDriver Driver { get; }
     }
 }

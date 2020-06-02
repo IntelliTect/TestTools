@@ -26,7 +26,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
                 typeof(NoSuchElementException),
                 typeof(StaleElementReferenceException));
 
-            return wait.Until( f => element.FindElement( by ) );
+            return wait.Until( _ => element.FindElement( by ) );
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
                 typeof(NoSuchElementException),
                 typeof(StaleElementReferenceException));
 
-            return wait.Until(f => element.FindElements(by));
+            return wait.Until(_ => element.FindElements(by));
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
                     return true;
                 } );
 
-                wait.Until( s =>
+                wait.Until( _ =>
                 {
                     element.SendKeys( value );
                     return true;
@@ -155,7 +155,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
                 typeof(NoSuchElementException));
 
             // Worth wrapping in a try/catch and throwing inner exception?
-            wait.Until(c =>
+            wait.Until(_ =>
             {
                 element.Click();
                 return true;

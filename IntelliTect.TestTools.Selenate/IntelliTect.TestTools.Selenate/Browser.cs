@@ -164,10 +164,7 @@ namespace IntelliTect.TestTools.Selenate
                 return;
             }
 
-            if(file.Exists)
-            {
-                file.Delete();
-            }
+            file.Delete();
 
             if (Driver is ITakesScreenshot takeScreenshot)
             {
