@@ -37,7 +37,7 @@ namespace IntelliTect.TestTools.Console.Tests
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.Write("Hello World");
-            });
+            }, NormalizeOptions.None);
         }
 
         [TestMethod]
@@ -48,7 +48,36 @@ namespace IntelliTect.TestTools.Console.Tests
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.WriteLine("Hello World");
-            }, true);
+            });
+        }
+
+        [TestMethod]
+        [DataRow("\u001b[49mMontoya", "Montoya", true)]
+        [DataRow("Inigo\u001b[49mMontoya", "InigoMontoya", true)]
+        [DataRow("Inigo\u001b[49m", "Inigo", true)]
+        [DataRow("\u001b[49m", "", true)]
+        [DataRow("\u001b[101mMontoya", "Montoya", true)]
+        [DataRow("\u001b[101mMontoya", "\u001b[101mMontoya", false)]
+        public void ConsoleTester_StringWithVT100Characters_VT100Stripped(string input, 
+            string expected, 
+            bool stripVT100)
+        {
+            ConsoleAssert.Expect(expected, () =>
+            {
+                System.Console.WriteLine(input);
+            });
+        }
+
+        [TestMethod]
+        public void ConsoleTester_ExplicitStrippingExplicitly_VT100Stripped()
+        {
+            string input = "\u001b[49mMontoya";
+            string expected = "Montoya";
+
+            ConsoleAssert.Expect(expected, () =>
+            {
+                System.Console.Write(input);
+            }, NormalizeOptions.StripAnsiEscapeCodes);
         }
 
         [TestMethod]
@@ -62,7 +91,7 @@ End";
                 System.Console.WriteLine("Begin");
                 System.Console.WriteLine("Middle");
                 System.Console.WriteLine("End");
-            }, true);
+            });
         }
 
         [TestMethod]
@@ -73,7 +102,21 @@ End";
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.Write("Hello World");
-            }, true);
+            });
+        }
+        
+        [TestMethod]
+        public void ConsoleTester_HelloWorld_DontNormalizeCRLF()
+        {
+            const string view = "Hello World\r\n";
+            
+            Assert.ThrowsException<Exception>(() =>
+            {
+                ConsoleAssert.Expect(view, () =>
+                {
+                    System.Console.Write("Hello World\r");
+                }, NormalizeOptions.None);
+            });
         }
 
         [TestMethod]
@@ -85,7 +128,7 @@ End";
             ConsoleAssert.Expect(view, () =>
             {
                 System.Console.WriteLine("Hello World");
-            });
+            }, NormalizeOptions.None);
         }
 
         [TestMethod]
