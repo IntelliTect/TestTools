@@ -8,6 +8,7 @@ using System.IO;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Edge;
+using System.Diagnostics;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -72,7 +73,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
-            return wait.Until(f => Driver.FindElement(by));
+            return wait.Until(f => f.FindElement(by));
         }
 
         /// <summary>
@@ -87,7 +88,7 @@ namespace IntelliTect.TestTools.Selenate
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
             try
             {
-                return wait.Until(f => Driver.FindElements(by));
+                return wait.Until(f => f.FindElements(by));
             }
             catch (WebDriverTimeoutException)
             {
@@ -111,7 +112,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(InvalidElementStateException));
             try
             {
-                if ( wait.Until( f => func() ) )
+                if ( wait.Until( _ => func() ) )
                 {
                     return true;
                 }
@@ -145,22 +146,30 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="file">The fully qualified or relative name of the file to save the screenshot.</param>
         public void TakeScreenshot(FileInfo file)
         {
+            if(file == null)
+            {
+                Debug.WriteLine($"Skipping TakeScreenshot. Argument {nameof(file)} was null.");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(file.FullName))
             {
-                Console.WriteLine($"Skipping TakeScreenshot. FileInfo handed into method had no valid full name.");
+                Debug.WriteLine("Skipping TakeScreenshot. FileInfo handed into method had no valid full name.");
                 return;
             }
 
             if (!file.Directory.Exists)
             {
-                Console.WriteLine($"Skipping TakeScreenshot. Path does not exist: {file.FullName}");
+                Debug.WriteLine($"Skipping TakeScreenshot. Path does not exist: {file.FullName}");
                 return;
             }
+
+            file.Delete();
 
             if (Driver is ITakesScreenshot takeScreenshot)
             {
                 Screenshot screenshot = takeScreenshot.GetScreenshot();
-                Console.WriteLine($"Saving screenshot to location: {file.FullName}");
+                Debug.WriteLine($"Saving screenshot to location: {file.FullName}");
                 screenshot?.SaveAsFile(file.FullName, ScreenshotImageFormat.Png);
             }
         }
@@ -175,7 +184,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.IgnoreExceptionTypes(typeof(NoSuchWindowException));
-            wait.Until(w => Driver.SwitchTo().Window(title));
+            wait.Until(w => w.SwitchTo().Window(title));
         }
 
         /// <summary>
@@ -187,7 +196,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
             wait.IgnoreExceptionTypes(typeof(NoAlertPresentException), typeof(UnhandledAlertException));
-            return wait.Until( a => Driver.SwitchTo().Alert() );
+            return wait.Until( a => a.SwitchTo().Alert() );
         }
 
         /// <summary>
@@ -210,7 +219,7 @@ namespace IntelliTect.TestTools.Selenate
             foreach (By by in bys)
             {
                 IWebElement element = FindElement(by);
-                wait.Until(f => Driver.SwitchTo().Frame(element));
+                wait.Until(f => f.SwitchTo().Frame(element));
             }
         }
 
@@ -237,8 +246,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             Driver?.Quit();
 
-            IWebDriver driver = null;
-
+            IWebDriver driver;
             switch (browser)
             {
                 case BrowserType.Chrome:
@@ -268,9 +276,11 @@ namespace IntelliTect.TestTools.Selenate
                     driver = new FirefoxDriver(Directory.GetCurrentDirectory(), ffOptions);
                     break;
                 case BrowserType.Edge:
-                    EdgeOptions edgeOptions = new EdgeOptions();
-                    edgeOptions.UseInPrivateBrowsing = true;
-                    edgeOptions.UnhandledPromptBehavior = UnhandledPromptBehavior.Accept;
+                    EdgeOptions edgeOptions = new EdgeOptions
+                    {
+                        UseInPrivateBrowsing = true,
+                        UnhandledPromptBehavior = UnhandledPromptBehavior.Accept
+                    };
                     driver = new EdgeDriver(Directory.GetCurrentDirectory(), edgeOptions);
                     break;
                 case BrowserType.HeadlessChrome:

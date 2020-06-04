@@ -15,7 +15,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="driver">The driver to use for polling</param>
         public ElementHandler(IWebDriver driver)
         {
-            this._Driver = driver;
+            this.Driver = driver;
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="secondsToTry">The seconds to wait for the element to be in a valid state before failing</param>
         public void ClickElementWhenReady(IWebElement element, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),
                 typeof(ElementNotInteractableException),
@@ -35,7 +35,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(NoSuchElementException));
 
             // Worth wrapping in a try/catch and throwing inner exception?
-            wait.Until(c =>
+            wait.Until(_ =>
             {
                 element.Click();
                 return true;
@@ -50,7 +50,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="secondsToTry">The seconds to wait for the element to be in a valid state before failing</param>
         public void SendKeysWhenReady(IWebElement element, string textToSend, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),
                 typeof(ElementNotInteractableException),
@@ -58,7 +58,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(InvalidElementStateException),
                 typeof(NoSuchElementException));
 
-            wait.Until(sk => {
+            wait.Until(_ => {
                 element.Clear();
                 element.SendKeys(textToSend);
                 System.Threading.Tasks.Task.Delay(250).Wait();
@@ -74,7 +74,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
         public bool WaitForVisibleState(IWebElement element, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotVisibleException),
                 typeof(StaleElementReferenceException),
@@ -82,7 +82,7 @@ namespace IntelliTect.TestTools.Selenate
 
             try
             {
-                return wait.Until(d => element.Displayed);
+                return wait.Until(_ => element.Displayed);
             }
             catch (WebDriverException ex)
                 when (ex.InnerException is ElementNotVisibleException
@@ -100,7 +100,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
         public bool WaitForEnabledState(IWebElement element, int secondsToTry = 5)
         {
-            WebDriverWait wait = new WebDriverWait(_Driver, TimeSpan.FromSeconds(secondsToTry));
+            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToTry));
             wait.IgnoreExceptionTypes(
                 typeof(ElementNotInteractableException),
                 typeof(StaleElementReferenceException),
@@ -108,15 +108,15 @@ namespace IntelliTect.TestTools.Selenate
 
             try
             {
-                return wait.Until(d => element.Enabled);
+                return wait.Until(_ => element.Enabled);
             }
             catch(WebDriverException ex)
                 when (ex.InnerException is ElementNotInteractableException)
             {
                 return false;
-            }            
+            }
         }
 
-        private IWebDriver _Driver { get; set; }
+        private IWebDriver Driver { get; }
     }
 }
