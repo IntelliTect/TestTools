@@ -1,4 +1,6 @@
-﻿namespace IntelliTect.TestTools.Data.Test
+﻿using System.Collections.Generic;
+
+namespace IntelliTect.TestTools.Data.Test
 {
     public class Person
     {
@@ -7,5 +9,7 @@
         public string Name { get; set; }
 
         public int Age { get; set; }
+
+        public ICollection<BlogPost> BlogPosts { get; set; }
     }
 }

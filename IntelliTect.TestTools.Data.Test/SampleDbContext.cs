@@ -6,6 +6,8 @@ namespace IntelliTect.TestTools.Data.Test
     {
         public DbSet<Person> Persons { get; set; }
 
+        public DbSet<BlogPost> BlogPosts { get; set; }
+
         public SampleDbContext(DbContextOptions options) : base(options)
         {
         }
