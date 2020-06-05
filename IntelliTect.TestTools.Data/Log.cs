@@ -5,10 +5,10 @@ namespace IntelliTect.TestTools.Data
 {
     public class Log
     {
-        private readonly LogLevel _LogLevel;
-        private readonly EventId _EventId;
-        private readonly object _State;
-        private readonly Exception _Exception;
+        public LogLevel LogLevel { get; }
+        public EventId EventId { get; }
+        public object State { get; }
+        public Exception Exception { get; }
 
         public Log(
             LogLevel logLevel,
@@ -16,10 +16,10 @@ namespace IntelliTect.TestTools.Data
             object state,
             Exception exception)
         {
-            _LogLevel = logLevel;
-            _EventId = eventId;
-            _State = state;
-            _Exception = exception;
+            LogLevel = logLevel;
+            EventId = eventId;
+            State = state;
+            Exception = exception;
         }
     }
 }

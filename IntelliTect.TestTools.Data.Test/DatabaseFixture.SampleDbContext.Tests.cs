@@ -55,6 +55,7 @@ namespace IntelliTect.TestTools.Data.Test
                 .GetInMemoryLoggers()["Microsoft.EntityFrameworkCore.Database.Command"];
 
             Assert.NotEmpty(logger.Logs);
+            Assert.NotEqual(0, logger.Logs.First().EventId);
         }
 
         [Fact]

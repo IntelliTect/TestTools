@@ -9,11 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.TestTools.Data
 {
-    public class DatabaseFixture<T> : IDisposable where T : DbContext
+    public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbContext
     {
         private SqliteConnection SqliteConnection { get; }
 
-        private Lazy<DbContextOptions<T>> Options { get; }
+        private Lazy<DbContextOptions<TDbContext>> Options { get; }
 
         private IServiceProvider ServiceProvider { get; set; }
 
@@ -22,7 +22,7 @@ namespace IntelliTect.TestTools.Data
             SqliteConnection = new SqliteConnection("DataSource=:memory:");
             SqliteConnection.Open();
 
-            Options = new Lazy<DbContextOptions<T>>(() => new DbContextOptionsBuilder<T>()
+            Options = new Lazy<DbContextOptions<TDbContext>>(() => new DbContextOptionsBuilder<TDbContext>()
                 .UseSqlite(SqliteConnection)
                 .EnableSensitiveDataLogging()
                 .UseLoggerFactory(GetLoggerFactory())
@@ -31,11 +31,6 @@ namespace IntelliTect.TestTools.Data
 
         public event EventHandler<ILoggingBuilder> BeforeLoggingSetup;
 
-        private void OnLoggingSetup(ILoggingBuilder builder)
-        {
-            BeforeLoggingSetup?.Invoke(this, builder);
-        }
-
         private ILoggerFactory GetLoggerFactory()
         {
             var serviceCollection = new ServiceCollection();
@@ -43,10 +38,7 @@ namespace IntelliTect.TestTools.Data
             {
                 builder.AddInMemory();
 
-                if (BeforeLoggingSetup is {})
-                {
-                    OnLoggingSetup(builder);
-                }
+                BeforeLoggingSetup?.Invoke(this, builder);;
             });
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
@@ -55,9 +47,9 @@ namespace IntelliTect.TestTools.Data
                 .GetService<ILoggerFactory>();
         }
 
-        private T CreateNewContext()
+        private TDbContext CreateNewContext()
         {
-            var constructorInfo = typeof(T)
+            var constructorInfo = typeof(TDbContext)
                 .GetConstructors()
                 .Where(x =>
                 {
@@ -69,13 +61,13 @@ namespace IntelliTect.TestTools.Data
             if (constructorInfo is null)
             {
                 throw new InvalidOperationException(
-                    $"'{typeof(T)}' must contain a constructor that has a single parameter " +
+                    $"'{typeof(TDbContext)}' must contain a constructor that has a single parameter " +
                     $"of type '{typeof(DbContextOptions)}'");
             }
 
             bool alreadyCreated = Options.IsValueCreated;
 
-            var db = (T) constructorInfo.Invoke(new object[]{ Options.Value });
+            var db = (TDbContext) constructorInfo.Invoke(new object[]{ Options.Value });
 
             if (!alreadyCreated)
             {
@@ -85,7 +77,7 @@ namespace IntelliTect.TestTools.Data
             return db;
         }
 
-        public async Task PerformDatabaseOperation(Func<T, Task> operation)
+        public async Task PerformDatabaseOperation(Func<TDbContext, Task> operation)
         {
             var db = CreateNewContext();
             await operation(db);
