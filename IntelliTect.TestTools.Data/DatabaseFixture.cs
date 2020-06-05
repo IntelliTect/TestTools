@@ -82,8 +82,10 @@ namespace IntelliTect.TestTools.Data
 
         /// <summary>
         /// Creates new instance of TDBContext and executes database operation.
-        /// This avoids issues where reusing the same DbContext can result in cached objects being returning,
-        /// suppressing problems.
+        /// This avoids issues where reusing the same DbContext can result in cached objects being returned,
+        /// suppressing issues with your LINQ to SQL code.
+        /// At minimum the Arrange/Act/Assert portions should each invoke this method separately, but more invocations
+        /// of this method should be preferred whenever possible.
         /// </summary>
         /// <param name="operation">The database operation to be performed</param>
         public async Task PerformDatabaseOperation(Func<TDbContext, Task> operation)
