@@ -7,13 +7,13 @@ namespace IntelliTect.TestTools.Data
     {
         public LogLevel LogLevel { get; }
         public EventId EventId { get; }
-        public object State { get; }
+        public object? State { get; }
         public Exception Exception { get; }
 
         public Log(
             LogLevel logLevel,
             EventId eventId,
-            object state,
+            object? state,
             Exception exception)
         {
             LogLevel = logLevel;

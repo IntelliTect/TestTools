@@ -15,7 +15,7 @@ namespace IntelliTect.TestTools.Data
 
         private Lazy<DbContextOptions<TDbContext>> Options { get; }
 
-        private IServiceProvider ServiceProvider { get; set; }
+        private IServiceProvider? ServiceProvider { get; set; }
 
         public DatabaseFixture()
         {
@@ -29,7 +29,7 @@ namespace IntelliTect.TestTools.Data
                 .Options);
         }
 
-        public event EventHandler<ILoggingBuilder> BeforeLoggingSetup;
+        public event EventHandler<ILoggingBuilder>? BeforeLoggingSetup;
 
         private ILoggerFactory GetLoggerFactory()
         {
