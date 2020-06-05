@@ -1,66 +1,116 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.TestTools.Data
 {
-    public class DatabaseFixture<T> where T : DbContext
+    public class DatabaseFixture<T> : IDisposable where T : DbContext
     {
         private SqliteConnection SqliteConnection { get; }
-        private DbContextOptions<T> Options { get; }
+
+        private Lazy<DbContextOptions<T>> Options { get; }
+
+        private IServiceProvider ServiceProvider { get; set; }
 
         public DatabaseFixture()
         {
             SqliteConnection = new SqliteConnection("DataSource=:memory:");
             SqliteConnection.Open();
 
-            Options = new DbContextOptionsBuilder<T>()
+            Options = new Lazy<DbContextOptions<T>>(() => new DbContextOptionsBuilder<T>()
                 .UseSqlite(SqliteConnection)
-                .Options;
+                .EnableSensitiveDataLogging()
+                .UseLoggerFactory(GetLoggerFactory())
+                .Options);
+        }
 
-            using var db = CreateNewContext();
-            db.Database.EnsureCreated();
+        public event EventHandler<ILoggingBuilder> BeforeLoggingSetup;
+
+        private void OnLoggingSetup(ILoggingBuilder builder)
+        {
+            BeforeLoggingSetup?.Invoke(this, builder);
+        }
+
+        private ILoggerFactory GetLoggerFactory()
+        {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging(builder =>
+            {
+                builder.AddInMemory();
+
+                if (BeforeLoggingSetup is {})
+                {
+                    OnLoggingSetup(builder);
+                }
+            });
+
+            ServiceProvider = serviceCollection.BuildServiceProvider();
+
+            return ServiceProvider
+                .GetService<ILoggerFactory>();
         }
 
         private T CreateNewContext()
         {
-            var constructor = typeof(T)
+            var constructorInfo = typeof(T)
                 .GetConstructors()
-                .Select(x => x.GetParameters())
-                .Where(x => x.Length == 1)
-                .Select(x => x.SingleOrDefault())
-                .Where(x => x != null)
-                .SingleOrDefault(x => x.ParameterType == typeof(DbContextOptions));
+                .Where(x =>
+                {
+                    var parameters = x.GetParameters();
+                    return parameters.Length == 1 && parameters[0].ParameterType == typeof(DbContextOptions);
+                })
+                .SingleOrDefault();
 
-            if (constructor is null)
+            if (constructorInfo is null)
             {
                 throw new InvalidOperationException(
                     $"'{typeof(T)}' must contain a constructor that has a single parameter " +
-                    "of type 'DbContextOptions'");
+                    $"of type '{typeof(DbContextOptions)}'");
             }
 
-            var db = Activator.CreateInstance(typeof(T), Options);
+            bool alreadyCreated = Options.IsValueCreated;
 
-            if (db is null)
+            var db = (T) constructorInfo.Invoke(new object[]{ Options.Value });
+
+            if (!alreadyCreated)
             {
-                throw new InvalidOperationException($"'{typeof(T)} could not be instantiated");
+                db.Database.EnsureCreated();
             }
 
-            return (T) db;
+            return db;
         }
 
-        public async Task PerformDatabaseOperationAsync(Func<T, Task> operation)
+        public async Task PerformDatabaseOperation(Func<T, Task> operation)
         {
             var db = CreateNewContext();
             await operation(db);
         }
 
-        public void PerformDatabaseOperation(Action<T> operation)
+        public ConcurrentDictionary<string,InMemoryLogger> GetInMemoryLoggers()
         {
-            var db = CreateNewContext();
-            operation(db);
+            if (ServiceProvider is null)
+            {
+                throw new InvalidOperationException("ServiceCollection is not yet initialized. " +
+                                                    "Perform some database operation to initialize loggers");
+            }
+
+            if (!(ServiceProvider.GetService<ILoggerProvider>() is InMemoryLoggerProvider loggerProvider))
+            {
+                throw new InvalidOperationException($"{typeof(ILoggerProvider)} of type " +
+                                                    $"{typeof(InMemoryLoggerProvider)} could not be found.");
+            }
+
+            return loggerProvider.GetLoggers();
+        }
+
+        public void Dispose()
+        {
+            SqliteConnection?.Dispose();
         }
     }
 }
