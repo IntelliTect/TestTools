@@ -29,6 +29,9 @@ namespace IntelliTect.TestTools.Data
                 .Options);
         }
 
+        /// <summary>
+        /// Fired when loggers are being setup. Immediately follows adding the InMemoryLogger
+        /// </summary>
         public event EventHandler<ILoggingBuilder>? BeforeLoggingSetup;
 
         private ILoggerFactory GetLoggerFactory()
@@ -77,12 +80,25 @@ namespace IntelliTect.TestTools.Data
             return db;
         }
 
+        /// <summary>
+        /// Creates new instance of TDBContext and executes database operation.
+        /// This avoids issues where reusing the same DbContext can result in cached objects being returning,
+        /// suppressing problems.
+        /// </summary>
+        /// <param name="operation">The database operation to be performed</param>
         public async Task PerformDatabaseOperation(Func<TDbContext, Task> operation)
         {
             var db = CreateNewContext();
             await operation(db);
         }
 
+        /// <summary>
+        /// If <see cref="InMemoryLogger"/> is configured and DbContext has been accessed at least once, returns a
+        /// Dictionary of all InMemoryLoggers
+        /// </summary>
+        /// <returns>Dictionary with category name, and instance of all InMemoryLoggers</returns>
+        /// <exception cref="InvalidOperationException">InMemoryLogger is not configured, or DbContext has not yet
+        /// been accessed</exception>
         public ConcurrentDictionary<string,InMemoryLogger> GetInMemoryLoggers()
         {
             if (ServiceProvider is null)
