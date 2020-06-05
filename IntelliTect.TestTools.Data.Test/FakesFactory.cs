@@ -42,7 +42,7 @@ namespace IntelliTect.IntelliTime.Data.Test.Util
         {
             Faker<T> faker = _AllFakers.OfType<Faker<T>>().FirstOrDefault();
 
-            if (faker == null)
+            if (faker is null)
             {
                 throw new InvalidOperationException(
                     $"Cannot construct and instance of type '{typeof(T).FullName}'");
