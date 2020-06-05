@@ -7,10 +7,13 @@ namespace IntelliTect.TestTools.Data.Test
     public class DatabaseFixtureBadDbContextTests
     {
         [Fact]
-        public void BadDbContext_MissingCorrectConstructor_ExceptionThrown()
+        public async Task BadDbContext_MissingCorrectConstructor_ExceptionThrown()
         {
             var databaseFixture = new DatabaseFixture<BadDbContext>();
-            databaseFixture.PerformDatabaseOperation(_ => Task.CompletedTask);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await databaseFixture.PerformDatabaseOperation(_ => Task.CompletedTask);
+            });
         }
     }
 }

@@ -16,17 +16,17 @@ namespace IntelliTect.TestTools.Data.Test
         }
 
         [Fact]
-        public void DatabaseFixture_CanPerformDatabaseOperation()
+        public async Task DatabaseFixture_CanPerformDatabaseOperation()
         {
             var person = FakesFactory.Create<Person>();
 
-            _DatabaseFixture.PerformDatabaseOperation(async context =>
+            await _DatabaseFixture.PerformDatabaseOperation(async context =>
             {
                 await context.Persons.AddAsync(person);
                 await context.SaveChangesAsync();
             });
 
-            _DatabaseFixture.PerformDatabaseOperation(context =>
+            await _DatabaseFixture.PerformDatabaseOperation(context =>
             {
                 var personInDatabase = context.Persons.SingleOrDefault();
 
@@ -39,11 +39,11 @@ namespace IntelliTect.TestTools.Data.Test
         }
 
         [Fact]
-        public void DatabaseFixture_EFInMemoryLoggingEnabled_LogsPopulated()
+        public async Task DatabaseFixture_EFInMemoryLoggingEnabled_LogsPopulated()
         {
             var person = FakesFactory.Create<Person>();
 
-            _DatabaseFixture.PerformDatabaseOperation(async context =>
+            await _DatabaseFixture.PerformDatabaseOperation(async context =>
             {
                 await context.Persons.AddAsync(person);
                 await context.SaveChangesAsync();
