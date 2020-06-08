@@ -101,7 +101,7 @@ namespace IntelliTect.TestTools.Data
         /// <returns>Dictionary with category name, and instance of all InMemoryLoggers</returns>
         /// <exception cref="InvalidOperationException">InMemoryLogger is not configured, or DbContext has not yet
         /// been accessed</exception>
-        public ConcurrentDictionary<string,InMemoryLogger> GetInMemoryLoggers()
+        public ConcurrentDictionary<string, InMemoryLogger> GetInMemoryLoggers()
         {
             if (ServiceProvider is null)
             {
