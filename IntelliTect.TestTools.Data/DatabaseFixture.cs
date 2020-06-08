@@ -111,8 +111,8 @@ namespace IntelliTect.TestTools.Data
 
             if (!(ServiceProvider.GetService<ILoggerProvider>() is InMemoryLoggerProvider loggerProvider))
             {
-                throw new InvalidOperationException($"{typeof(ILoggerProvider)} of type " +
-                                                    $"{typeof(InMemoryLoggerProvider)} could not be found.");
+                throw new InvalidOperationException($"{typeof(ILoggerProvider).FullName} of type " +
+                                                    $"{typeof(InMemoryLoggerProvider).FullName} could not be found.");
             }
 
             return loggerProvider.GetLoggers();
