@@ -388,15 +388,15 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public ExampleTestBlockWithConstructorForOwnType(ExampleDataThing input)
         {
-            _Input = input;
+            Input = input;
         }
 
         public void Execute()
         {
-            Assert.Equal("Testing", _Input.Testing);
+            Assert.Equal("Testing", Input.Testing);
         }
 
-        private ExampleDataThing _Input { get; }
+        private ExampleDataThing Input { get; }
     }
 
     public class ExampleTestBlockForFactoryWithExecuteArg : ITestBlock

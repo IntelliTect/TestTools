@@ -2,5 +2,6 @@
 {
     public interface ITestBlock
     {
+        //public ILogger Logger { get; }
     }
 }

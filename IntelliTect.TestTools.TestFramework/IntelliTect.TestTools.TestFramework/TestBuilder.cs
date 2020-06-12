@@ -86,6 +86,7 @@ namespace IntelliTect.TestTools.TestFramework
         /// <returns>This</returns>
         public TestBuilder AddDependencyInstance(object objToAdd)
         {
+            if (objToAdd == null) throw new ArgumentNullException(nameof(objToAdd));
             // Need to add some testing around this to see if it behaves in a similarly odd fashion as AddLogger when running tests in parallel
             Services.AddSingleton(objToAdd.GetType(), objToAdd);
             return this;
@@ -139,7 +140,7 @@ namespace IntelliTect.TestTools.TestFramework
                         SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
                         if (TestBlockException != null) break;
 
-                        MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
+                        MethodInfo execute = GetExecuteMethod(testBlockInstance);
                         if (TestBlockException != null) break;
 
                         var executeArgs = GatherTestBlockArguments(testBlockScope, execute, tb);
@@ -164,7 +165,7 @@ namespace IntelliTect.TestTools.TestFramework
                         SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
                         if (TestBlockException != null) break;
 
-                        MethodInfo execute = GetExecuteMethod(testBlockScope, testBlockInstance);
+                        MethodInfo execute = GetExecuteMethod(testBlockInstance);
                         if (TestBlockException != null) break;
 
                         var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb);
@@ -194,7 +195,7 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        private string GetObjectDataAsJsonString(object obj)
+        private static string GetObjectDataAsJsonString(object obj)
         {
             try
             {
@@ -239,7 +240,7 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        private MethodInfo GetExecuteMethod(IServiceScope scope, object testBlockInstance)
+        private MethodInfo GetExecuteMethod(object testBlockInstance)
         {
             List<MethodInfo> methods = testBlockInstance.GetType().GetMethods().Where(m => m.Name.ToUpperInvariant() == "EXECUTE").ToList();
             if (methods.Count != 1)
