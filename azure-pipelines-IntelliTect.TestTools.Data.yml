@@ -35,8 +35,8 @@ steps:
   inputs:
     solution: '**/IntelliTect.TestTools.Data.sln'
     clean: true
-    configuration: 'Release'
-    msbuildArgs: '-c $(BuildConfiguration) /p:Version=$(version)'
+    configuration: '$(BuildConfiguration)'
+    msbuildArgs: '/p:Version=$(version)'
 
 - task: DotNetCoreCLI@2
   displayName: 'Test'
