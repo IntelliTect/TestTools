@@ -40,7 +40,7 @@ steps:
   displayName: 'Test'
   inputs:
     command: 'test'
-    projects: '$(System.DefaultWorkingDirectory)/IntelliTect.TestTools.Data.Tests/IntelliTect.TestTools.Data.Tests.csproj'
+    projects: '$(System.DefaultWorkingDirectory)/IntelliTect.TestTools.Data.Test/IntelliTect.TestTools.Data.Test.csproj'
 
 - task: PowerShell@2
   displayName: 'dotnet pack'
