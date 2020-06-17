@@ -4,9 +4,7 @@
 # https://aka.ms/yaml
 
 trigger:
-  branches:
-    include:
-      - master
+- master
   paths:
     include:
       - IntelliTect.TestTools.Data/*
@@ -42,8 +40,7 @@ steps:
   displayName: 'Test'
   inputs:
     command: 'test'
-    projects: '**/IntelliTect.TestTools.Data.Tests.csproj'
-    arguments: '-c $(BuildConfiguration)'
+    projects: '$(System.DefaultWorkingDirectory)/IntelliTect.TestTools.Data.Tests/IntelliTect.TestTools.Data.Tests.csproj'
 
 - task: PowerShell@2
   displayName: 'dotnet pack'
