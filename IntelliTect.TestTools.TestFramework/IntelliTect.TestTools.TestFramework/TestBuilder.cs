@@ -129,7 +129,6 @@ namespace IntelliTect.TestTools.TestFramework
 
                 using (var testBlockScope = serviceProvider.CreateScope())
                 {
-                    HashSet<object> testBlockResults = new HashSet<object>();
                     foreach (var tb in TestBlocksAndParams)
                     {
                         if (logger != null) logger.CurrentTestBlock = tb.TestBlockType.ToString();
@@ -183,7 +182,7 @@ namespace IntelliTect.TestTools.TestFramework
                 }
                 else
                 {
-                    logger?.Error($"Test case failed: {TestBlockException.ToString()}");
+                    logger?.Error($"Test case failed: {TestBlockException}");
                 }
             }
             
@@ -246,7 +245,7 @@ namespace IntelliTect.TestTools.TestFramework
             if (methods.Count != 1)
             {
                 TestBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
-                    $"Please review test block {testBlockInstance.GetType().ToString()}.");
+                    $"Please review test block {testBlockInstance.GetType()}.");
                 return null;
             }
 
