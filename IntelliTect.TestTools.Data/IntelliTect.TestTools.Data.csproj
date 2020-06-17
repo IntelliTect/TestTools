@@ -17,10 +17,11 @@
 
     <!-- https://github.com/dotnet/sourcelink/issues/572 -->
     <PropertyGroup>
+        <DefaultLanguageSourceExtension Condition="$(DefaultLanguageSourceExtension) == '' Or $(DefaultLanguageSourceExtension) == '*Undefined*'">.cs</DefaultLanguageSourceExtension>
         <TargetFrameworkMonikerAssemblyAttributesPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)','$(TargetFramework).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
     </PropertyGroup>
     <ItemGroup>
-        <EmbeddedFiles Include="$(GeneratedAssemblyInfoFile)"/>
+        <EmbeddedFiles Include="$(GeneratedAssemblyInfoFile)" />
     </ItemGroup>
 
 </Project>
