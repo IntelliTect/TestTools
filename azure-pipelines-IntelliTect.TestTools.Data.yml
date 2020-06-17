@@ -13,6 +13,7 @@ trigger:
 
 variables:
   version: '0.1.0'
+  BuildConfiguration: Release
 
 pool:
   vmImage: 'windows-latest'
@@ -35,7 +36,7 @@ steps:
     solution: '**/IntelliTect.TestTools.Data.sln'
     clean: true
     configuration: 'Release'
-    msbuildArgs: '/p:Version=$(version)'
+    msbuildArgs: '-c $(BuildConfiguration) /p:Version=$(version)'
 
 - task: DotNetCoreCLI@2
   displayName: 'Test'
@@ -47,7 +48,7 @@ steps:
   displayName: 'dotnet pack'
   inputs:
     targetType: 'inline'
-    script: dotnet pack $(System.DefaultWorkingDirectory)/IntelliTect.TestTools.Data/ --no-build -p:Version="$(version)-ci-$(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)
+    script: dotnet pack $(System.DefaultWorkingDirectory)/IntelliTect.TestTools.Data/ --no-build -c $(BuildConfiguration) -p:Version="$(version)-ci-$(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)
     pwsh: true
 
 - task: PublishBuildArtifacts@1

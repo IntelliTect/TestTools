@@ -21,7 +21,7 @@
         <TargetFrameworkMonikerAssemblyAttributesPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)','$(TargetFramework).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
     </PropertyGroup>
     <ItemGroup>
-        <EmbeddedFiles Include="$(GeneratedAssemblyInfoFile)" />
+        <Compile Remove="*.AssemblyAttributes$(DefaultLanguageSourceExtension)" />
     </ItemGroup>
 
 </Project>
