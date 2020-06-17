@@ -43,6 +43,7 @@ steps:
   inputs:
     command: 'test'
     projects: '**/IntelliTect.TestTools.Data.Tests.csproj'
+    arguments: '-c $(BuildConfiguration)'
 
 - task: PowerShell@2
   displayName: 'dotnet pack'
