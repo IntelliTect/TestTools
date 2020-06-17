@@ -47,7 +47,7 @@ steps:
   displayName: 'dotnet pack'
   inputs:
     targetType: 'inline'
-    script: dotnet pack --no-build -p:Version="$(version)-ci-$(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)
+    script: dotnet pack $(System.DefaultWorkingDirectory)/IntelliTect.TestTools.Data/ --no-build -p:Version="$(version)-ci-$(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)
     pwsh: true
 
 - task: PublishBuildArtifacts@1
