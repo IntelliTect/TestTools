@@ -4,11 +4,24 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <LangVersion>8.0</LangVersion>
         <Nullable>Enable</Nullable>
+
+        <Authors>IntelliTect</Authors>
+
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.4" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.4" />
+    </ItemGroup>
+
+    <!-- https://github.com/dotnet/sourcelink/issues/572 -->
+    <PropertyGroup>
+        <DefaultLanguageSourceExtension Condition="$(DefaultLanguageSourceExtension) == '' Or $(DefaultLanguageSourceExtension) == '*Undefined*'">.cs</DefaultLanguageSourceExtension>
+        <TargetFrameworkMonikerAssemblyAttributesPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)','$(TargetFramework).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Remove="*.AssemblyAttributes$(DefaultLanguageSourceExtension)" />
     </ItemGroup>
 
 </Project>
