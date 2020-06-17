@@ -4,7 +4,12 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - IntelliTect.TestTools.Data/*
 
 variables:
   version: '0.1.0'
@@ -42,7 +47,7 @@ steps:
   displayName: 'dotnet pack'
   inputs:
     targetType: 'inline'
-    script: dotnet pack $(System.DefaultWorkingDirectory)/IntelliTect.TestTools.Data/IntelliTect.TestTools.Data.csproj -p:Version="$(version)-ci-$(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)
+    script: dotnet pack --no-build $(System.DefaultWorkingDirectory)/IntelliTect.TestTools.Data/IntelliTect.TestTools.Data.csproj -p:Version="$(version)-ci-$(Build.BuildId)" -o $(Build.ArtifactStagingDirectory)
     pwsh: true
 
 - task: PublishBuildArtifacts@1
