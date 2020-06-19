@@ -18,12 +18,12 @@ namespace IntelliTect.TestTools.Data
         /// <summary>
         /// Log entry contents.
         /// </summary>
-        public object? State { get; }
+        public object State { get; }
 
         /// <summary>
         /// The exception for the entry.
         /// </summary>
-        public Exception? Exception { get; }
+        public Exception Exception { get; }
 
         /// <summary>
         /// Represents a single log event.
@@ -35,7 +35,7 @@ namespace IntelliTect.TestTools.Data
         public Log(
             LogLevel logLevel,
             EventId eventId,
-            object? state,
+            object state,
             Exception exception)
         {
             LogLevel = logLevel;

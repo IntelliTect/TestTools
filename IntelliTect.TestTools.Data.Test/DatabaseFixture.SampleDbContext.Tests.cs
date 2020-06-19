@@ -24,7 +24,7 @@ namespace IntelliTect.TestTools.Data.Test
 
             await _DatabaseFixture.PerformDatabaseOperation(async context =>
             {
-                await context.Persons.AddAsync(person);
+                context.Persons.Add(person);
                 await context.SaveChangesAsync();
             });
 
@@ -47,7 +47,7 @@ namespace IntelliTect.TestTools.Data.Test
 
             await _DatabaseFixture.PerformDatabaseOperation(async context =>
             {
-                await context.Persons.AddAsync(person);
+                context.Persons.Add(person);
                 await context.SaveChangesAsync();
             });
 
@@ -65,7 +65,7 @@ namespace IntelliTect.TestTools.Data.Test
 
             await _DatabaseFixture.PerformDatabaseOperation(async context =>
             {
-                await context.Persons.AddAsync(person);
+                context.Persons.Add(person);
                 await context.SaveChangesAsync();
             });
 
@@ -80,7 +80,7 @@ namespace IntelliTect.TestTools.Data.Test
 
             await _DatabaseFixture.PerformDatabaseOperation(async context =>
             {
-                await context.BlogPosts.AddRangeAsync(blogPosts);
+                context.BlogPosts.AddRange(blogPosts);
                 await context.SaveChangesAsync();
             });
 
@@ -105,7 +105,7 @@ namespace IntelliTect.TestTools.Data.Test
 
             await _DatabaseFixture.PerformDatabaseOperation(async context =>
             {
-                await context.Persons.AddAsync(person);
+                context.Persons.Add(person);
                 await context.SaveChangesAsync();
             });
 
@@ -120,7 +120,7 @@ namespace IntelliTect.TestTools.Data.Test
 
             await _DatabaseFixture.PerformDatabaseOperation(async context =>
             {
-                await context.BlogPosts.AddRangeAsync(blogPosts);
+                context.BlogPosts.AddRange(blogPosts);
                 await context.SaveChangesAsync();
             });
 
