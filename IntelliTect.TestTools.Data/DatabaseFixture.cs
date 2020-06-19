@@ -57,7 +57,9 @@ namespace IntelliTect.TestTools.Data
                 .Where(x =>
                 {
                     var parameters = x.GetParameters();
-                    return parameters.Length == 1 && parameters[0].ParameterType == typeof(DbContextOptions);
+                    return parameters.Length == 1
+                           && parameters[0].ParameterType == typeof(DbContextOptions<>)
+                               .MakeGenericType(typeof(TDbContext));
                 })
                 .SingleOrDefault();
 
