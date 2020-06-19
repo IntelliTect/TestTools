@@ -43,7 +43,7 @@ namespace IntelliTect.TestTools.Data
         /// </summary>
         public IDisposable BeginScope<TState>(TState state)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }
