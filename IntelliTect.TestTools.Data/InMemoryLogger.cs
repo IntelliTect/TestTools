@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace IntelliTect.TestTools.Data
 {
-    public class InMemoryLogger : ILogger
+    public class InMemoryLogger : ILogger, IDisposable
     {
         /// <summary>
         /// Collection of all Logs recorded by this InMemoryLogger
@@ -43,7 +43,30 @@ namespace IntelliTect.TestTools.Data
         /// </summary>
         public IDisposable BeginScope<TState>(TState state)
         {
-            return null;
+            return this;
+        }
+
+        private bool _Disposed;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_Disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                Logs.Clear();
+            }
+
+            _Disposed = true;
         }
     }
 }

@@ -40,7 +40,7 @@ namespace IntelliTect.TestTools.Data
         {
             LogLevel = logLevel;
             EventId = eventId;
-            State = state;
+            State = state ?? throw new ArgumentNullException(nameof(state));
             Exception = exception;
         }
     }
