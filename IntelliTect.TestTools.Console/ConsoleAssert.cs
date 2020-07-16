@@ -559,4 +559,4 @@ namespace IntelliTect.TestTools.Console
             return process;
         }
     }
-
+}
