@@ -448,8 +448,10 @@ namespace IntelliTect.TestTools.Console
                 provider.GenerateCodeFromExpression(new CodePrimitiveExpression(text), writer, 
                     new CodeGeneratorOptions() { BlankLinesBetweenMembers = false });
                 result = writer.ToString();
-                // Remove extra lines added during code generation (Note: BlankLinesBetweenMembers = false does not suffice)
-                return Regex.Replace(result, @"\s*\+\s*", "");
+		
+		// Remove extra text added during formatting (..realtext" + "realtext..)
+                return Regex.Replace(result, @"""\s+\+\s+""", "");
+
             }
         }
 
