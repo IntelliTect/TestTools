@@ -448,7 +448,7 @@ namespace IntelliTect.TestTools.Console
                 provider.GenerateCodeFromExpression(new CodePrimitiveExpression(text), writer, 
                     new CodeGeneratorOptions() { BlankLinesBetweenMembers = false });
                 result = writer.ToString();
-		
+
 		// Remove extra text added during formatting (..realtext" + "realtext..)
                 return Regex.Replace(result, @"""\s+\+\s+""", "");
 
