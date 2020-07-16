@@ -451,7 +451,6 @@ namespace IntelliTect.TestTools.Console
 
 		// Remove extra text added during formatting (..realtext" + "realtext..)
                 return Regex.Replace(result, @"""\s+\+\s+""", "");
-
             }
         }
 
@@ -560,4 +559,4 @@ namespace IntelliTect.TestTools.Console
             return process;
         }
     }
-}
+
