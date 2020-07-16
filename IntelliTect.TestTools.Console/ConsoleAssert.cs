@@ -449,7 +449,7 @@ namespace IntelliTect.TestTools.Console
                     new CodeGeneratorOptions() { BlankLinesBetweenMembers = false });
                 result = writer.ToString();
 
-		        // Remove extra text added during formatting (..realtext" + "realtext..)
+                // Remove extra text added during formatting (..realtext" + "realtext..)
                 return Regex.Replace(result, @"""\s+\+\s+""", "");
             }
         }
