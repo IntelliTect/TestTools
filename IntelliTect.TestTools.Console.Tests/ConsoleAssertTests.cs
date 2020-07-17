@@ -120,6 +120,21 @@ End";
         }
 
         [TestMethod]
+        public void ConsoleTester_DoesNotStripPluses()
+        {
+            String assert_expect = "C++";
+            String assert_actual = "Not C++";
+
+            Exception exception = Assert.ThrowsException<Exception>(() => {
+                ConsoleAssert.Expect(assert_expect, () => {
+                    System.Console.Write(assert_actual);
+                }, NormalizeOptions.None);
+            });
+            StringAssert.Contains(exception.Message, assert_expect);
+            StringAssert.Contains(exception.Message, assert_actual);
+        }
+
+        [TestMethod]
         public void ConsoleTester_HelloWorld_MissingNewline()
         {
             const string view = @"Hello World
