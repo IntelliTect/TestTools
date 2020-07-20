@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IntelliTect.TestTools.Console;
@@ -120,18 +121,22 @@ End";
         }
 
         [TestMethod]
-        public void ConsoleTester_DoesNotStripPluses()
+        public void ConsoleTester_OutputIncludesPluses_PlusesAreNotStripped()
         {
-            String assert_expect = "C++";
-            String assert_actual = "Not C++";
+            List<string> consoleInputCases = new List<string> {
+                "C++",
+                "word + word",
+                "+hello+world+"
+            };
 
-            Exception exception = Assert.ThrowsException<Exception>(() => {
-                ConsoleAssert.Expect(assert_expect, () => {
-                    System.Console.Write(assert_actual);
-                }, NormalizeOptions.None);
-            });
-            StringAssert.Contains(exception.Message, assert_expect);
-            StringAssert.Contains(exception.Message, assert_actual);
+            foreach (string consoleInput in consoleInputCases) {
+                Exception exception = Assert.ThrowsException<Exception>(() => {
+                    ConsoleAssert.Expect(consoleInput, () => {
+                        System.Console.Write(""); // Always fail
+                    }, NormalizeOptions.None);
+                });
+                StringAssert.Contains(exception.Message, consoleInput);
+            }
         }
 
         [TestMethod]
