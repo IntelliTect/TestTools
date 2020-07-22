@@ -121,22 +121,17 @@ End";
         }
 
         [TestMethod]
-        public void ConsoleTester_OutputIncludesPluses_PlusesAreNotStripped()
+        [DataRow("C++")]
+        [DataRow("word + word")]
+        [DataRow("+hello+world+")]
+        public void ConsoleTester_OutputIncludesPluses_PlusesAreNotStripped(string consoleInput)
         {
-            List<string> consoleInputCases = new List<string> {
-                "C++",
-                "word + word",
-                "+hello+world+"
-            };
-
-            foreach (string consoleInput in consoleInputCases) {
-                Exception exception = Assert.ThrowsException<Exception>(() => {
-                    ConsoleAssert.Expect(consoleInput, () => {
-                        System.Console.Write(""); // Always fail
-                    }, NormalizeOptions.None);
-                });
-                StringAssert.Contains(exception.Message, consoleInput);
-            }
+            Exception exception = Assert.ThrowsException<Exception>(() => {
+                ConsoleAssert.Expect(consoleInput, () => {
+                    System.Console.Write(""); // Always fail
+                }, NormalizeOptions.None);
+            });
+            StringAssert.Contains(exception.Message, consoleInput);
         }
 
         [TestMethod]
