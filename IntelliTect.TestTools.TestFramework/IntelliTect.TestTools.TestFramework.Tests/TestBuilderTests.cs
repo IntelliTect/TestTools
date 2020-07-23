@@ -344,15 +344,15 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public ExampleTestBlockWithConstructor(string input)
         {
-            _Input = input;
+            Input = input;
         }
 
         public void Execute()
         {
-            Assert.Equal("Testing", _Input);
+            Assert.Equal("Testing", Input);
         }
 
-        private string _Input { get; }
+        private string Input { get; }
     }
 
     public class ExampleTestBlockWithMultipleDependencies : ITestBlock
@@ -370,6 +370,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public void Execute(ExampleDataThing input)
         {
+            if (input == null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("Testing", input.Testing);
         }
     }
@@ -388,21 +389,22 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public ExampleTestBlockWithConstructorForOwnType(ExampleDataThing input)
         {
-            _Input = input;
+            Input = input;
         }
 
         public void Execute()
         {
-            Assert.Equal("Testing", _Input.Testing);
+            Assert.Equal("Testing", Input.Testing);
         }
 
-        private ExampleDataThing _Input { get; }
+        private ExampleDataThing Input { get; }
     }
 
     public class ExampleTestBlockForFactoryWithExecuteArg : ITestBlock
     {
         public void Execute(ExampleDataThing input)
         {
+            if (input == null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("TestingOverride", input.Testing);
         }
     }
@@ -421,15 +423,15 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public ExampleTestBlockForFactoryWithConstructor(ExampleDataThing input)
         {
-            _Input = input;
+            Input = input;
         }
 
         public void Execute()
         {
-            Assert.Equal("TestingOverride", _Input.Testing);
+            Assert.Equal("TestingOverride", Input.Testing);
         }
 
-        private ExampleDataThing _Input { get; }
+        private ExampleDataThing Input { get; }
     }
 
     public class ExampleTestBlockWithPropertyWithNoSetter : ITestBlock
@@ -459,6 +461,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public void Execute(ILogger log)
         {
+            if (log == null) throw new ArgumentNullException(nameof(log));
             log.Debug("This should throw");
         }
     }
