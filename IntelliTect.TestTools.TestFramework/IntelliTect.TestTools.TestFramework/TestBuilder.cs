@@ -86,7 +86,7 @@ namespace IntelliTect.TestTools.TestFramework
         /// <returns>This</returns>
         public TestBuilder AddDependencyInstance(object objToAdd)
         {
-            if (objToAdd == null) throw new ArgumentNullException(nameof(objToAdd));
+            if (objToAdd is null) throw new ArgumentNullException(nameof(objToAdd));
             // Need to add some testing around this to see if it behaves in a similarly odd fashion as AddLogger when running tests in parallel
             Services.AddSingleton(objToAdd.GetType(), objToAdd);
             return this;
