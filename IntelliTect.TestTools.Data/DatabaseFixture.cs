@@ -15,7 +15,7 @@ namespace IntelliTect.TestTools.Data
 
         private Lazy<DbContextOptions<TDbContext>> Options { get; }
 
-        private IServiceProvider? ServiceProvider { get; set; }
+        private IServiceProvider ServiceProvider { get; set; }
 
         public DatabaseFixture()
         {
@@ -32,7 +32,7 @@ namespace IntelliTect.TestTools.Data
         /// <summary>
         /// Fired when loggers are being setup. Immediately follows adding the InMemoryLogger
         /// </summary>
-        public event EventHandler<ILoggingBuilder>? BeforeLoggingSetup;
+        public event EventHandler<ILoggingBuilder> BeforeLoggingSetup;
 
         private ILoggerFactory GetLoggerFactory()
         {
