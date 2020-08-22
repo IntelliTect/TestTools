@@ -33,14 +33,6 @@ namespace IntelliTect.TestTools.Selenate
     public class Browser : IDisposable
     {
         /// <summary>
-        /// Initializes a Selenium webdriver in Chrome with some basic settings that work for many websites
-        /// </summary>
-        public Browser()
-        {
-            Driver = InitDriver(BrowserType.Chrome);
-        }
-
-        /// <summary>
         /// Initializes a Selenium webdriver of the specified browser type with some basic settings that work for many websites
         /// </summary>
         /// <param name="browser">The type of browser to instantiate when initializing Selenium Webdriver</param>
@@ -67,8 +59,67 @@ namespace IntelliTect.TestTools.Selenate
         /// Wraps the Selenium Driver's native web element to wait until the element exists before returning.
         /// </summary>
         /// <param name="by">Selenium "By" statement to find the element</param>
+        /// <param name="elem">Selenium "By" statement to find the element</param>
+        /// <param name="secondsToTry">Seconds to wait while retrying before failing</param>
+        /// <returns></returns>
+        public bool TryFindElement(By by, out IWebElement elem, int secondsToTry = 15)
+        {
+            DefaultWait<IWebDriver> wait = new DefaultWait<IWebDriver>(Driver);
+            wait.PollingInterval = TimeSpan.FromMilliseconds(100);
+            wait.Timeout = TimeSpan.FromSeconds(secondsToTry);
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+
+            try
+            {
+                elem = wait.Until(d =>
+                {
+                    return d.FindElement(by);
+                });
+                return true;
+            }
+            catch(WebDriverException ex) when (ex.InnerException.GetType() == typeof(NoSuchElementException))
+            {
+                elem = null;
+                return false;
+            } 
+        }
+
+        /// <summary>
+        /// Wraps the Selenium Driver's native web element to wait until the element exists before returning.
+        /// </summary>
+        /// <param name="by">Selenium "By" statement to find the element</param>
+        /// <param name="elems">Selenium "By" statement to find the element</param>
+        /// <param name="secondsToTry">Seconds to wait while retrying before failing</param>
+        /// <returns></returns>
+        public bool TryFindElements(By by, out IReadOnlyList<IWebElement> elems, int secondsToTry = 15)
+        {
+            DefaultWait<IWebDriver> wait = new DefaultWait<IWebDriver>(Driver);
+            wait.PollingInterval = TimeSpan.FromMilliseconds(100);
+            wait.Timeout = TimeSpan.FromSeconds(secondsToTry);
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+
+            try
+            {
+                elems = wait.Until(d =>
+                {
+                    return d.FindElements(by);
+                });
+                return true;
+            }
+            catch (WebDriverException ex) when (ex.InnerException.GetType() == typeof(NoSuchElementException))
+            {
+                elems = Array.Empty<IWebElement>();
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Wraps the Selenium Driver's native web element to wait until the element exists before returning.
+        /// </summary>
+        /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
+        [Obsolete("Obsoleting in favor of using ElementHandler methods for basic implementations, or custom implementations for complex scenarios.")]
         public IWebElement FindElement(By by, int secondsToWait = 15)
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
@@ -82,6 +133,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="by">Selenium "By" statement to find the element</param>
         /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
         /// <returns></returns>
+        [Obsolete("Obsoleting in favor of using ElementHandler methods for basic implementations, or custom implementations for complex scenarios")]
         public IReadOnlyCollection<IWebElement> FindElements(By by, int secondsToWait = 15)
         {
             WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
@@ -102,6 +154,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="func">Function to evaluate</param>
         /// <param name="secondsToWait">Seconds to wait until timeout / return false</param>
         /// <returns></returns>
+        [Obsolete("Obsoleting in favor of using ElementHandler methods for basic implementations, or custom implementations for complex scenarios")]
         public bool WaitUntil(Func<bool> func, int secondsToWait = 15)
         {
             WebDriverWait wait = new WebDriverWait( Driver, TimeSpan.FromSeconds( secondsToWait ) );
@@ -218,7 +271,9 @@ namespace IntelliTect.TestTools.Selenate
             // See if restarting the whole search like we currently do on PTT is necessary, or if we can just wait for something to finish loading
             foreach (By by in bys)
             {
+#pragma warning disable CS0618 // Type or member is obsolete. Will be replaced by new method once complete.
                 IWebElement element = FindElement(by);
+#pragma warning restore CS0618 // Type or member is obsolete
                 wait.Until(f => f.SwitchTo().Frame(element));
             }
         }
