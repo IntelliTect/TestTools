@@ -18,16 +18,7 @@ namespace IntelliTect.TestTools.Selenate
             this.Driver = driver;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public ElementHandler(Browser browser)
-        {
-            Browser = browser;
-        }
-
         private IWebDriver Driver { get; }
-        private Browser Browser { get; }
 
         /// <summary>
         /// 
@@ -49,11 +40,6 @@ namespace IntelliTect.TestTools.Selenate
             // Worth wrapping in a try/catch and returning false if not successful?
             wait.Until(d =>
             {
-                if(Browser.TryFindElement(locator, out IWebElement elemt))
-                {
-                    elemt.Click();
-                    return true;
-                }
                 d.FindElement(locator).Click();
                 return true;
             });
