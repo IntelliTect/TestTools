@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Reflection;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -92,10 +93,11 @@ namespace IntelliTect.TestTools.Selenate
             wait.Until(d =>
             {
                 IWebElement elem = d.FindElement(locator);
-                elem.Clear();
+                //elem.Clear();
                 elem.SendKeys(textToSend);
-                System.Threading.Tasks.Task.Delay(100).Wait();
-                return elem.GetAttribute("value") == textToSend;
+                //System.Threading.Tasks.Task.Delay(100).Wait();
+                //return elem.GetAttribute("value") == textToSend;
+                return true;
             });
         }
 

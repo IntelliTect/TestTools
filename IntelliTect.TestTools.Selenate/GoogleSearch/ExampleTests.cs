@@ -10,17 +10,26 @@ namespace GoogleSearch
     [TestClass]
     public class ExampleTests
     {
+        private GoogleBrowser Browser { get; set; }
+        private GoogleOperations Google { get; set; }
+        //private GoogleHarness Harness { get; set; }
+        private ElementHandler Element { get; set; }
+
         [TestInitialize]
         public void Setup()
         {
             Browser = new GoogleBrowser(BrowserType.Chrome);
             Google = new GoogleOperations(Browser);
-            Harness = new GoogleHarness(Browser);
+            Element = new ElementHandler(Browser.Driver);
+            //Harness = new GoogleHarness();
         }
+
+        
 
         [TestMethod]
         public void SearchForSeleniumOnGoogle()
         {
+            Google.NavigateToGoogle();
             Assert.IsTrue(Google.SearchForItem("selenium browser automation"), 
                 "No search results displayed when they were expected");
             Assert.IsTrue(Google.FindSearchResultItem("SeleniumHQ Browser Automation"),
@@ -30,6 +39,7 @@ namespace GoogleSearch
         [TestMethod]
         public void VerifySeleniumDoesNotExistForElement()
         {
+            Google.NavigateToGoogle();
             Google.SearchForItem("selenium element");
             Assert.IsFalse(Google.FindSearchResultItem("Selenium - Web Browser Automation"),
                 "Found a specific search result for Selenium - Web Browser Automation when none was expected");
@@ -38,9 +48,10 @@ namespace GoogleSearch
         [TestMethod]
         public void ReturnToHomepage()
         {
+            Google.NavigateToGoogle();
             Google.SearchForItem("selenium automation");
             Google.GoToHomePage();
-            Assert.IsFalse(Browser.WaitUntil(() => Harness.SearchResultsDiv.Displayed),
+            Assert.IsTrue(Element.WaitForInvisibleState(GoogleHarness.SearchResultsDiv),
                 "Search results displayed when they were not expected");
         }
 
@@ -57,9 +68,5 @@ namespace GoogleSearch
             Browser.TakeScreenshot(file);
             Browser.Dispose();
         }
-
-        private GoogleBrowser Browser { get; set; }
-        private GoogleOperations Google { get; set; }
-        private GoogleHarness Harness { get; set; }
     }
 }

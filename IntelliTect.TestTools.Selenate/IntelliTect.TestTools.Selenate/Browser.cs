@@ -55,6 +55,10 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         public IWebDriver Driver { get; }
 
+
+
+        // IS THIS WORTH IT?
+
         /// <summary>
         /// Wraps the Selenium Driver's native web element to wait until the element exists before returning.
         /// </summary>
@@ -83,6 +87,10 @@ namespace IntelliTect.TestTools.Selenate
                 return false;
             } 
         }
+
+
+
+        // IS THIS WORTH IT?
 
         /// <summary>
         /// Wraps the Selenium Driver's native web element to wait until the element exists before returning.
@@ -113,36 +121,45 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
+
+        // IS THIS WORTH IT?
+
         /// <summary>
         /// Wraps the Selenium Driver's native web element to wait until the element exists before returning.
         /// </summary>
         /// <param name="by">Selenium "By" statement to find the element</param>
-        /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
+
         /// <returns></returns>
-        [Obsolete("Obsoleting in favor of using ElementHandler methods for basic implementations, or custom implementations for complex scenarios.")]
-        public IWebElement FindElement(By by, int secondsToWait = 15)
+        /// [Obsolete("Obsoleting in favor of using ElementHandler methods for basic implementations, or custom implementations for complex scenarios")]
+        public IWebElement FindElement(By by/*, int secondsToWait = 15*/)
         {
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
-            return wait.Until(f => f.FindElement(by));
+            try
+            {
+                return Driver.FindElement(by);
+            }
+            catch(NoSuchElementException)
+            {
+                return null;
+            }
         }
+
+
+        // IS THIS WORTH IT?
 
         /// <summary>
         /// Wraps the Selenium Driver's native web element to wait until at least one element exists before returning.
         /// </summary>
         /// <param name="by">Selenium "By" statement to find the element</param>
-        /// <param name="secondsToWait">Seconds to wait while retrying before failing</param>
+
         /// <returns></returns>
         [Obsolete("Obsoleting in favor of using ElementHandler methods for basic implementations, or custom implementations for complex scenarios")]
-        public IReadOnlyCollection<IWebElement> FindElements(By by, int secondsToWait = 15)
+        public IReadOnlyCollection<IWebElement> FindElements(By by/*, int secondsToWait = 15*/)
         {
-            WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(secondsToWait));
-            wait.IgnoreExceptionTypes(typeof(NoSuchElementException), typeof(StaleElementReferenceException));
             try
             {
-                return wait.Until(f => f.FindElements(by));
+                return Driver.FindElements(by);
             }
-            catch (WebDriverTimeoutException)
+            catch (NoSuchElementException)
             {
                 return Array.Empty<IWebElement>();
             }

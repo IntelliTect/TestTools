@@ -2,6 +2,7 @@
 using System.Linq;
 using IntelliTect.TestTools.Selenate;
 using System;
+using OpenQA.Selenium.Support.UI;
 
 namespace GoogleSearch
 {
@@ -10,32 +11,46 @@ namespace GoogleSearch
         public GoogleOperations(GoogleBrowser browser)
         {
             Browser = browser ?? throw new ArgumentNullException(nameof(browser));
-            Harness = new GoogleHarness(Browser);
             Element = new ElementHandler(Browser.Driver);
+        }
+
+        public bool NavigateToGoogle()
+        {
+            Browser.Driver.Navigate().GoToUrl(GoogleHarness.URL);
+            return Element.WaitForEnabledState(GoogleHarness.SearchInput);
         }
 
         public bool SearchForItem(string searchItem)
         {
-            Browser.Driver.Navigate().GoToUrl(GoogleHarness.URL);
-            Element.WaitForEnabledState(Harness.SearchInput);
-            Element.SendKeysWhenReady(Harness.SearchInput, searchItem);
-            Harness.SearchInput.SendKeys(Keys.Return);
-            return Element.WaitForVisibleState(Harness.SearchResultsDiv);
+            Element.SendKeysWhenReady(GoogleHarness.SearchInput, searchItem);
+            Element.SendKeysWhenReady(GoogleHarness.SearchInput, Keys.Return);
+            return Element.WaitForVisibleState(GoogleHarness.SearchResultsDiv);
         }
 
         public bool FindSearchResultItem(string result)
         {
-            return Browser.WaitUntil(() => Harness.SearchResultsHeadersList.Any(h => h.Text == result), 5);
+            // Use custom wait due to needing a Any() call on the FindElements result.
+            DefaultWait<IWebDriver> wait = new DefaultWait<IWebDriver>(Browser.Driver);
+            wait.PollingInterval = TimeSpan.FromMilliseconds(100);
+            wait.Timeout = TimeSpan.FromSeconds(5);
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            try
+            {
+                return wait.Until(d => d.FindElements(GoogleHarness.SearchResultsHeadersList).Any(h => h.Text == result));
+            }
+            catch(WebDriverTimeoutException)
+            {
+                return false;
+            }
         }
 
         public bool GoToHomePage()
         {
-            Element.ClickElementWhenReady(Harness.GoHomeButton);
-            return Element.WaitForVisibleState(Harness.GoogleSearchButton);
+            Element.ClickElementWhenReady(GoogleHarness.GoHomeButton);
+            return Element.WaitForVisibleState(GoogleHarness.GoogleSearchButton);
         }
 
         private GoogleBrowser Browser { get; }
-        private GoogleHarness Harness { get; }
         private ElementHandler Element { get; }
     }
 }

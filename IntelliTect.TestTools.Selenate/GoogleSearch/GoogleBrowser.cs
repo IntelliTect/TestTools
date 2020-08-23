@@ -11,7 +11,7 @@ namespace GoogleSearch
         {
         }
 
-        public IWebElement FindElement(By by)
+        public new IWebElement FindElement(By by)
         {
             return Find(by);
         }
