@@ -93,11 +93,39 @@ namespace IntelliTect.TestTools.Selenate
             wait.Until(d =>
             {
                 IWebElement elem = d.FindElement(locator);
-                //elem.Clear();
                 elem.SendKeys(textToSend);
-                //System.Threading.Tasks.Task.Delay(100).Wait();
-                //return elem.GetAttribute("value") == textToSend;
                 return true;
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="locator"></param>
+        /// <param name="textToSend"></param>
+        /// <param name="secondsToTry"></param>
+        public void ReplaceText(By locator, string textToSend, int secondsToTry = 5)
+        {
+            DefaultWait<IWebDriver> wait = new DefaultWait<IWebDriver>(Driver);
+            wait.PollingInterval = TimeSpan.FromMilliseconds(100);
+            wait.Timeout = TimeSpan.FromSeconds(secondsToTry);
+            wait.IgnoreExceptionTypes(
+                typeof(NoSuchElementException),
+                typeof(InvalidElementStateException),
+                typeof(ElementNotVisibleException),
+                typeof(StaleElementReferenceException),
+                typeof(ElementNotInteractableException)
+                );
+            // Worth wrapping in a try/catch and returning false if not successful?
+            wait.Until(d =>
+            {
+                // NEED TO HANDLE KEYS.ENTER, KEYS.F1, ETC. HERE
+                IWebElement elem = d.FindElement(locator);
+                elem.Clear();
+                elem.SendKeys(textToSend);
+                System.Threading.Tasks.Task.Delay(100).Wait();
+                return elem.GetAttribute("value") == textToSend;
+                //return true;
             });
         }
 
