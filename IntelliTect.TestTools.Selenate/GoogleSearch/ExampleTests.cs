@@ -47,13 +47,18 @@ namespace GoogleSearch
         [TestMethod]
         public void TakeScreenshotSavesFile()
         {
-            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.Delete(path, true);
+            string path = Path.Combine(Path.GetTempPath(), "screenshots");
+            if(Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
 
             Google.SearchForItem("selenium automation");
             Browser.TakeScreenshot();
             var files = Directory.GetFiles(path);
             Assert.AreEqual(1, files.Length);
+
+            Directory.Delete(path, true);
         }
 
         [TestMethod]
@@ -63,7 +68,10 @@ namespace GoogleSearch
                 Path.Combine(Directory.GetCurrentDirectory(),
                 "screenshot",
                 $"{((RemoteWebDriver)Browser.Driver).Capabilities.GetCapability("browserName")}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
-            Directory.Delete(file.Directory.FullName, true);
+            if (Directory.Exists(file.Directory.FullName))
+            {
+                Directory.Delete(file.Directory.FullName, true);
+            }
 
             Google.SearchForItem("selenium automation");
 
@@ -71,6 +79,8 @@ namespace GoogleSearch
             Browser.TakeScreenshot(file);
             var files = Directory.GetFiles(file.Directory.FullName);
             Assert.AreEqual(1, files.Length);
+
+            Directory.Delete(file.Directory.FullName, true);
         }
 
         [TestCleanup]
