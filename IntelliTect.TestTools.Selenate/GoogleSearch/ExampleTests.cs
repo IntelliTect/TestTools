@@ -51,7 +51,7 @@ namespace GoogleSearch
             Google.NavigateToGoogle();
             Google.SearchForItem("selenium automation");
             Google.GoToHomePage();
-            Assert.IsTrue(Element.WaitForInvisibleState(GoogleFrontPage.SearchResultsDiv),
+            Assert.IsTrue(Element.WaitForInvisibleState(GoogleSearchResultsPage.SearchResultsDiv),
                 "Search results displayed when they were not expected");
         }
 

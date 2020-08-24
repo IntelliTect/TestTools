@@ -178,7 +178,7 @@ namespace IntelliTect.TestTools.Selenate
                     return elem.Displayed;
                 });
             }
-            catch (WebDriverException ex)
+            catch (WebDriverTimeoutException ex)
                 when (ex.InnerException is NoSuchElementException)
             {
                 return false;
@@ -197,7 +197,6 @@ namespace IntelliTect.TestTools.Selenate
             wait.PollingInterval = TimeSpan.FromMilliseconds(100);
             wait.Timeout = TimeSpan.FromSeconds(secondsToTry);
             wait.IgnoreExceptionTypes(
-                typeof(NoSuchElementException),
                 typeof(StaleElementReferenceException)
                 );
 
@@ -209,8 +208,7 @@ namespace IntelliTect.TestTools.Selenate
                     return !elem.Displayed;
                 });
             }
-            catch (WebDriverException ex)
-                when (ex.InnerException is NoSuchElementException)
+            catch (NoSuchElementException)
             {
                 return true;
             }
@@ -267,7 +265,7 @@ namespace IntelliTect.TestTools.Selenate
                     return elem.Enabled;
                 });
             }
-            catch (WebDriverException ex)
+            catch (WebDriverTimeoutException ex)
                 when (ex.InnerException is NoSuchElementException)
             {
                 return false;
@@ -298,7 +296,7 @@ namespace IntelliTect.TestTools.Selenate
                     return !elem.Enabled;
                 });
             }
-            catch (WebDriverException ex)
+            catch (WebDriverTimeoutException ex)
                 when (ex.InnerException is NoSuchElementException)
             {
                 return true;
