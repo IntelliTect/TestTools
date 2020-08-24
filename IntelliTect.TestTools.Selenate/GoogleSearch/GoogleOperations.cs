@@ -16,15 +16,15 @@ namespace GoogleSearch
 
         public bool NavigateToGoogle()
         {
-            Browser.Driver.Navigate().GoToUrl(GoogleHarness.URL);
-            return Element.WaitForEnabledState(GoogleHarness.SearchInput);
+            Browser.Driver.Navigate().GoToUrl(GoogleFrontPage.URL);
+            return Element.WaitForEnabledState(GoogleFrontPage.SearchInput);
         }
 
         public bool SearchForItem(string searchItem)
         {
-            Element.SendKeysWhenReady(GoogleHarness.SearchInput, searchItem);
-            Element.SendKeysWhenReady(GoogleHarness.SearchInput, Keys.Return);
-            return Element.WaitForVisibleState(GoogleHarness.SearchResultsDiv);
+            Element.SendKeysWhenReady(GoogleFrontPage.SearchInput, searchItem);
+            Element.SendKeysWhenReady(GoogleFrontPage.SearchInput, Keys.Return);
+            return Element.WaitForVisibleState(GoogleSearchResultsPage.SearchResultsDiv);
         }
 
         public bool FindSearchResultItem(string result)
@@ -36,7 +36,7 @@ namespace GoogleSearch
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             try
             {
-                return wait.Until(d => d.FindElements(GoogleHarness.SearchResultsHeadersList).Any(h => h.Text == result));
+                return wait.Until(d => d.FindElements(GoogleSearchResultsPage.SearchResultsHeadersList).Any(h => h.Text == result));
             }
             catch(WebDriverTimeoutException)
             {
@@ -46,8 +46,8 @@ namespace GoogleSearch
 
         public bool GoToHomePage()
         {
-            Element.ClickElementWhenReady(GoogleHarness.GoHomeButton);
-            return Element.WaitForVisibleState(GoogleHarness.GoogleSearchButton);
+            Element.ClickElementWhenReady(GoogleSearchResultsPage.GoHomeButton);
+            return Element.WaitForVisibleState(GoogleFrontPage.GoogleSearchButton);
         }
 
         private GoogleBrowser Browser { get; }
