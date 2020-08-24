@@ -44,17 +44,48 @@ namespace GoogleSearch
                 "Search results displayed when they were not expected");
         }
 
+        [TestMethod]
+        public void TakeScreenshotSavesFile()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "screenshots");
+            if(Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+
+            Google.SearchForItem("selenium automation");
+            Browser.TakeScreenshot();
+            var files = Directory.GetFiles(path);
+            Assert.AreEqual(1, files.Length);
+
+            Directory.Delete(path, true);
+        }
+
+        [TestMethod]
+        public void TakeScreenshotWithPathSavesFile()
+        {
+            FileInfo file = new FileInfo(
+                Path.Combine(Directory.GetCurrentDirectory(),
+                "screenshot",
+                $"{((RemoteWebDriver)Browser.Driver).Capabilities.GetCapability("browserName")}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
+            if (Directory.Exists(file.Directory.FullName))
+            {
+                Directory.Delete(file.Directory.FullName, true);
+            }
+
+            Google.SearchForItem("selenium automation");
+
+            Directory.CreateDirectory(file.DirectoryName);
+            Browser.TakeScreenshot(file);
+            var files = Directory.GetFiles(file.Directory.FullName);
+            Assert.AreEqual(1, files.Length);
+
+            Directory.Delete(file.Directory.FullName, true);
+        }
+
         [TestCleanup]
         public void Teardown()
         {
-            // Two ways to take screenshots.
-            Browser.TakeScreenshot();
-            FileInfo file = new FileInfo(
-                Path.Combine(Directory.GetCurrentDirectory(), 
-                "screenshot", 
-                $"{((RemoteWebDriver)Browser.Driver).Capabilities.BrowserName}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
-            Directory.CreateDirectory(file.DirectoryName);
-            Browser.TakeScreenshot(file);
             Browser.Dispose();
         }
 
