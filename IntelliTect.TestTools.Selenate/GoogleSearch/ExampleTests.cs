@@ -47,7 +47,7 @@ namespace GoogleSearch
         [TestMethod]
         public void TakeScreenshotSavesFile()
         {
-            string path = Path.Combine("C:", "temp", "screenshots");
+            string path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.Delete(path, true);
 
             Google.SearchForItem("selenium automation");
