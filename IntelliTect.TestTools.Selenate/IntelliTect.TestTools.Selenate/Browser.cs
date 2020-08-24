@@ -196,15 +196,14 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// Take a screenshot of the browser, and save it to a "screenshots"
-        /// directory inside the current working directory.
+        /// Take a screenshot of the browser, and save it to the current users temp directory, in a screenshots subdirectory.
         /// </summary>
         public void TakeScreenshot()
         {
             FileInfo file = new FileInfo(
-                Path.Combine("C:\\Temp", 
+                Path.Combine(Path.GetTempPath(), 
                 "screenshots", 
-                $"{((RemoteWebDriver)Driver).Capabilities.BrowserName}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
+                $"{((RemoteWebDriver)Driver).Capabilities.GetCapability("browserName")}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
             Directory.CreateDirectory(file.DirectoryName);
             TakeScreenshot(file);
         }
