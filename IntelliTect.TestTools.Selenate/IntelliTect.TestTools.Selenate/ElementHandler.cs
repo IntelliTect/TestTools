@@ -154,6 +154,11 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
+
+        // TO DO: Fix new WaitForVisible and WaitForInvisible methods.
+        // Currently if the elem.Displayed returns false, we retry always... 
+        // which don't necessarily want to do depending on if we're waiting for the visible or invisible state
+
         /// <summary>
         /// Waits for the element to be visible.
         /// </summary>
