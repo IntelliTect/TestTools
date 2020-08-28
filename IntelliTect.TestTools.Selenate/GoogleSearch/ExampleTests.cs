@@ -16,16 +16,16 @@ namespace GoogleSearch
         //private GoogleHarness Harness { get; set; }
         //private ElementHandler Element { get; set; }
         private IWebDriver Driver { get; set; }
-        private SeleniumHandler Selenium { get; set; }
+        //private SeleniumHandler Selenium { get; set; }
         private GooglePage Google => new GooglePage(Driver);
-        //private DriverHandler B => new DriverHandler(Driver);
+        private DriverHandler B => new DriverHandler(Driver);
         //private SeleniumHandler Selenium => new SeleniumHandler(Driver);
 
         [TestInitialize]
         public void Setup()
         {
             Driver = new WebDriverFactory(BrowserType.Chrome).GetDriver();
-            Selenium = new SeleniumHandler(Driver);
+            //Selenium = new SeleniumHandler(Driver);
             //Browser = new DriverHandler(Driver);
             //Browser = new GoogleBrowser(BrowserType.Chrome);
             Test = new GoogleOperations(Driver);
@@ -36,13 +36,8 @@ namespace GoogleSearch
         [TestMethod]
         public void ExampleTest()
         {
-            Selenium.Driver.NavigateToPage(GooglePage.URL);
-            Selenium.Element.Find(FrontPage.SearchInputBy).SendKeysWhenReady("selenium browser automation" + Keys.Enter);
-            Selenium.Element.Find(FrontPage.SeachButtonBy).ClickWhenReady();
-            Assert.IsTrue(Selenium.Element.Find(ResultsPage.ResultsDivBy).WaitForVisibleState());
-
             Driver.Navigate().GoToUrl(GooglePage.URL);
-            Google.FrontPage.SearchInput.SendKeysWhenReady("selenium browser automation" + Keys.Enter);
+            Google.FrontPage.SearchInput.SendKeysWhenReady("selenium browser automation");
             Google.FrontPage.SeachButton.ClickWhenReady();
             Assert.IsTrue(Google.ResultsPage.SearchResultsDiv.WaitForVisibleState());
         }
@@ -87,6 +82,7 @@ namespace GoogleSearch
                 Directory.Delete(path, true);
             }
 
+            Test.NavigateToGoogle();
             Test.SearchForItem("selenium automation");
             B.TakeScreenshot();
             var files = Directory.GetFiles(path);
@@ -101,16 +97,17 @@ namespace GoogleSearch
             FileInfo file = new FileInfo(
                 Path.Combine(Directory.GetCurrentDirectory(),
                 "screenshot",
-                $"{((RemoteWebDriver)Selenium.Driver).Capabilities.GetCapability("browserName")}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
+                $"{((RemoteWebDriver)Driver).Capabilities.GetCapability("browserName")}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
             if (Directory.Exists(file.Directory.FullName))
             {
                 Directory.Delete(file.Directory.FullName, true);
             }
 
+            Test.NavigateToGoogle();
             Test.SearchForItem("selenium automation");
 
             Directory.CreateDirectory(file.DirectoryName);
-            Selenium.TakeScreenshot(file);
+            B.SetScreenshotLocation(file).TakeScreenshot();
             var files = Directory.GetFiles(file.Directory.FullName);
             Assert.AreEqual(1, files.Length);
 
@@ -120,7 +117,7 @@ namespace GoogleSearch
         [TestCleanup]
         public void Teardown()
         {
-            Selenium.Dispose();
+            Driver.Dispose();
         }
     }
 }
