@@ -58,19 +58,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="locator"></param>
         /// <returns></returns>
-        public ElementHandler Find(By locator)
-        {
-            Locator = locator;
-            return this;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public void Click()
+        public void ClickWhenReady()
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(
@@ -92,7 +81,7 @@ namespace IntelliTect.TestTools.Selenate
         /// 
         /// </summary>
         /// <param name="textToSend"></param>
-        public void SendKeys(string textToSend)
+        public void SendKeysWhenReady(string textToSend)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(
@@ -115,7 +104,7 @@ namespace IntelliTect.TestTools.Selenate
         /// 
         /// </summary>
         /// <param name="textToSend"></param>
-        public void ReplaceText(string textToSend)
+        public void ReplaceTextWhenReady(string textToSend)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(

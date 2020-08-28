@@ -54,17 +54,6 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="locator"></param>
-        /// <returns></returns>
-        public ElementsHandler FindAll(By locator)
-        {
-            Locator = locator;
-            return this;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="text"></param>
         public bool ContainsText(string text)
         {

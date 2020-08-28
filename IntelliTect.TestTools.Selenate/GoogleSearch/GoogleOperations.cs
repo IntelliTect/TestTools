@@ -27,8 +27,8 @@ namespace GoogleSearch
 
         public bool SearchForItem(string searchItem)
         {
-            Google.FrontPage.SearchInput.SendKeys(searchItem);
-            Google.FrontPage.SearchInput.SendKeys(Keys.Return);
+            Google.FrontPage.SearchInput.SendKeysWhenReady(searchItem);
+            Google.FrontPage.SearchInput.SendKeysWhenReady(Keys.Return);
             return Google.ResultsPage.SearchResultsDiv.WaitForVisibleState();
             //Page.SendKeysWhenReady(FrontPage.SearchInput, searchItem);
             //Page.SendKeysWhenReady(FrontPage.SearchInput, Keys.Return);
@@ -56,7 +56,7 @@ namespace GoogleSearch
 
         public bool GoToHomePage()
         {
-            Google.ResultsPage.GoHomeButton.Click();
+            Google.ResultsPage.GoHomeButton.ClickWhenReady();
             return Google.FrontPage.SeachButton.WaitForEnabledState();
 
             //var homeButton = new ElementHandler(Driver.Driver, By.CssSelector(""));

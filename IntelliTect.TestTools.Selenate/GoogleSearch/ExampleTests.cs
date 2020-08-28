@@ -37,13 +37,13 @@ namespace GoogleSearch
         public void ExampleTest()
         {
             Selenium.Driver.NavigateToPage(GooglePage.URL);
-            Selenium.Element.Find(FrontPage.SearchInputBy).SendKeys("selenium browser automation" + Keys.Enter);
-            Selenium.Element.Find(FrontPage.SeachButtonBy).Click();
+            Selenium.Element.Find(FrontPage.SearchInputBy).SendKeysWhenReady("selenium browser automation" + Keys.Enter);
+            Selenium.Element.Find(FrontPage.SeachButtonBy).ClickWhenReady();
             Assert.IsTrue(Selenium.Element.Find(ResultsPage.ResultsDivBy).WaitForVisibleState());
 
             Driver.Navigate().GoToUrl(GooglePage.URL);
-            Google.FrontPage.SearchInput.SendKeys("selenium browser automation" + Keys.Enter);
-            Google.FrontPage.SeachButton.Click();
+            Google.FrontPage.SearchInput.SendKeysWhenReady("selenium browser automation" + Keys.Enter);
+            Google.FrontPage.SeachButton.ClickWhenReady();
             Assert.IsTrue(Google.ResultsPage.SearchResultsDiv.WaitForVisibleState());
         }
 
