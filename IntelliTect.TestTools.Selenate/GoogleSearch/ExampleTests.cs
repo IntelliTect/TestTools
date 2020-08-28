@@ -4,24 +4,47 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IntelliTect.TestTools.Selenate;
 using System.IO;
 using OpenQA.Selenium.Remote;
+using OpenQA.Selenium;
 
 namespace GoogleSearch
 {
     [TestClass]
     public class ExampleTests
     {
-        private GoogleBrowser Browser { get; set; }
-        private GoogleOperations Google { get; set; }
+        //private DriverHandler Browser { get; set; }
+        private GoogleOperations Test { get; set; }
         //private GoogleHarness Harness { get; set; }
-        private ElementHandler Element { get; set; }
+        //private ElementHandler Element { get; set; }
+        private IWebDriver Driver { get; set; }
+        private SeleniumHandler Selenium { get; set; }
+        private GooglePage Google => new GooglePage(Driver);
+        //private DriverHandler B => new DriverHandler(Driver);
+        //private SeleniumHandler Selenium => new SeleniumHandler(Driver);
 
         [TestInitialize]
         public void Setup()
         {
-            Browser = new GoogleBrowser(BrowserType.Chrome);
-            Google = new GoogleOperations(Browser);
-            Element = new ElementHandler(Browser.Driver);
+            Driver = new WebDriverFactory(BrowserType.Chrome).GetDriver();
+            Selenium = new SeleniumHandler(Driver);
+            //Browser = new DriverHandler(Driver);
+            //Browser = new GoogleBrowser(BrowserType.Chrome);
+            Test = new GoogleOperations(Driver);
+            //Element = new ElementHandler(Browser.Driver);
             //Harness = new GoogleHarness();
+        }
+
+        [TestMethod]
+        public void ExampleTest()
+        {
+            Selenium.Driver.NavigateToPage(GooglePage.URL);
+            Selenium.Element.Find(FrontPage.SearchInputBy).SendKeys("selenium browser automation" + Keys.Enter);
+            Selenium.Element.Find(FrontPage.SeachButtonBy).Click();
+            Assert.IsTrue(Selenium.Element.Find(ResultsPage.ResultsDivBy).WaitForVisibleState());
+
+            Driver.Navigate().GoToUrl(GooglePage.URL);
+            Google.FrontPage.SearchInput.SendKeys("selenium browser automation" + Keys.Enter);
+            Google.FrontPage.SeachButton.Click();
+            Assert.IsTrue(Google.ResultsPage.SearchResultsDiv.WaitForVisibleState());
         }
 
         
@@ -29,30 +52,30 @@ namespace GoogleSearch
         [TestMethod]
         public void SearchForSeleniumOnGoogle()
         {
-            Google.NavigateToGoogle();
-            Assert.IsTrue(Google.SearchForItem("selenium browser automation"), 
+            Test.NavigateToGoogle();
+            Assert.IsTrue(Test.SearchForItem("selenium browser automation"), 
                 "No search results displayed when they were expected");
-            Assert.IsTrue(Google.FindSearchResultItem("SeleniumHQ Browser Automation"),
+            Assert.IsTrue(Test.FindSearchResultItem("SeleniumHQ Browser Automation"),
                 "Did not find a specific search result for Selenium - Web Browser Automation");
         }
 
         [TestMethod]
         public void VerifySeleniumDoesNotExistForElement()
         {
-            Google.NavigateToGoogle();
-            Google.SearchForItem("selenium element");
-            Assert.IsFalse(Google.FindSearchResultItem("Selenium - Web Browser Automation"),
+            Test.NavigateToGoogle();
+            Test.SearchForItem("selenium element");
+            Assert.IsFalse(Test.FindSearchResultItem("Selenium - Web Browser Automation"),
                 "Found a specific search result for Selenium - Web Browser Automation when none was expected");
         }
 
         [TestMethod]
         public void ReturnToHomepage()
         {
-            Google.NavigateToGoogle();
-            Google.SearchForItem("selenium automation");
-            Google.GoToHomePage();
-            Assert.IsTrue(Element.WaitForInvisibleState(GoogleSearchResultsPage.SearchResultsDiv),
-                "Search results displayed when they were not expected");
+            Test.NavigateToGoogle();
+            Test.SearchForItem("selenium automation");
+            Test.GoToHomePage();
+            //Assert.IsTrue(Element.WaitForInvisibleState(ResultsPage.SearchResultsDiv),
+            //    "Search results displayed when they were not expected");
         }
 
         [TestMethod]
@@ -64,8 +87,8 @@ namespace GoogleSearch
                 Directory.Delete(path, true);
             }
 
-            Google.SearchForItem("selenium automation");
-            Browser.TakeScreenshot();
+            Test.SearchForItem("selenium automation");
+            B.TakeScreenshot();
             var files = Directory.GetFiles(path);
             Assert.AreEqual(1, files.Length);
 
@@ -78,16 +101,16 @@ namespace GoogleSearch
             FileInfo file = new FileInfo(
                 Path.Combine(Directory.GetCurrentDirectory(),
                 "screenshot",
-                $"{((RemoteWebDriver)Browser.Driver).Capabilities.GetCapability("browserName")}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
+                $"{((RemoteWebDriver)Selenium.Driver).Capabilities.GetCapability("browserName")}_override_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
             if (Directory.Exists(file.Directory.FullName))
             {
                 Directory.Delete(file.Directory.FullName, true);
             }
 
-            Google.SearchForItem("selenium automation");
+            Test.SearchForItem("selenium automation");
 
             Directory.CreateDirectory(file.DirectoryName);
-            Browser.TakeScreenshot(file);
+            Selenium.TakeScreenshot(file);
             var files = Directory.GetFiles(file.Directory.FullName);
             Assert.AreEqual(1, files.Length);
 
@@ -97,7 +120,7 @@ namespace GoogleSearch
         [TestCleanup]
         public void Teardown()
         {
-            Browser.Dispose();
+            Selenium.Dispose();
         }
     }
 }

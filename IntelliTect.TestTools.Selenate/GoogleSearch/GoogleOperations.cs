@@ -3,54 +3,83 @@ using System.Linq;
 using IntelliTect.TestTools.Selenate;
 using System;
 using OpenQA.Selenium.Support.UI;
+using OpenQA.Selenium.Interactions;
 
 namespace GoogleSearch
 {
     public class GoogleOperations
     {
-        public GoogleOperations(GoogleBrowser browser)
+        public GoogleOperations(IWebDriver driver)
         {
-            Browser = browser ?? throw new ArgumentNullException(nameof(browser));
-            Element = new ElementHandler(Browser.Driver);
+            Driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
+
+        private GooglePage Google => new GooglePage(Driver);
+        private IWebDriver Driver { get; }
+        private ElementHandler Page { get; }
 
         public bool NavigateToGoogle()
         {
-            Browser.Driver.Navigate().GoToUrl(GoogleFrontPage.URL);
-            return Element.WaitForEnabledState(GoogleFrontPage.SearchInput);
+            Driver.Navigate().GoToUrl(FrontPage.URL);
+            return Google.FrontPage.SearchInput.WaitForEnabledState();
+            //return Page.WaitForEnabledState(FrontPage.SearchInput);
         }
 
         public bool SearchForItem(string searchItem)
         {
-            Element.SendKeysWhenReady(GoogleFrontPage.SearchInput, searchItem);
-            Element.SendKeysWhenReady(GoogleFrontPage.SearchInput, Keys.Return);
-            return Element.WaitForVisibleState(GoogleSearchResultsPage.SearchResultsDiv);
+            Google.FrontPage.SearchInput.SendKeys(searchItem);
+            Google.FrontPage.SearchInput.SendKeys(Keys.Return);
+            return Google.ResultsPage.SearchResultsDiv.WaitForVisibleState();
+            //Page.SendKeysWhenReady(FrontPage.SearchInput, searchItem);
+            //Page.SendKeysWhenReady(FrontPage.SearchInput, Keys.Return);
+            //return Page.WaitForVisibleState(ResultsPage.SearchResultsDiv);
         }
 
         public bool FindSearchResultItem(string result)
         {
+            return Google.ResultsPage.SearchResultsHeadersList.ContainsText(result);
+
             // Use custom wait due to needing a Any() call on the FindElements result.
-            DefaultWait<IWebDriver> wait = new DefaultWait<IWebDriver>(Browser.Driver);
-            wait.PollingInterval = TimeSpan.FromMilliseconds(100);
-            wait.Timeout = TimeSpan.FromSeconds(5);
-            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-            try
-            {
-                return wait.Until(d => d.FindElements(GoogleSearchResultsPage.SearchResultsHeadersList).Any(h => h.Text == result));
-            }
-            catch(WebDriverTimeoutException)
-            {
-                return false;
-            }
+            //var wait = new DefaultWait<IWebDriver>(Driver);
+            //wait.PollingInterval = TimeSpan.FromMilliseconds(100);
+            //wait.Timeout = TimeSpan.FromSeconds(5);
+            //wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            //try
+            //{
+            //    return wait.Until(d => d.FindElements(ResultsPage.ResultsHeaderBy).Any(h => h.Text == result));
+            //}
+            //catch(WebDriverTimeoutException)
+            //{
+            //    return false;
+            //}
         }
 
         public bool GoToHomePage()
         {
-            Element.ClickElementWhenReady(GoogleSearchResultsPage.GoHomeButton);
-            return Element.WaitForVisibleState(GoogleFrontPage.GoogleSearchButton);
-        }
+            Google.ResultsPage.GoHomeButton.Click();
+            return Google.FrontPage.SeachButton.WaitForEnabledState();
 
-        private GoogleBrowser Browser { get; }
-        private ElementHandler Element { get; }
+            //var homeButton = new ElementHandler(Driver.Driver, By.CssSelector(""));
+
+            //homeButton.Timeout(TimeSpan.FromSeconds(5)).Click();
+
+            //Actions action = new Actions(Driver.Driver);
+            //action
+            //    .Click()
+            //    .SendKeys("some text");
+
+            //Google
+            //    .SearchButton
+            //    .PerformAction(action);
+
+
+            //Page
+            //    .Element(ResultsPage.GoHomeButton)
+            //    .SetTimeoutSeconds(5)
+            //    .ClickElementWhenReady()
+            //    .TakeScreenshot();
+            ////Element.ClickElementWhenReady(GoogleSearchResultsPage.GoHomeButton);
+            //return Page.WaitForVisibleState(FrontPage.GoogleSearchButton);
+        }
     }
 }
