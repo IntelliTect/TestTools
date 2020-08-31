@@ -27,11 +27,6 @@ namespace IntelliTect.TestTools.Selenate
         public ElementHandler(IWebDriver driver) : base(driver) { }
 
         private By Locator { get; set; }
-        //private TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(5);
-        //private TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(100);
-        //private Type[] ExceptionsToIgnore { get; set; } = { typeof(NoSuchElementException), typeof(StaleElementReferenceException) };
-
-        //private IWebDriver Driver { get; }
 
         /// <summary>
         /// 
@@ -40,8 +35,17 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public ElementHandler SetTimeout(TimeSpan timeout)
         {
-            base.Timeout = timeout;
-            return this;
+            return SetTimeout<ElementHandler>(timeout);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="timeoutInSeconds"></param>
+        /// <returns></returns>
+        public ElementHandler SetTimeout(int timeoutInSeconds)
+        {
+            return SetTimeout<ElementHandler>(TimeSpan.FromSeconds(timeoutInSeconds));
         }
 
         /// <summary>
@@ -51,8 +55,17 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public ElementHandler SetPollingInterval(TimeSpan pollingInterval)
         {
-            base.PollingInterval = pollingInterval;
-            return this;
+            return SetPollingInterval<ElementHandler>(pollingInterval);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pollIntervalInMilliseconds"></param>
+        /// <returns></returns>
+        public ElementHandler SetPollingInterval(int pollIntervalInMilliseconds)
+        {
+            return SetPollingInterval<ElementHandler>(TimeSpan.FromMilliseconds(pollIntervalInMilliseconds));
         }
 
         /// <summary>

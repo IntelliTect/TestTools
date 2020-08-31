@@ -22,7 +22,6 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         private FileInfo ScreenshotLocation { get; set; }
-        //private IWebDriver Driver { get; }
 
         /// <summary>
         /// 
@@ -31,8 +30,17 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public DriverHandler SetTimeout(TimeSpan timeout)
         {
-            Timeout = timeout;
-            return this;
+            return SetTimeout<DriverHandler>(timeout);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="timeoutInSeconds"></param>
+        /// <returns></returns>
+        public DriverHandler SetTimeout(int timeoutInSeconds)
+        {
+            return SetTimeout<DriverHandler>(TimeSpan.FromSeconds(timeoutInSeconds));
         }
 
         /// <summary>
@@ -42,8 +50,17 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public DriverHandler SetPollingInterval(TimeSpan pollingInterval)
         {
-            PollingInterval = pollingInterval;
-            return this;
+            return SetPollingInterval<DriverHandler>(pollingInterval);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pollIntervalInMilliseconds"></param>
+        /// <returns></returns>
+        public DriverHandler SetPollingInterval(int pollIntervalInMilliseconds)
+        {
+            return SetPollingInterval<DriverHandler>(TimeSpan.FromMilliseconds(pollIntervalInMilliseconds));
         }
 
         /// <summary>

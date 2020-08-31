@@ -40,6 +40,30 @@ namespace IntelliTect.TestTools.Selenate
                 PollingInterval = PollingInterval 
             };
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        protected T SetTimeout<T>(TimeSpan timeout) where T : HandlerBase
+        {
+            Timeout = timeout;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pollingInterval"></param>
+        /// <returns></returns>
+        protected T SetPollingInterval<T>(TimeSpan pollingInterval) where T : HandlerBase
+        {
+            PollingInterval = pollingInterval;
+            return (T)this;
+        }
+
         ///// <summary>
         ///// 
         ///// </summary>
@@ -68,7 +92,7 @@ namespace IntelliTect.TestTools.Selenate
         //{
         //    return new ElementListHandler(WrappedDriver, locator);
         //}
-      
+
         //protected List<Type> ExceptionsToIgnore { get; } = new List<Type>();
 
 
