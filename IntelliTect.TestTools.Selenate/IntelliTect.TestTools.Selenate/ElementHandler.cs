@@ -43,7 +43,7 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="timeoutInSeconds"></param>
         /// <returns></returns>
-        public ElementHandler SetTimeout(int timeoutInSeconds)
+        public ElementHandler SetTimeoutSeconds(int timeoutInSeconds)
         {
             return SetTimeout<ElementHandler>(TimeSpan.FromSeconds(timeoutInSeconds));
         }
@@ -63,7 +63,7 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="pollIntervalInMilliseconds"></param>
         /// <returns></returns>
-        public ElementHandler SetPollingInterval(int pollIntervalInMilliseconds)
+        public ElementHandler SetPollingIntervalMilliseconds(int pollIntervalInMilliseconds)
         {
             return SetPollingInterval<ElementHandler>(TimeSpan.FromMilliseconds(pollIntervalInMilliseconds));
         }
