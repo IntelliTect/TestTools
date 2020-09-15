@@ -10,6 +10,8 @@ trigger:
   paths:
     include:
       - IntelliTect.TestTools.Data/*
+      - IntelliTect.TestTools.Data.sln
+      - Samples/IntelliTect.TestTools.Data.Sample/*
 
 variables:
   version: '0.1.1'
