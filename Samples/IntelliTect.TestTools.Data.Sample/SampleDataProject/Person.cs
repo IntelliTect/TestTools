@@ -10,6 +10,8 @@ namespace SampleDataProject
 
         public int Age { get; set; }
 
+#pragma warning disable CA2227 // Collection Properties should be read only
         public ICollection<BlogPost> BlogPosts { get; set; }
+#pragma warning restore CA2227 // Collection Properties should be read only
     }
 }

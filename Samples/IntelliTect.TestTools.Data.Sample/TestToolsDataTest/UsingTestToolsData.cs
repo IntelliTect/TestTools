@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using IntelliTect.TestTools.Data;
@@ -6,7 +7,7 @@ using Xunit;
 
 namespace TestToolsDataTest
 {
-    public class UsingTestToolsData
+    public class UsingTestToolsData : IDisposable
     {
         private readonly DatabaseFixture<SampleDbContext> _DatabaseFixture;
 
@@ -44,6 +45,29 @@ namespace TestToolsDataTest
 
                 Assert.NotNull(blogs.First().Person);
             });
+        }
+
+        private bool _Disposed;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_Disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                _DatabaseFixture?.Dispose();
+            }
+
+            _Disposed = true;
         }
     }
 }

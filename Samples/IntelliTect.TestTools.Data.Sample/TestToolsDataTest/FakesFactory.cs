@@ -14,7 +14,9 @@ namespace TestToolsDataTest
         private static readonly Faker<Person> _PersonFaker;
         private static readonly Faker<BlogPost> _BlogPostFaker;
 
+#pragma warning disable CA1810 // Initialize reference type static fields inline
         static FakesFactory()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
         {
             _PersonFaker = new Faker<Person>()
                 .StrictMode(true)
@@ -33,7 +35,7 @@ namespace TestToolsDataTest
             _AllFakers = typeof(FakesFactory).GetFields(BindingFlags.GetField
                                                         | BindingFlags.Static
                                                         | BindingFlags.NonPublic)
-                .Where(x => x.Name.ToLower().EndsWith("faker"))
+                .Where(x => x.Name.EndsWith("faker", StringComparison.InvariantCultureIgnoreCase))
                 .Select(field => field.GetValue(null))
                 .ToArray();
         }

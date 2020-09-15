@@ -11,9 +11,5 @@ namespace SampleDataProject
         public SampleDbContext(DbContextOptions<SampleDbContext> options) : base(options)
         {
         }
-
-        public SampleDbContext(DbContextOptions options, string something) : base(options)
-        {
-        }
     }
 }

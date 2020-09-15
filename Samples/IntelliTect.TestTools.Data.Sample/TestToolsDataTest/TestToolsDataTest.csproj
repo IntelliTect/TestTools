@@ -2,8 +2,10 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-
+        <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+        <LangVersion>8.0</LangVersion>
         <IsPackable>false</IsPackable>
+        <NoWarn>INTL0003;CA1707;CA2007</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
