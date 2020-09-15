@@ -64,7 +64,7 @@ namespace TestToolsDataTest
 
             if (disposing)
             {
-                _DatabaseFixture?.Dispose();
+                _DatabaseFixture.Dispose();
             }
 
             _Disposed = true;
