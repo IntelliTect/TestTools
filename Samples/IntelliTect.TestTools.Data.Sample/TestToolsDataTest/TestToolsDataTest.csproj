@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+        <LangVersion>8.0</LangVersion>
+        <IsPackable>false</IsPackable>
+        <NoWarn>INTL0003;CA1707;CA2007</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Bogus" Version="31.0.2" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+        <PackageReference Include="xunit" Version="2.4.0" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+        <PackageReference Include="coverlet.collector" Version="1.2.0" />
+        <PackageReference Include="IntelliTect.TestTools.Data" Version="0.1.1-ci-9642" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\IntelliTect.TestTools.Data\IntelliTect.TestTools.Data.csproj" />
+      <ProjectReference Include="..\SampleDataProject\SampleDataProject.csproj" />
+    </ItemGroup>
+
+</Project>
