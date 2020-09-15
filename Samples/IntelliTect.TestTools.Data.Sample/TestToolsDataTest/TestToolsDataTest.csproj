@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\IntelliTect.TestTools.Data\IntelliTect.TestTools.Data.csproj" />
       <ProjectReference Include="..\SampleDataProject\SampleDataProject.csproj" />
     </ItemGroup>
 
