@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using System.Dynamic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,7 +8,7 @@ namespace IntelliTect.TestTools.Data.Test
     public class DatabaseFixtureDbContextWithDependencyTests
     {
         [Fact]
-        public async Task BadDbContext_MissingCorrectConstructor_ExceptionThrown()
+        public async Task DbContextWithDependency_MissingCorrectConstructor_ExceptionThrown()
         {
             var databaseFixture = new DatabaseFixture<DbContextWithDependency>();
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -19,7 +18,7 @@ namespace IntelliTect.TestTools.Data.Test
         }
 
         [Fact]
-        public async Task BadDbContext_DependencySpecified_ContextCreated()
+        public async Task DbContextWithDependency_DependencyByTypeSpecified_ContextCreated()
         {
             var dependency = new Dependency();
             var databaseFixture = new DatabaseFixture<DbContextWithDependency>();
@@ -31,7 +30,55 @@ namespace IntelliTect.TestTools.Data.Test
             });
         }
 
+        [Fact]
+        public async Task DbContextWithDependency_DependencyByNameSpecified_ContextCreated()
+        {
+            var dependency1 = new Dependency();
+            var dependency2 = new Dependency();
+            var databaseFixture = new DatabaseFixture<HasDuplicateTypeDependencies>();
+            databaseFixture.AddDependency<IDependency>(dependency1, "dependency1");
+            databaseFixture.AddDependency<IDependency>(dependency2, "dependency2");
+
+            await databaseFixture.PerformDatabaseOperation(context =>
+            {
+                Assert.Equal(dependency1, context.Dependency1);
+                Assert.Equal(dependency2, context.Dependency2);
+            });
+        }
+
+        [Fact]
+        public async Task DbContextWithOnlyDefaultConstructor_ThrowsException()
+        {
+            var databaseFixture = new DatabaseFixture<HasDefaultConstructor>();
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => 
+                databaseFixture.PerformDatabaseOperation(context => { }));
+
+            Assert.Equal($"'{typeof(HasDefaultConstructor)}' does not contain constructor that has a valid signature", ex.Message);
+        }
+
+        [Fact]
+        public async Task DbContextWithInvalidConstructor_ThrowsException()
+        {
+            var databaseFixture = new DatabaseFixture<HasInvalidConstructor>();
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                databaseFixture.PerformDatabaseOperation(context => { }));
+
+            Assert.Equal($"'{typeof(HasInvalidConstructor)}' does not contain constructor that has a valid signature", ex.Message);
+        }
+
         private class Dependency : IDependency
+        { }
+
+
+        private class HasInvalidConstructor : DbContext
+        {
+            public HasInvalidConstructor(IDependency dependency)
+            { }
+        }
+
+        private class HasDefaultConstructor : DbContext
         { }
 
         private class HasDuplicateTypeDependencies : DbContext

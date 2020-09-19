@@ -63,7 +63,14 @@ namespace IntelliTect.TestTools.Data
         {
             var constructorInfo = typeof(TDbContext)
                 .GetConstructors()
-                .Where(x => x.GetParameters().All(p => GetConstructorParameter(p) != null))
+                .Where(x => 
+                {
+                    var parameters = x.GetParameters();
+                    if (parameters.Length < 1) return false;
+                    if (!parameters.Any(IsDbContextOptions)) return false;
+                    if (parameters.Any(p => GetConstructorParameter(p) == null)) return false;
+                    return true;
+                })
                 .OrderByDescending(x => x.GetParameters().Length)
                 .FirstOrDefault();
 
@@ -84,10 +91,13 @@ namespace IntelliTect.TestTools.Data
 
             return db;
 
+            static bool IsDbContextOptions(ParameterInfo parameter) 
+                => parameter.ParameterType == typeof(DbContextOptions<>).MakeGenericType(typeof(TDbContext)) ||
+                   parameter.ParameterType == typeof(DbContextOptions);
+
             Func<object> GetConstructorParameter(ParameterInfo parameter)
             {
-                if (parameter.ParameterType == typeof(DbContextOptions<>).MakeGenericType(typeof(TDbContext)) ||
-                        parameter.ParameterType == typeof(DbContextOptions))
+                if (IsDbContextOptions(parameter))
                 {
                     return () => Options.Value;
                 }
