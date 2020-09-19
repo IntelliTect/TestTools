@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +19,8 @@ namespace IntelliTect.TestTools.Data
 
         private IServiceProvider ServiceProvider { get; set; }
 
+        private Dictionary<(Type, string), object> ConstructorDependencies { get; } = new Dictionary<(Type, string), object>();
+
         public DatabaseFixture()
         {
             SqliteConnection = new SqliteConnection("DataSource=:memory:");
@@ -27,6 +31,11 @@ namespace IntelliTect.TestTools.Data
                 .EnableSensitiveDataLogging()
                 .UseLoggerFactory(GetLoggerFactory())
                 .Options);
+        }
+
+        public void AddDependency<T>(T contextConstructorDependency, string name = null)
+        {
+            ConstructorDependencies.Add((typeof(T), name ?? ""), contextConstructorDependency);
         }
 
         /// <summary>
@@ -41,7 +50,7 @@ namespace IntelliTect.TestTools.Data
             {
                 builder.AddInMemory();
 
-                BeforeLoggingSetup?.Invoke(this, builder);;
+                BeforeLoggingSetup?.Invoke(this, builder); ;
             });
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
@@ -54,25 +63,19 @@ namespace IntelliTect.TestTools.Data
         {
             var constructorInfo = typeof(TDbContext)
                 .GetConstructors()
-                .Where(x =>
-                {
-                    var parameters = x.GetParameters();
-                    return parameters.Length == 1
-                           && parameters[0].ParameterType == typeof(DbContextOptions<>)
-                               .MakeGenericType(typeof(TDbContext));
-                })
-                .SingleOrDefault();
+                .Where(x => x.GetParameters().All(p => GetConstructorParameter(p) != null))
+                .OrderByDescending(x => x.GetParameters().Length)
+                .FirstOrDefault();
 
             if (constructorInfo is null)
             {
                 throw new InvalidOperationException(
-                    $"'{typeof(TDbContext)}' must contain a constructor that has a single parameter " +
-                    $"of type '{typeof(DbContextOptions)}'");
+                    $"'{typeof(TDbContext)}' does not contain constructor that has a valid signature");
             }
 
             bool alreadyCreated = Options.IsValueCreated;
 
-            var db = (TDbContext) constructorInfo.Invoke(new object[]{ Options.Value });
+            var db = (TDbContext)constructorInfo.Invoke(GetConstructorValues(constructorInfo));
 
             if (!alreadyCreated)
             {
@@ -80,6 +83,50 @@ namespace IntelliTect.TestTools.Data
             }
 
             return db;
+
+            Func<object> GetConstructorParameter(ParameterInfo parameter)
+            {
+                if (parameter.ParameterType == typeof(DbContextOptions<>).MakeGenericType(typeof(TDbContext)) ||
+                        parameter.ParameterType == typeof(DbContextOptions))
+                {
+                    return () => Options.Value;
+                }
+                else if (ConstructorDependencies.TryGetValue((parameter.ParameterType, parameter.Name), out object typeAndNameMatch))
+                {
+                    return () => typeAndNameMatch;
+                }
+                else if (ConstructorDependencies.TryGetValue((parameter.ParameterType, ""), out object typeMatch))
+                {
+                    return () => typeMatch;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            object[] GetConstructorValues(ConstructorInfo constructor)
+            {
+                var parameters = constructor.GetParameters();
+
+                var values = new object[parameters.Length];
+
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    Func<object> constructorValue = GetConstructorParameter(parameters[i]);
+                    if (constructorValue != null)
+                    {
+                        values[i] = constructorValue();
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException();
+                    }
+                }
+
+
+                return values;
+            }
         }
 
         /// <summary>
