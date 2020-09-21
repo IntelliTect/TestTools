@@ -1,16 +1,24 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.TestTools.Data", "IntelliTect.TestTools.Data\IntelliTect.TestTools.Data.csproj", "{689C10E8-4735-43B0-8A29-77845E549E3F}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30509.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.Data", "IntelliTect.TestTools.Data\IntelliTect.TestTools.Data.csproj", "{689C10E8-4735-43B0-8A29-77845E549E3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.TestTools.Data.Test", "IntelliTect.TestTools.Data.Test\IntelliTect.TestTools.Data.Test.csproj", "{62094069-2820-49DA-9A0E-4FB39883CA84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.Data.Test", "IntelliTect.TestTools.Data.Test\IntelliTect.TestTools.Data.Test.csproj", "{62094069-2820-49DA-9A0E-4FB39883CA84}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{99CF921A-0AE5-4110-B6F8-5A675747CE46}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntelliTect.TestTools.Data.Sample", "IntelliTect.TestTools.Data.Sample", "{5653C46B-3D53-4C68-BFBA-6AEABB2702A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleDataProject", "Samples\IntelliTect.TestTools.Data.Sample\SampleDataProject\SampleDataProject.csproj", "{3E916D32-B407-4B35-82F2-FC4A139556FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleDataProject", "Samples\IntelliTect.TestTools.Data.Sample\SampleDataProject\SampleDataProject.csproj", "{3E916D32-B407-4B35-82F2-FC4A139556FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestToolsDataTest", "Samples\IntelliTect.TestTools.Data.Sample\TestToolsDataTest\TestToolsDataTest.csproj", "{4D5C95A3-7995-4BD6-BBFC-C6AFCFEA7615}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestToolsDataTest", "Samples\IntelliTect.TestTools.Data.Sample\TestToolsDataTest\TestToolsDataTest.csproj", "{4D5C95A3-7995-4BD6-BBFC-C6AFCFEA7615}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7DAE8663-363E-43E1-81BA-908123D25F80}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines-IntelliTect.TestTools.Data.yml = azure-pipelines-IntelliTect.TestTools.Data.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,9 +43,15 @@ Global
 		{4D5C95A3-7995-4BD6-BBFC-C6AFCFEA7615}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D5C95A3-7995-4BD6-BBFC-C6AFCFEA7615}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5653C46B-3D53-4C68-BFBA-6AEABB2702A9} = {99CF921A-0AE5-4110-B6F8-5A675747CE46}
 		{3E916D32-B407-4B35-82F2-FC4A139556FF} = {5653C46B-3D53-4C68-BFBA-6AEABB2702A9}
 		{4D5C95A3-7995-4BD6-BBFC-C6AFCFEA7615} = {5653C46B-3D53-4C68-BFBA-6AEABB2702A9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7C9252BA-CB82-4BE0-B06A-31F324C6CF32}
 	EndGlobalSection
 EndGlobal

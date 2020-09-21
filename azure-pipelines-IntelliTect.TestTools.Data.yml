@@ -14,7 +14,7 @@ trigger:
       - Samples/IntelliTect.TestTools.Data.Sample/*
 
 variables:
-  version: '0.1.2'
+  version: '0.2.0'
   BuildConfiguration: Release
 
 pool:
