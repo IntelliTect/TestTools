@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using OpenQA.Selenium;
 
 namespace ExampleTests.Harness

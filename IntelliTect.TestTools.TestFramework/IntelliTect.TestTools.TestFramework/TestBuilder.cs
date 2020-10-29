@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -196,14 +196,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         private static string GetObjectDataAsJsonString(object obj)
         {
-            try
-            {
-                return JsonConvert.SerializeObject(obj, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
-            }
-            catch (JsonSerializationException e)
-            {
-                return $"Unable to serialize to JSON. Mark the relevant property or constructor with the [JsonIgnore] attribute: {e.Message}";
-            }
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
         }
 
         private object GetTestBlock(IServiceScope scope, Type tbType)
