@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="IntelliTect.TestTools.TestFramework" Version="1.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Selenium.WebDriver" Version="4.0.0-alpha01" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
