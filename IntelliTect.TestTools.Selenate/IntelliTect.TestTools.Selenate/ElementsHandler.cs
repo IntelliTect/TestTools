@@ -32,6 +32,17 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="by"></param>
+        /// <returns></returns>
+        public ElementsHandler SetLocator(By by)
+        {
+            Locator = by;
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="timeout"></param>
         /// <returns></returns>
         public ElementsHandler SetTimeout(TimeSpan timeout)
