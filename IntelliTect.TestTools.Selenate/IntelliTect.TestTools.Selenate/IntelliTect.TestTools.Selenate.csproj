@@ -17,7 +17,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IntelliTect.Analyzers" Version="0.1.7" />
+    <PackageReference Include="IntelliTect.Analyzers" Version="0.1.8">
+      <ExcludeAssets>all</ExcludeAssets>
+    </PackageReference>
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
   </ItemGroup>
 
