@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -84,6 +85,30 @@ namespace IntelliTect.TestTools.Selenate
             WrappedDriver.Navigate().GoToUrl(uri);
             // Should we check for some thing to be present here?
             return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="by"></param>
+        /// <returns></returns>
+        public IWebElement FindElement(By by)
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            return wait.Until(w => w.FindElement(by));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="by"></param>
+        /// <returns></returns>
+        public IList<IWebElement> FindElements(By by)
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            return wait.Until(w => w.FindElements(by));
         }
 
         /// <summary>
