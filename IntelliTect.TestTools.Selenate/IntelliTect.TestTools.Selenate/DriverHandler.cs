@@ -38,7 +38,7 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="timeoutInSeconds"></param>
         /// <returns></returns>
-        public DriverHandler SetTimeout(int timeoutInSeconds)
+        public DriverHandler SetTimeoutSeconds(int timeoutInSeconds)
         {
             return SetTimeout<DriverHandler>(TimeSpan.FromSeconds(timeoutInSeconds));
         }
@@ -58,7 +58,7 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="pollIntervalInMilliseconds"></param>
         /// <returns></returns>
-        public DriverHandler SetPollingInterval(int pollIntervalInMilliseconds)
+        public DriverHandler SetPollingIntervalMilliseconds(int pollIntervalInMilliseconds)
         {
             return SetPollingInterval<DriverHandler>(TimeSpan.FromMilliseconds(pollIntervalInMilliseconds));
         }
