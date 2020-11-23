@@ -1,17 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>8.0</LangVersion>
+        <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
+        <LangVersion>9.0</LangVersion>
 
         <Authors>IntelliTect</Authors>
 
         <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="[2.2.*, 4.0.0)" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.4" />
+    </ItemGroup>
+	
+	<ItemGroup Condition="'$(TargetFramework)'=='net5.0'">
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="[5.0.*, 6.0.0)" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="[5.0.*, 6.0.0)" />
     </ItemGroup>
 
     <!-- https://github.com/dotnet/sourcelink/issues/572 -->
