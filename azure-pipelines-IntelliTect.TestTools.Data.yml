@@ -22,7 +22,7 @@ pool:
 
 steps:
 
-- task: NuGetToolInstaller@0
+- task: NuGetToolInstaller@1
   displayName: 'Use latest NuGet'
 
 - task: NuGetCommand@2
