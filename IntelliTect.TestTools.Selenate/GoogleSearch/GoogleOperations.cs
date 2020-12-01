@@ -20,7 +20,8 @@ namespace GoogleSearch
 
         public bool NavigateToGoogle()
         {
-            Driver.Navigate().GoToUrl(FrontPage.URL);
+            //Driver.Navigate().GoToUrl(FrontPage.URL);
+            Driver.Url = FrontPage.URL.AbsoluteUri;
             return Google.FrontPage.SearchInput.WaitForEnabledState();
             //return Page.WaitForEnabledState(FrontPage.SearchInput);
         }

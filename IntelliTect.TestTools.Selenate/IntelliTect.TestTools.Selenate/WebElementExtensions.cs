@@ -1,7 +1,5 @@
 ﻿using System;
-using IntelliTect.TestTools.Selenate;
 using OpenQA.Selenium;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using OpenQA.Selenium.Support.UI;
 
@@ -10,6 +8,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
     /// <summary>
     /// Extension methods for <see cref="IWebElement"/>
     /// </summary>
+    [Obsolete("Deprecating in favor of ElementHandler and ElementsHandler classes.")]
     public static class WebElementExtensions
     {
         /// <summary>

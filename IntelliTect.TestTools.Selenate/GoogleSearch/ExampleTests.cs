@@ -1,15 +1,15 @@
 using System;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IntelliTect.TestTools.Selenate;
 using System.IO;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium;
+using Xunit;
 
 namespace GoogleSearch
 {
-    [TestClass]
-    public class ExampleTests
+#pragma warning disable CA1063 // Implement IDisposable Correctly
+    public class ExampleTests : IDisposable
+#pragma warning restore CA1063 // Implement IDisposable Correctly
     {
         //private DriverHandler Browser { get; set; }
         private GoogleOperations Test { get; set; }
@@ -21,8 +21,7 @@ namespace GoogleSearch
         private DriverHandler B => new DriverHandler(Driver);
         //private SeleniumHandler Selenium => new SeleniumHandler(Driver);
 
-        [TestInitialize]
-        public void Setup()
+        public ExampleTests()
         {
             Driver = new WebDriverFactory(BrowserType.Chrome).GetDriver();
             //Selenium = new SeleniumHandler(Driver);
@@ -33,47 +32,47 @@ namespace GoogleSearch
             //Harness = new GoogleHarness();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExampleTest()
         {
             Driver.Navigate().GoToUrl(GooglePage.URL);
             Google.FrontPage.SearchInput.SendKeysWhenReady("selenium browser automation");
             Google.FrontPage.SeachButton.ClickWhenReady();
-            Assert.IsTrue(Google.ResultsPage.SearchResultsDiv.WaitForVisibleState());
+            Assert.True(Google.ResultsPage.SearchResultsDiv.WaitForVisibleState());
         }
 
         
 
-        [TestMethod]
+        [Fact]
         public void SearchForSeleniumOnGoogle()
         {
             Test.NavigateToGoogle();
-            Assert.IsTrue(Test.SearchForItem("selenium browser automation"), 
+            Assert.True(Test.SearchForItem("selenium browser automation"), 
                 "No search results displayed when they were expected");
-            Assert.IsTrue(Test.FindSearchResultItem("SeleniumHQ Browser Automation"),
+            Assert.True(Test.FindSearchResultItem("SeleniumHQ Browser Automation"),
                 "Did not find a specific search result for Selenium - Web Browser Automation");
         }
 
-        [TestMethod]
+        [Fact]
         public void VerifySeleniumDoesNotExistForElement()
         {
             Test.NavigateToGoogle();
             Test.SearchForItem("selenium element");
-            Assert.IsFalse(Test.FindSearchResultItem("Selenium - Web Browser Automation"),
+            Assert.False(Test.FindSearchResultItem("Selenium - Web Browser Automation"),
                 "Found a specific search result for Selenium - Web Browser Automation when none was expected");
         }
 
-        [TestMethod]
+        [Fact]
         public void ReturnToHomepage()
         {
             Test.NavigateToGoogle();
             Test.SearchForItem("selenium automation");
             Test.GoToHomePage();
-            //Assert.IsTrue(Element.WaitForInvisibleState(ResultsPage.SearchResultsDiv),
+            //Assert.True(Element.WaitForInvisibleState(ResultsPage.SearchResultsDiv),
             //    "Search results displayed when they were not expected");
         }
 
-        [TestMethod]
+        [Fact]
         public void TakeScreenshotSavesFile()
         {
             string path = Path.Combine(Path.GetTempPath(), "screenshots");
@@ -86,12 +85,12 @@ namespace GoogleSearch
             Test.SearchForItem("selenium automation");
             B.TakeScreenshot();
             var files = Directory.GetFiles(path);
-            Assert.AreEqual(1, files.Length);
+            Assert.Single(files);
 
             Directory.Delete(path, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void TakeScreenshotWithPathSavesFile()
         {
             FileInfo file = new FileInfo(
@@ -109,15 +108,19 @@ namespace GoogleSearch
             Directory.CreateDirectory(file.DirectoryName);
             B.SetScreenshotLocation(file).TakeScreenshot();
             var files = Directory.GetFiles(file.Directory.FullName);
-            Assert.AreEqual(1, files.Length);
+            Assert.Single(files);
 
             Directory.Delete(file.Directory.FullName, true);
         }
 
-        [TestCleanup]
-        public void Teardown()
+#pragma warning disable CA1063 // Implement IDisposable Correctly
+#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
+        public void Dispose()
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
+#pragma warning restore CA1063 // Implement IDisposable Correctly
         {
             Driver.Dispose();
+            
         }
     }
 }

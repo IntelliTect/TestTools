@@ -82,33 +82,62 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public DriverHandler NavigateToPage(Uri uri)
         {
-            WrappedDriver.Navigate().GoToUrl(uri);
-            // Should we check for some thing to be present here?
+            if (uri is null) throw new ArgumentNullException(nameof(uri));
+            WrappedDriver.Url = uri.ToString();
             return this;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="by"></param>
+        /// <param name="uri"></param>
         /// <returns></returns>
-        public IWebElement FindElement(By by)
+        public DriverHandler NavigateToPage(string uri)
         {
-            IWait<IWebDriver> wait = Wait;
-            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-            return wait.Until(w => w.FindElement(by));
+            if (string.IsNullOrWhiteSpace(uri)) throw new ArgumentNullException(nameof(uri));
+            return NavigateToPage(new Uri(uri));
         }
+
+        //public IWebElement FindElement(By by)
+        //{
+        //    IWait<IWebDriver> wait = Wait;
+        //    wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+        //    return wait.Until(w => w.FindElement(by));
+        //}
+
+        // OOOOOR
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="by"></param>
         /// <returns></returns>
-        public IList<IWebElement> FindElements(By by)
+        public ElementHandler FindElement(By by)
         {
-            IWait<IWebDriver> wait = Wait;
-            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-            return wait.Until(w => w.FindElements(by));
+            return new ElementHandler(WrappedDriver, by)
+                .SetPollingInterval(PollingInterval)
+                .SetTimeout(Timeout);
+        }
+
+        //public IList<IWebElement> FindElements(By by)
+        //{
+        //    IWait<IWebDriver> wait = Wait;
+        //    wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+        //    return wait.Until(w => w.FindElements(by));
+        //}
+
+        // OOOOOR
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="by"></param>
+        /// <returns></returns>
+        public ElementsHandler FindElements(By by)
+        {
+            return new ElementsHandler(WrappedDriver, by)
+                .SetPollingInterval(PollingInterval)
+                .SetTimeout(Timeout);
         }
 
         /// <summary>

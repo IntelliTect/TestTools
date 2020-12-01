@@ -4,9 +4,7 @@ using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace IntelliTect.TestTools.Selenate
 {
