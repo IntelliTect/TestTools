@@ -151,6 +151,23 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
+        public string GetElementText()
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(
+                typeof(NoSuchElementException),
+                typeof(InvalidElementStateException),
+                typeof(ElementNotVisibleException),
+                typeof(StaleElementReferenceException)
+                );
+            
+            return wait.Until(d =>
+            {
+                IWebElement elem = d.FindElement(Locator);
+                return elem.Text;
+            });
+        }
+
         /// <summary>
         /// Waits for the element to be visible.
         /// </summary>
