@@ -26,10 +26,12 @@ namespace IntelliTect.TestTools.Selenate
         /// 
         /// </summary>
         protected TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(5);
+
         /// <summary>
         /// 
         /// </summary>
         protected TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(100);
+
         /// <summary>
         /// 
         /// </summary>
@@ -63,64 +65,5 @@ namespace IntelliTect.TestTools.Selenate
             PollingInterval = pollingInterval;
             return (T)this;
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //public DriverHandler Browser()
-        //{
-        //    return new DriverHandler(WrappedDriver);
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="locator"></param>
-        ///// <returns></returns>
-        //public ElementHandler Element(By locator)
-        //{
-        //    return new ElementHandler(WrappedDriver, locator);
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="locator"></param>
-        ///// <returns></returns>
-        //public ElementListHandler Elements(By locator)
-        //{
-        //    return new ElementListHandler(WrappedDriver, locator);
-        //}
-
-        //protected List<Type> ExceptionsToIgnore { get; } = new List<Type>();
-
-
-        //public ElementHandler Element(By locator)
-        //{
-        //    Locator = locator;
-        //    return this;
-        //}
-
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //public DriverHandler Browser()
-        //{
-        //    return new DriverHandler(Driver);
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="locator"></param>
-        ///// <returns></returns>
-        //public ElementHandler Element(By locator)
-        //{
-        //    return new ElementHandler(Driver, locator);
-        //}
     }
 }

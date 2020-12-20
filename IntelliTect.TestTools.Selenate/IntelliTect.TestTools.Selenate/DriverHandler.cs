@@ -3,6 +3,7 @@ using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 
@@ -140,6 +141,11 @@ namespace IntelliTect.TestTools.Selenate
                 .SetTimeout(Timeout);
         }
 
+        public string GetWindowTitle()
+        {
+            return WrappedDriver.Title;
+        }
+
         /// <summary>
         /// Attempts to switch to the window by title for a certain number of seconds before failing if the switch is unsuccessful
         /// </summary>
@@ -147,9 +153,20 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public DriverHandler SwitchToWindow(string title)
         {
+
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(typeof(NoSuchWindowException));
-            wait.Until(w => w.SwitchTo().Window(title));
+            wait.Until(w => {
+                IReadOnlyCollection<string> handles = w.WindowHandles;
+                foreach(var h in handles)
+                {
+                    w.SwitchTo().Window(h);
+                    if (w.Title == title) return true;
+                }
+
+                // We did not find the correct window.
+                return false;
+            });
             return this;
         }
 
@@ -171,7 +188,7 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="bys"></param>
         /// <returns></returns>
-        public void SwitchToIFrame(params By[] bys)
+        public DriverHandler SwitchToIFrame(params By[] bys)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(
@@ -186,6 +203,8 @@ namespace IntelliTect.TestTools.Selenate
             {
                 wait.Until(f => f.SwitchTo().Frame(f.FindElement(by)));
             }
+
+            return this;
         }
 
         ///// <summary>
