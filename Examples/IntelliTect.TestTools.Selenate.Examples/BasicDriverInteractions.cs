@@ -1,3 +1,4 @@
+using IntelliTect.TestTools.Selenate.Examples.Pages;
 using OpenQA.Selenium;
 using System;
 using Xunit;
