@@ -5,18 +5,14 @@ using Xunit;
 
 namespace IntelliTect.TestTools.Selenate.Examples
 {
-    public class BasicElementInteractions : IDisposable
+    public class BasicElementInteractions : TestBase
     {
         public BasicElementInteractions()
         {
-            _WebDriver = new WebDriverFactory(BrowserType.Chrome).GetDriver();
-            _DriverHandler = new DriverHandler(_WebDriver);
             _DynamicLoadingPage = new DynamicLoadingPages(_WebDriver);
             _DynamicControlsPage = new DynamicControlsPage(_WebDriver);
         }
 
-        private readonly IWebDriver _WebDriver;
-        private readonly DriverHandler _DriverHandler;
         private readonly DynamicLoadingPages _DynamicLoadingPage;
         private readonly DynamicControlsPage _DynamicControlsPage;
 
@@ -51,13 +47,15 @@ namespace IntelliTect.TestTools.Selenate.Examples
         }
 
         [Fact]
-        public void VerifyElementsThatDisappearCanBeTracked()
+        public void CheckForVisibleStates()
         {
             _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
 
             Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
             _DynamicControlsPage.RemoveAddButton.Click();
             Assert.True(_DynamicControlsPage.Checkbox.WaitForInvisibleState());
+            _DynamicControlsPage.RemoveAddButton.Click();
+            Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
         }
 
         [Fact]
@@ -65,28 +63,11 @@ namespace IntelliTect.TestTools.Selenate.Examples
         {
             _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
 
+            Assert.True(_DynamicControlsPage.TextBox.WaitForDisabledState());
+            _DynamicControlsPage.EnableDisableButton.Click();
             Assert.True(_DynamicControlsPage.TextBox.WaitForEnabledState());
             _DynamicControlsPage.EnableDisableButton.Click();
-            Assert.True(_DynamicControlsPage.TextBox.WaitForInvisibleState());
-        }
-
-
-        // Move to its own class
-        [Fact]
-        public void ComplexWaitConditions()
-        {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
-
-            Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
-            _DynamicControlsPage.RemoveAddButton.Click();
-            Assert.True(_DynamicControlsPage.Checkbox.WaitForInvisibleState());
-            _DynamicControlsPage.RemoveAddButton.Click(); // This needs to be a custom webdriverwait
-            Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
-        }
-
-        public void Dispose()
-        {
-            _WebDriver.Dispose();
+            Assert.True(_DynamicControlsPage.TextBox.WaitForDisabledState());
         }
     }
 }
