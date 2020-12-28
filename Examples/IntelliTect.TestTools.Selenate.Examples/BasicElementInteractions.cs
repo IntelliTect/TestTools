@@ -58,8 +58,6 @@ namespace IntelliTect.TestTools.Selenate.Examples
             Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
             _DynamicControlsPage.RemoveAddButton.Click();
             Assert.True(_DynamicControlsPage.Checkbox.WaitForInvisibleState());
-            _DynamicControlsPage.RemoveAddButton.Click(); // Bug here. Button does not become enabled in time
-            Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
         }
 
         [Fact]
@@ -70,8 +68,20 @@ namespace IntelliTect.TestTools.Selenate.Examples
             Assert.True(_DynamicControlsPage.TextBox.WaitForEnabledState());
             _DynamicControlsPage.EnableDisableButton.Click();
             Assert.True(_DynamicControlsPage.TextBox.WaitForInvisibleState());
-            _DynamicControlsPage.EnableDisableButton.Click();
-            Assert.True(_DynamicControlsPage.TextBox.WaitForVisibleState());
+        }
+
+
+        // Move to its own class
+        [Fact]
+        public void ComplexWaitConditions()
+        {
+            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
+
+            Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
+            _DynamicControlsPage.RemoveAddButton.Click();
+            Assert.True(_DynamicControlsPage.Checkbox.WaitForInvisibleState());
+            _DynamicControlsPage.RemoveAddButton.Click(); // This needs to be a custom webdriverwait
+            Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
         }
 
         public void Dispose()
