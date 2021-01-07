@@ -57,7 +57,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
             _DynamicControlsPage.RemoveAddButton.Click();
             Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
         }
-
+    
         [Fact]
         public void CheckForElementEnabledStates()
         {

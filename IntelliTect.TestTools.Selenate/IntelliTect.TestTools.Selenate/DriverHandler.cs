@@ -99,15 +99,6 @@ namespace IntelliTect.TestTools.Selenate
             return NavigateToPage(new Uri(uri));
         }
 
-        //public IWebElement FindElement(By by)
-        //{
-        //    IWait<IWebDriver> wait = Wait;
-        //    wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-        //    return wait.Until(w => w.FindElement(by));
-        //}
-
-        // OOOOOR
-
         /// <summary>
         /// 
         /// </summary>
@@ -119,15 +110,6 @@ namespace IntelliTect.TestTools.Selenate
                 .SetPollingInterval(PollingInterval)
                 .SetTimeout(Timeout);
         }
-
-        //public IList<IWebElement> FindElements(By by)
-        //{
-        //    IWait<IWebDriver> wait = Wait;
-        //    wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-        //    return wait.Until(w => w.FindElements(by));
-        //}
-
-        // OOOOOR
 
         /// <summary>
         /// 
