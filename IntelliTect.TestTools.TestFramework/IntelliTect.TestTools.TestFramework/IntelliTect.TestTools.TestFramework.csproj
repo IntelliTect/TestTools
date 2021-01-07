@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="IntelliTect.Analyzers" Version="0.1.8">
-      <ExcludeAssets>all</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
