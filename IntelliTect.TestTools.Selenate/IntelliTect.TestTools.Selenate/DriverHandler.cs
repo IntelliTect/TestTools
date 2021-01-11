@@ -20,7 +20,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="driver"></param>
         public DriverHandler(IWebDriver driver) : base(driver)
         {
-            //Driver = driver;
+
         }
 
         private FileInfo ScreenshotLocation { get; set; }
