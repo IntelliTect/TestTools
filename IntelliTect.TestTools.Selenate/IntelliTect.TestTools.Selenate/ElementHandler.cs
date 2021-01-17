@@ -1,6 +1,8 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Linq;
+using System.Reflection;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -93,7 +95,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(StaleElementReferenceException),
                 typeof(ElementClickInterceptedException)
                 );
-            
+
             wait.Until(d =>
             {
                 d.FindElement(Locator).Click();
@@ -105,7 +107,7 @@ namespace IntelliTect.TestTools.Selenate
         /// 
         /// </summary>
         /// <param name="textToSend"></param>
-        public void SendText(string textToSend)
+        public void SendKeys(string textToSend)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(
@@ -115,7 +117,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(StaleElementReferenceException),
                 typeof(ElementNotInteractableException)
                 );
-            
+
             wait.Until(d =>
             {
                 IWebElement elem = d.FindElement(Locator);
@@ -138,16 +140,29 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(StaleElementReferenceException),
                 typeof(ElementNotInteractableException)
                 );
-            
+
+            bool shouldValidateText = true;
+            foreach (FieldInfo k in typeof(Keys).GetFields())
+            {
+                if (textToSend.Contains((string)k.GetValue(null)))
+                {
+                    shouldValidateText = false;
+                    break;
+                }
+            }
+
             wait.Until(d =>
             {
-                // NEED TO HANDLE KEYS.ENTER, KEYS.F1, ETC. HERE
                 IWebElement elem = d.FindElement(Locator);
                 elem.Clear();
                 elem.SendKeys(textToSend);
-                System.Threading.Tasks.Task.Delay(100).Wait();
-                return elem.GetAttribute("value") == textToSend;
-                //return true;
+                bool success = true;
+                if (shouldValidateText)
+                {
+                    System.Threading.Tasks.Task.Delay(100).Wait();
+                    success = elem.GetAttribute("value") == textToSend;
+                }
+                return success;
             });
         }
 
@@ -160,7 +175,7 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(ElementNotVisibleException),
                 typeof(StaleElementReferenceException)
                 );
-            
+
             return wait.Until(d =>
             {
                 IWebElement elem = d.FindElement(Locator);

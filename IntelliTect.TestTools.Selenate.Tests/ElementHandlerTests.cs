@@ -61,7 +61,18 @@ namespace IntelliTect.TestTools.Selenate.Tests
         [Fact]
         public void SendTextWorksWithKeys()
         {
-            var test = Keys.Enter;
+            var mockElement = new Mock<IWebElement>();
+            mockElement.Setup(c => c.SendKeys(It.IsAny<string>()))
+                .Verifiable();
+            var mockDriver = new Mock<IWebDriver>();
+            mockDriver.Setup
+                (f => f.FindElement(It.IsAny<By>()))
+                .Returns(mockElement.Object);
+
+            var element = SetupElementHandler(mockDriver.Object);
+            element.SendKeys(Keys.Enter);
+
+            mockElement.Verify();
         }
 
         [Fact]

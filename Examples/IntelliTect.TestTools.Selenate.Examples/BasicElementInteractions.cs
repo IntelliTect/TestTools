@@ -1,6 +1,7 @@
 ﻿using IntelliTect.TestTools.Selenate.Examples.Pages;
 using OpenQA.Selenium;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace IntelliTect.TestTools.Selenate.Examples
@@ -11,10 +12,12 @@ namespace IntelliTect.TestTools.Selenate.Examples
         {
             _DynamicLoadingPage = new DynamicLoadingPages(_WebDriver);
             _DynamicControlsPage = new DynamicControlsPage(_WebDriver);
+            _KeyPressesPage = new KeyPressesPage(_WebDriver);
         }
 
         private readonly DynamicLoadingPages _DynamicLoadingPage;
         private readonly DynamicControlsPage _DynamicControlsPage;
+        private readonly KeyPressesPage _KeyPressesPage;
 
 
         // Below two tests should functionally operate the same
@@ -30,6 +33,14 @@ namespace IntelliTect.TestTools.Selenate.Examples
                     .SetTimeoutSeconds(8)
                     .WaitForVisibleState(),
                 "Hello World label did not appear when we expected it to.");
+        }
+
+        [Fact]
+        public void ReplaceTextWorksWithKeys()
+        {
+            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/key_presses");
+            _KeyPressesPage.InputBox.ReplaceText(Keys.Control);
+            Assert.Equal("CONTROL", _KeyPressesPage.ResultText.GetElementText().Split(' ').Last());
         }
 
         [Fact]
