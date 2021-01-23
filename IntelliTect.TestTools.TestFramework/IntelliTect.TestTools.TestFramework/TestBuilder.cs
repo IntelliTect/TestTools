@@ -196,7 +196,16 @@ namespace IntelliTect.TestTools.TestFramework
 
         private static string GetObjectDataAsJsonString(object obj)
         {
-            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
+
+            try
+            {
+                return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
+            }
+            catch (JsonException e)
+            {
+                return $"Unable to serialize object {obj?.GetType()} to JSON. Mark the relevant property with the [JsonIgnore] attribute: {e.Message}";
+            }
+            
         }
 
         private object GetTestBlock(IServiceScope scope, Type tbType)
