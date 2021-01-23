@@ -1,6 +1,11 @@
 ﻿namespace IntelliTect.TestTools.TestFramework.Tests
 {
-    public class ExampleDataThing
+    public interface IExampleDataInterface
+    {
+        string Testing { get; set; }
+    }
+
+    public class ExampleDataThing : IExampleDataInterface
     {
         public string Testing { get; set; } = "Testing";
     }

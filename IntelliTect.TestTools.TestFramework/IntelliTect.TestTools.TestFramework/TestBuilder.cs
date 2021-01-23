@@ -79,6 +79,12 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        public TestBuilder AddDependencyService<TServiceType,TImplementationType>()
+        {
+            Services.AddScoped(typeof(TServiceType), typeof(TImplementationType));
+            return this;
+        }
+
         /// <summary>
         /// Adds an instance of a Type to the container that is needed for a TestBlock to execute
         /// </summary>
@@ -89,6 +95,12 @@ namespace IntelliTect.TestTools.TestFramework
             if (objToAdd is null) throw new ArgumentNullException(nameof(objToAdd));
             // Need to add some testing around this to see if it behaves in a similarly odd fashion as AddLogger when running tests in parallel
             Services.AddSingleton(objToAdd.GetType(), objToAdd);
+            return this;
+        }
+
+        public TestBuilder AddDependencyInstance<T>(object objToAdd)
+        {
+            Services.AddSingleton(typeof(T), objToAdd);
             return this;
         }
 
