@@ -92,6 +92,12 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        public TestBuilder AddDependencyInstance<T>(object objToAdd)
+        {
+            Services.AddSingleton(typeof(T), objToAdd);
+            return this;
+        }
+
         // Are there other cases where we'll need to add something at this level?
         // If so, this shouldn't be called "AddLogger".
         // Might need to make this scoped. It's behaving oddly when running tests in parallel
