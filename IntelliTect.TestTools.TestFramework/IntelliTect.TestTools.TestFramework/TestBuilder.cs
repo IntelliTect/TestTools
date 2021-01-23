@@ -79,6 +79,12 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        public TestBuilder AddDependencyService<TService,TImplementation>()
+        {
+            Services.AddScoped(typeof(TService), typeof(TImplementation));
+            return this;
+        }
+
         /// <summary>
         /// Adds an instance of a Type to the container that is needed for a TestBlock to execute
         /// </summary>
