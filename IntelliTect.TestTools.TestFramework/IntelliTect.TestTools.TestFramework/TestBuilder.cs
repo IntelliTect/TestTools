@@ -79,9 +79,9 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        public TestBuilder AddDependencyService<TService,TImplementation>()
+        public TestBuilder AddDependencyService<TServiceType,TImplementationType>()
         {
-            Services.AddScoped(typeof(TService), typeof(TImplementation));
+            Services.AddScoped(typeof(TServiceType), typeof(TImplementationType));
             return this;
         }
 
