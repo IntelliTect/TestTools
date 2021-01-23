@@ -105,6 +105,26 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                 .ExecuteTestCase();
         }
 
+        [Fact]
+        public void FetchByImplementationForExecuteArg()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyInstance<IExampleDataInterface>(new ExampleDataThing())
+                .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
+                .ExecuteTestCase();
+        }
+
+        [Fact]
+        public void FetchByImplementationAndTypeForExecuteArg()
+        {
+            TestBuilder builder = new TestBuilder();
+            builder
+                .AddDependencyService<IExampleDataInterface, ExampleDataThing>()
+                .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
+                .ExecuteTestCase();
+        }
+
         // This test probably isn't necessary. This is MS DI out-of-the-box functionality
         [Fact]
         public void FetchByFactoryForConstructor()
@@ -369,6 +389,15 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     public class ExampleTestBlockWithExecuteArgForOwnType : ITestBlock
     {
         public void Execute(ExampleDataThing input)
+        {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            Assert.Equal("Testing", input.Testing);
+        }
+    }
+
+    public class ExampleTestBlockWithExecuteArgForInterface : ITestBlock
+    {
+        public void Execute(IExampleDataInterface input)
         {
             if (input == null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("Testing", input.Testing);
