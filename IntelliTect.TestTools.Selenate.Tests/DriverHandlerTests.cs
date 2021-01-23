@@ -2,6 +2,7 @@
 using OpenQA.Selenium;
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using Xunit;
 
 namespace IntelliTect.TestTools.Selenate.Tests
@@ -17,17 +18,21 @@ namespace IntelliTect.TestTools.Selenate.Tests
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
             handler.SetTimeout(TimeSpan.FromMilliseconds(10));
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            try
-            {
-                handler.SwitchToWindow("failedTest");
-            }
-            catch(WebDriverTimeoutException)
-            { 
-            }
-            sw.Stop();
-            Assert.True(sw.Elapsed < TimeSpan.FromSeconds(5), "Timeout did not get set to less than the default value.");
+
+            PropertyInfo prop = handler.GetType().GetProperty("Timeout");
+            Assert.Equal(TimeSpan.FromMilliseconds(10), prop.GetValue(handler));
+
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
+            //try
+            //{
+            //    handler.SwitchToWindow("failedTest");
+            //}
+            //catch(WebDriverTimeoutException)
+            //{ 
+            //}
+            //sw.Stop();
+            //Assert.True(sw.Elapsed < TimeSpan.FromSeconds(5), "Timeout did not get set to less than the default value.");
         }
 
         [Fact]
@@ -158,6 +163,13 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void TakeScreenshotTakesScreenshotWithExpectedLocation()
         {
 
+        }
+
+        // Null checks here
+        [Fact]
+        public void NullConstructorThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new DriverHandler(null));
         }
     }
 }

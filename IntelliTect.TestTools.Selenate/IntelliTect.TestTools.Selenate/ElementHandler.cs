@@ -144,7 +144,8 @@ namespace IntelliTect.TestTools.Selenate
             bool shouldValidateText = true;
             foreach (FieldInfo k in typeof(Keys).GetFields())
             {
-                if (textToSend.Contains((string)k.GetValue(null)))
+                if (textToSend.Contains((string)k.GetValue(null), 
+                    StringComparison.InvariantCultureIgnoreCase))
                 {
                     shouldValidateText = false;
                     break;
