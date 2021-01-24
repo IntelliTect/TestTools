@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -79,6 +79,12 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        public TestBuilder AddDependencyService<TServiceType,TImplementationType>()
+        {
+            Services.AddScoped(typeof(TServiceType), typeof(TImplementationType));
+            return this;
+        }
+
         /// <summary>
         /// Adds an instance of a Type to the container that is needed for a TestBlock to execute
         /// </summary>
@@ -89,6 +95,12 @@ namespace IntelliTect.TestTools.TestFramework
             if (objToAdd is null) throw new ArgumentNullException(nameof(objToAdd));
             // Need to add some testing around this to see if it behaves in a similarly odd fashion as AddLogger when running tests in parallel
             Services.AddSingleton(objToAdd.GetType(), objToAdd);
+            return this;
+        }
+
+        public TestBuilder AddDependencyInstance<T>(object objToAdd)
+        {
+            Services.AddSingleton(typeof(T), objToAdd);
             return this;
         }
 
@@ -196,14 +208,16 @@ namespace IntelliTect.TestTools.TestFramework
 
         private static string GetObjectDataAsJsonString(object obj)
         {
+
             try
             {
-                return JsonConvert.SerializeObject(obj, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects });
+                return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
             }
-            catch (JsonSerializationException e)
+            catch (JsonException e)
             {
-                return $"Unable to serialize to JSON. Mark the relevant property or constructor with the [JsonIgnore] attribute: {e.Message}";
+                return $"Unable to serialize object {obj?.GetType()} to JSON. Mark the relevant property with the [JsonIgnore] attribute: {e.Message}";
             }
+            
         }
 
         private object GetTestBlock(IServiceScope scope, Type tbType)

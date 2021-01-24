@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IntelliTect.TestTools.Console;
@@ -117,6 +118,20 @@ End";
                     System.Console.Write("Hello World\r");
                 }, NormalizeOptions.None);
             });
+        }
+
+        [TestMethod]
+        [DataRow("C++")]
+        [DataRow("word + word")]
+        [DataRow("+hello+world+")]
+        public void ConsoleTester_OutputIncludesPluses_PlusesAreNotStripped(string consoleInput)
+        {
+            Exception exception = Assert.ThrowsException<Exception>(() => {
+                ConsoleAssert.Expect(consoleInput, () => {
+                    System.Console.Write(""); // Always fail
+                }, NormalizeOptions.None);
+            });
+            StringAssert.Contains(exception.Message, consoleInput);
         }
 
         [TestMethod]
