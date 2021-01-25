@@ -167,7 +167,7 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
-        public string GetElementText()
+        public string Text()
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(
@@ -188,7 +188,7 @@ namespace IntelliTect.TestTools.Selenate
         /// Waits for the element to be visible.
         /// </summary>
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
-        public bool WaitForVisibleState()
+        public bool WaitForDisplayed()
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(
@@ -215,7 +215,7 @@ namespace IntelliTect.TestTools.Selenate
         /// Waits for the element to be visible.
         /// </summary>
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
-        public bool WaitForInvisibleState()
+        public bool WaitForNotDisplayed()
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(

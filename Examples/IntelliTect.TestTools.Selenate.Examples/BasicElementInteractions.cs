@@ -31,7 +31,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
             Assert.True(
                 _DynamicLoadingPage.HelloWorldLabel
                     .SetTimeoutSeconds(8)
-                    .WaitForVisibleState(),
+                    .WaitForDisplayed(),
                 "Hello World label did not appear when we expected it to.");
         }
 
@@ -40,7 +40,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         {
             _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/key_presses");
             _KeyPressesPage.InputBox.ReplaceText(Keys.Control);
-            Assert.Equal("CONTROL", _KeyPressesPage.ResultText.GetElementText().Split(' ').Last());
+            Assert.Equal("CONTROL", _KeyPressesPage.ResultText.Text().Split(' ').Last());
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
             Assert.True(
                 _DynamicLoadingPage.HelloWorldLabel
                     .SetTimeoutSeconds(8)
-                    .WaitForVisibleState(),
+                    .WaitForDisplayed(),
                 "Hello World label did not appear when we expected it to.");
         }
 
@@ -62,11 +62,11 @@ namespace IntelliTect.TestTools.Selenate.Examples
         {
             _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
 
-            Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
+            Assert.True(_DynamicControlsPage.Checkbox.WaitForDisplayed());
             _DynamicControlsPage.RemoveAddButton.Click();
-            Assert.True(_DynamicControlsPage.Checkbox.WaitForInvisibleState());
+            Assert.True(_DynamicControlsPage.Checkbox.WaitForNotDisplayed());
             _DynamicControlsPage.RemoveAddButton.Click();
-            Assert.True(_DynamicControlsPage.Checkbox.WaitForVisibleState());
+            Assert.True(_DynamicControlsPage.Checkbox.WaitForDisplayed());
         }
     
         [Fact]

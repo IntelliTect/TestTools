@@ -22,7 +22,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
                 .Click();
 
             Assert.Equal("A/B Test Control", _DriverHandler.FindElement(By.CssSelector("div[class='example']>h3"))
-                .GetElementText());
+                .Text());
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
 
             Assert.Equal(
                 "You clicked: Ok",
-                _DriverHandler.FindElement(By.CssSelector("p[id='result']")).GetElementText());
+                _DriverHandler.FindElement(By.CssSelector("p[id='result']")).Text());
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
                     By.CssSelector("frame[src='/frame_top']"),
                     By.CssSelector("frame[src='/frame_left']"))
                 .FindElement(By.CssSelector("body"))
-                .GetElementText());
+                .Text());
         }
     }
 }

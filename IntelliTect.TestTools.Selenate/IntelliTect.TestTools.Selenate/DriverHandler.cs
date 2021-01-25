@@ -189,32 +189,13 @@ namespace IntelliTect.TestTools.Selenate
             return this;
         }
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public void TakeScreenshot()
-        //{
-        //    FileInfo file = new FileInfo(
-        //        Path.Combine(Path.GetTempPath(),
-        //        "screenshots",
-        //        $"{((RemoteWebDriver)Driver).Capabilities.GetCapability("browserName")}_{DateTime.Now:yyyy.MM.dd_hh.mm.ss}.png"));
-        //    Directory.CreateDirectory(file.DirectoryName);
-        //    //TakeScreenshot(file);
-        //}
-
         /// <summary>
         /// Take a screenshot of the browser and save it to the passed in fully qualified path.
         /// Will not throw if the path does not exist.
         /// </summary>
         public void TakeScreenshot()
         {
-            //if (file == null)
-            //{
-            //    Debug.WriteLine($"Skipping TakeScreenshot. Argument {nameof(file)} was null.");
-            //    return;
-            //}
-
-            if(ScreenshotLocation == null)
+            if(ScreenshotLocation is null)
             {
                 ScreenshotLocation = new FileInfo(
                     Path.Combine(Path.GetTempPath(),
