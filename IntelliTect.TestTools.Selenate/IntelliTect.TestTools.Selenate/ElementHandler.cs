@@ -129,6 +129,41 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// 
         /// </summary>
+        public void Clear()
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(
+                typeof(NoSuchElementException),
+                typeof(InvalidElementStateException),
+                typeof(StaleElementReferenceException)
+                );
+
+            wait.Until(d =>
+            {
+                IWebElement elem = d.FindElement(Locator);
+                elem.Clear();
+                return true;
+            });
+        }
+
+        public IWebElement FindElement()
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(
+                typeof(NoSuchElementException)
+                );
+
+            return wait.Until(d =>
+            {
+                IWebElement elem = d.FindElement(Locator);
+                if (elem.Displayed) return elem;
+                return null;
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="textToSend"></param>
         public void ReplaceText(string textToSend)
         {

@@ -13,11 +13,13 @@ namespace IntelliTect.TestTools.Selenate.Examples
             _DynamicLoadingPage = new DynamicLoadingPages(_WebDriver);
             _DynamicControlsPage = new DynamicControlsPage(_WebDriver);
             _KeyPressesPage = new KeyPressesPage(_WebDriver);
+            _DropDownPage = new DropDownPage(_WebDriver);
         }
 
         private readonly DynamicLoadingPages _DynamicLoadingPage;
         private readonly DynamicControlsPage _DynamicControlsPage;
         private readonly KeyPressesPage _KeyPressesPage;
+        private readonly DropDownPage _DropDownPage;
 
 
         // Below two tests should functionally operate the same
@@ -79,6 +81,14 @@ namespace IntelliTect.TestTools.Selenate.Examples
             Assert.True(_DynamicControlsPage.TextBox.WaitForEnabledState());
             _DynamicControlsPage.EnableDisableButton.Click();
             Assert.True(_DynamicControlsPage.TextBox.WaitForDisabledState());
+        }
+
+        [Fact]
+        public void ManipulateSelectElement()
+        {
+            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dropdown");
+            _DropDownPage.DropDownSelect.SelectByText("Option 2");
+            Assert.Equal("Option 2", _DropDownPage.DropDownSelect.SelectedOption.Text);
         }
     }
 }
