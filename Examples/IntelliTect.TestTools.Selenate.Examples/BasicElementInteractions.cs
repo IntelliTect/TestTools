@@ -46,6 +46,17 @@ namespace IntelliTect.TestTools.Selenate.Examples
         }
 
         [Fact]
+        public void ClearAndSendKeys()
+        {
+            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
+            _DynamicControlsPage.EnableDisableButton.Click();
+            _DynamicControlsPage.TextBox.SendKeys("Hello!");
+            Assert.Equal("Hello!", _DynamicControlsPage.TextBox.GetAttribute("value"));
+            _DynamicControlsPage.TextBox.Clear();
+            Assert.Equal("", _DynamicControlsPage.TextBox.GetAttribute("value"));
+        }
+
+        [Fact]
         public void FindElementThatIsCreatedAfterPageLoad()
         {
             _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_loading/2");
