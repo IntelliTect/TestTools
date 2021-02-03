@@ -38,14 +38,6 @@ namespace IntelliTect.TestTools.Selenate.Examples
         }
 
         [Fact]
-        public void ReplaceTextWorksWithKeys()
-        {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/key_presses");
-            _KeyPressesPage.InputBox.ReplaceText(Keys.Control);
-            Assert.Equal("CONTROL", _KeyPressesPage.ResultText.Text().Split(' ').Last());
-        }
-
-        [Fact]
         public void ClearAndSendKeys()
         {
             _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");

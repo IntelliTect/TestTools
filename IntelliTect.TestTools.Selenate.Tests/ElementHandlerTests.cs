@@ -75,24 +75,6 @@ namespace IntelliTect.TestTools.Selenate.Tests
             mockElement.Verify();
         }
 
-        [Fact]
-        public void ReplaceTextDoesNotThrowIfSuccessful()
-        {
-
-        }
-
-        [Fact]
-        public void ReplaceTextThrowsIfUnsuccessful()
-        {
-
-        }
-
-        [Fact]
-        public void ReplaceTextWorksWithKeys()
-        {
-            var test = Keys.Enter;
-        }
-
         private ElementHandler SetupElementHandler(IWebDriver driver)
         {
             return new ElementHandler(driver)
