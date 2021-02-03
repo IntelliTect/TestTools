@@ -161,47 +161,6 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="textToSend"></param>
-        public void ReplaceText(string textToSend)
-        {
-            IWait<IWebDriver> wait = Wait;
-            wait.IgnoreExceptionTypes(
-                typeof(NoSuchElementException),
-                typeof(InvalidElementStateException),
-                typeof(ElementNotVisibleException),
-                typeof(StaleElementReferenceException),
-                typeof(ElementNotInteractableException)
-                );
-
-            bool shouldValidateText = true;
-            foreach (FieldInfo k in typeof(Keys).GetFields())
-            {
-                if (textToSend.Contains((string)k.GetValue(null), 
-                    StringComparison.InvariantCultureIgnoreCase))
-                {
-                    shouldValidateText = false;
-                    break;
-                }
-            }
-
-            wait.Until(d =>
-            {
-                IWebElement elem = d.FindElement(Locator);
-                elem.Clear();
-                elem.SendKeys(textToSend);
-                bool success = true;
-                if (shouldValidateText)
-                {
-                    System.Threading.Tasks.Task.Delay(100).Wait();
-                    success = elem.GetAttribute("value") == textToSend;
-                }
-                return success;
-            });
-        }
-
         public string Text()
         {
             IWait<IWebDriver> wait = Wait;
@@ -216,6 +175,22 @@ namespace IntelliTect.TestTools.Selenate
             {
                 IWebElement elem = d.FindElement(Locator);
                 return elem.Text;
+            });
+        }
+
+        public string GetAttribute(string attributeName)
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(
+                typeof(NoSuchElementException),
+                typeof(InvalidElementStateException),
+                typeof(StaleElementReferenceException)
+                );
+
+            return wait.Until(d =>
+            {
+                IWebElement elem = d.FindElement(Locator);
+                return elem.GetAttribute(attributeName);
             });
         }
 
