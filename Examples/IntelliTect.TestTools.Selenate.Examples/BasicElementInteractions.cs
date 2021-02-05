@@ -1,7 +1,4 @@
 ﻿using IntelliTect.TestTools.Selenate.Examples.Pages;
-using OpenQA.Selenium;
-using System;
-using System.Linq;
 using Xunit;
 
 namespace IntelliTect.TestTools.Selenate.Examples
@@ -12,13 +9,11 @@ namespace IntelliTect.TestTools.Selenate.Examples
         {
             _DynamicLoadingPage = new DynamicLoadingPages(_WebDriver);
             _DynamicControlsPage = new DynamicControlsPage(_WebDriver);
-            _KeyPressesPage = new KeyPressesPage(_WebDriver);
             _DropDownPage = new DropDownPage(_WebDriver);
         }
 
         private readonly DynamicLoadingPages _DynamicLoadingPage;
         private readonly DynamicControlsPage _DynamicControlsPage;
-        private readonly KeyPressesPage _KeyPressesPage;
         private readonly DropDownPage _DropDownPage;
 
 

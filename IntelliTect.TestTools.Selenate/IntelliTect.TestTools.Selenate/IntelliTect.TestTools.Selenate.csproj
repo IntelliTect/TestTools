@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="HandlerBase.cs~RF6d5b2d80.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="IntelliTect.Analyzers" Version="0.1.8">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

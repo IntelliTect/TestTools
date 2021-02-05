@@ -28,7 +28,9 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="driver"></param>
         public ElementHandler(IWebDriver driver) : base(driver) { }
 
-        private By Locator { get; set; }
+        public  By Locator { get; private set; }
+
+        private bool _IgnoreExceptions;
 
         /// <summary>
         /// 
@@ -84,10 +86,19 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// 
         /// </summary>
+        public ElementHandler IgnoreAllWebdriverExceptions(bool shouldIgnoreExceptions = true)
+        {
+            _IgnoreExceptions = shouldIgnoreExceptions;
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <returns></returns>
         public void Click()
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException),
                 typeof(InvalidElementStateException),
@@ -109,7 +120,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="textToSend"></param>
         public void SendKeys(string textToSend)
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException),
                 typeof(InvalidElementStateException),
@@ -131,7 +142,7 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         public void Clear()
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException),
                 typeof(InvalidElementStateException),
@@ -146,9 +157,13 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public IWebElement FindElement()
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException)
                 );
@@ -161,9 +176,13 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string Text()
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException),
                 typeof(InvalidElementStateException),
@@ -178,9 +197,14 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="attributeName"></param>
+        /// <returns></returns>
         public string GetAttribute(string attributeName)
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException),
                 typeof(InvalidElementStateException),
@@ -200,7 +224,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
         public bool WaitForDisplayed()
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException),
                 typeof(StaleElementReferenceException)
@@ -227,7 +251,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
         public bool WaitForNotDisplayed()
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(StaleElementReferenceException)
                 );
@@ -252,7 +276,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
         public bool WaitForEnabledState()
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException),
                 typeof(StaleElementReferenceException)
@@ -279,7 +303,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
         public bool WaitForDisabledState()
         {
-            IWait<IWebDriver> wait = Wait;
+            IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
                 typeof(NoSuchElementException),
                 typeof(StaleElementReferenceException)
@@ -298,6 +322,17 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return true;
             }
+        }
+
+        private IWait<IWebDriver> ElementWait()
+        {
+            IWait<IWebDriver> wait = Wait;
+            if (_IgnoreExceptions)
+            {
+                wait.IgnoreExceptionTypes(typeof(WebDriverException));
+            }
+
+            return wait;
         }
     }
 }

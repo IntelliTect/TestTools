@@ -17,7 +17,6 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="locator"></param>
         public ElementsHandler(IWebDriver driver, By locator) : base(driver)
         {
-            //Driver = driver;
             Locator = locator;
         }
 
@@ -27,7 +26,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="driver"></param>
         public ElementsHandler(IWebDriver driver) : base(driver) { }
 
-        private By Locator { get; set; }
+        public By Locator { get; private set; }
 
         /// <summary>
         /// 
