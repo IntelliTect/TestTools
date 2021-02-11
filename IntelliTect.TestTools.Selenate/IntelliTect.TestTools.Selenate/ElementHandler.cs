@@ -320,7 +320,7 @@ namespace IntelliTect.TestTools.Selenate
             catch (WebDriverTimeoutException ex)
                 when (ex.InnerException is NoSuchElementException)
             {
-                return true;
+                return true; // This might not actually make sense. If it's not there, but we're explicitly looking for Disabled, we should probably fail. May make sense to remove the try/catch entirely.
             }
         }
 
