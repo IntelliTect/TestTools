@@ -238,8 +238,7 @@ namespace IntelliTect.TestTools.Selenate
                     return elem.Displayed;
                 });
             }
-            catch (WebDriverTimeoutException ex)
-                when (ex.InnerException is NoSuchElementException)
+            catch (WebDriverTimeoutException)
             {
                 return false;
             }
@@ -268,13 +267,17 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return true;
             }
+            catch (WebDriverTimeoutException)
+            {
+                return false;
+            }
         }
 
         /// <summary>
         /// Waits for the element to be enabled.
         /// </summary>
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
-        public bool WaitForEnabledState()
+        public bool WaitForEnabled()
         {
             IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
@@ -290,8 +293,9 @@ namespace IntelliTect.TestTools.Selenate
                     return elem.Enabled;
                 });
             }
+            // A Null inner exception implies the element was found but was in a disabled state
             catch (WebDriverTimeoutException ex)
-                when (ex.InnerException is NoSuchElementException)
+                when (ex.InnerException is null) 
             {
                 return false;
             }
@@ -301,7 +305,7 @@ namespace IntelliTect.TestTools.Selenate
         /// Waits for the element to be enabled.
         /// </summary>
         /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
-        public bool WaitForDisabledState()
+        public bool WaitForDisabled()
         {
             IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
@@ -317,11 +321,13 @@ namespace IntelliTect.TestTools.Selenate
                     return !elem.Enabled;
                 });
             }
+            // A Null inner exception implies the element was found but was in an enabled state
             catch (WebDriverTimeoutException ex)
-                when (ex.InnerException is NoSuchElementException)
+                when (ex.InnerException is null)
             {
-                return true; // This might not actually make sense. If it's not there, but we're explicitly looking for Disabled, we should probably fail. May make sense to remove the try/catch entirely.
+                return false;
             }
+            
         }
 
         private IWait<IWebDriver> ElementWait()

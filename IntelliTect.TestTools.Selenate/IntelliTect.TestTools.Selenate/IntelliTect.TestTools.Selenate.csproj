@@ -7,6 +7,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CA1303</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="HandlerBase.cs~RF6d5b2d80.TMP" />
   </ItemGroup>

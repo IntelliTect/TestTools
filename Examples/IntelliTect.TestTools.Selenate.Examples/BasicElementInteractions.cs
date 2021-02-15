@@ -74,11 +74,11 @@ namespace IntelliTect.TestTools.Selenate.Examples
         {
             _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
 
-            Assert.True(_DynamicControlsPage.TextBox.WaitForDisabledState());
+            Assert.True(_DynamicControlsPage.TextBox.WaitForDisabled());
             _DynamicControlsPage.EnableDisableButton.Click();
-            Assert.True(_DynamicControlsPage.TextBox.WaitForEnabledState());
+            Assert.True(_DynamicControlsPage.TextBox.WaitForEnabled());
             _DynamicControlsPage.EnableDisableButton.Click();
-            Assert.True(_DynamicControlsPage.TextBox.WaitForDisabledState());
+            Assert.True(_DynamicControlsPage.TextBox.WaitForDisabled());
         }
 
         [Fact]

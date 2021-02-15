@@ -84,7 +84,7 @@ namespace IntelliTect.TestTools.Selenate
         public DriverHandler NavigateToPage(Uri uri)
         {
             if (uri is null) throw new ArgumentNullException(nameof(uri));
-            WrappedDriver.Url = uri.ToString();
+            WrappedDriver.Navigate().GoToUrl(uri);
             return this;
         }
 

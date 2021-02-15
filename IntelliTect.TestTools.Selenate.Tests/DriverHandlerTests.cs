@@ -3,7 +3,6 @@ using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Reflection;
 using Xunit;
 
@@ -11,143 +10,159 @@ namespace IntelliTect.TestTools.Selenate.Tests
 {
     public class DriverHandlerTests
     {
-        // Change these to just make sure the property is overridden. Otherwise will take too long to run these.
+        // Null checks here
+        [Fact]
+        public void NullConstructorThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new DriverHandler(null));
+        }
+
+        [Fact]
+        public void SetTimeoutWithNegativeValueThrowsException()
+        {
+            var mockDriver = new Mock<IWebDriver>();
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => handler.SetTimeout(TimeSpan.FromSeconds(-1)));
+        }
+
+        [Fact]
+        public void SetTimeoutSecondsWithNegativeValueThrowsException()
+        {
+            var mockDriver = new Mock<IWebDriver>();
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => handler.SetTimeoutSeconds(-1));
+        }
+
+        [Fact]
+        public void SetPollingIntervalWithNegativeValueThrowsException()
+        {
+            var mockDriver = new Mock<IWebDriver>();
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => handler.SetPollingInterval(TimeSpan.FromSeconds(-1)));
+        }
+
+        [Fact]
+        public void SetPollingIntervalMillisecondsWithNegativeValueThrowsException()
+        {
+            var mockDriver = new Mock<IWebDriver>();
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => handler.SetPollingIntervalMilliseconds(-1));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void NavigateToPageWithEmptyStringThrowsException(string val)
+        {
+            var mockDriver = new Mock<IWebDriver>();
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+
+            Assert.Throws<ArgumentNullException>(() => handler.NavigateToPage(val));
+        }
+
+        [Fact]
+        public void NavigateToPageWithNullThrowsException()
+        {
+            var mockDriver = new Mock<IWebDriver>();
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+            Uri uri = null;
+
+            Assert.Throws<ArgumentNullException>(() => handler.NavigateToPage(uri));
+        }
+
+        // More complex scenarios here
         [Fact]
         public void SetTimeoutChangesDefaultValue()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver
-                .SetupGet(w => w.WindowHandles)
-                .Returns(() => throw new NoSuchWindowException());
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
-            handler.SetTimeout(TimeSpan.FromMilliseconds(1));
+            handler.SetTimeout(TimeSpan.FromSeconds(1));
 
-            // Not sure which approach to take here... 
-            // Reflection, timing, or neither and handle this in an integrated test?
-            PropertyInfo prop = handler.GetType().GetProperty("Timeout", BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.Equal(TimeSpan.FromMilliseconds(1), prop.GetValue(handler));
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            try
-            {
-                handler.SwitchToWindow("failedTest");
-            }
-            catch (WebDriverTimeoutException)
-            {
-            }
-            sw.Stop();
-            Assert.True(sw.Elapsed < TimeSpan.FromMilliseconds(10), "Timeout did not get set to less than the default value.");
+            Assert.Equal(
+                TimeSpan.FromSeconds(1),
+                handler
+                    .GetType()
+                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler));
         }
 
         [Fact]
         public void SetTimeoutSecondsChangesDefaultValue()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver
-                .SetupGet(w => w.WindowHandles)
-                .Returns(() => throw new NoSuchWindowException());
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
             handler.SetTimeoutSeconds(1);
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            try
-            {
-                handler.SwitchToWindow("failedTest");
-            }
-            catch (WebDriverTimeoutException)
-            {
-            }
-            sw.Stop();
-            Assert.True(sw.Elapsed < TimeSpan.FromSeconds(5), 
-                "Timeout did not get set to more than the default value.");
+
+            Assert.Equal(
+                TimeSpan.FromSeconds(1),
+                handler
+                    .GetType()
+                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler));
         }
 
         [Fact]
         public void SetPollingIntervalChangesDefaultValue()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver
-                .SetupGet(w => w.WindowHandles)
-                .Returns(() => throw new NoSuchWindowException())
-                .Verifiable();
-
-            
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
-            handler.SetTimeout(TimeSpan.FromSeconds(1));
             handler.SetPollingInterval(TimeSpan.FromMilliseconds(1));
-            try
-            {
-                handler.SwitchToWindow("failedTest");
-            }
-            catch (WebDriverTimeoutException)
-            {
-            }
 
-            mockDriver.Verify(w => w.WindowHandles, Times.AtLeast(50));
+            Assert.Equal(
+                TimeSpan.FromMilliseconds(1), 
+                handler.GetType().GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler));
         }
 
         [Fact]
         public void SetPollingMillisecondsIntervalChangesDefaultValue()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver
-                .SetupGet(w => w.WindowHandles)
-                .Returns(() => throw new NoSuchWindowException())
-                .Verifiable();
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
-            handler.SetTimeout(TimeSpan.FromSeconds(1));
             handler.SetPollingIntervalMilliseconds(1);
-            try
-            {
-                handler.SwitchToWindow("failedTest");
-            }
-            catch (WebDriverTimeoutException)
-            {
-            }
 
-            mockDriver.Verify(w => w.WindowHandles, Times.AtLeast(50));
+            Assert.Equal(
+                TimeSpan.FromMilliseconds(1),
+                handler
+                    .GetType()
+                    .GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler));
         }
-
-        // This should be an integrated test
-        //[Fact]
-        //public void SetScreenshotLocation()
-        //{
-        //    var mockDriver = new Mock<ITakesScreenshot>();
-        //    mockDriver
-        //        .Setup(w => w.GetScreenshot()).Returns(() => throw new Exception(""))
-        //        .Returns(() => throw new NoSuchWindowException())
-        //        .Verifiable();
-
-        //    DriverHandler handler = new DriverHandler(mockDriver.Object);
-        //}
 
         [Fact]
         public void NavigateToPageProperlySetsWebDriverUrl()
         {
-            string uri = "http://www.someSuccess.com";
+            var mockNavigation = new Mock<INavigation>();
+            mockNavigation.Setup(n => n.GoToUrl(It.IsNotNull<Uri>()))
+                .Verifiable();
+
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.SetupProperty(x => x.Url);
+            mockDriver.Setup(x => x.Navigate()).Returns(mockNavigation.Object);
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
-            handler.NavigateToPage(new Uri(uri));
-            Assert.Equal(uri, handler.WrappedDriver.Url);
+            handler.NavigateToPage(new Uri("http://www.someSuccess.com/"));
+
+            mockNavigation.Verify(d => d.GoToUrl(It.IsNotNull<Uri>()), Times.Once);
         }
 
         [Fact]
         public void NavigateToPageWithStringProperlySetsWebDriverUrl()
         {
-            string uri = "http://www.someSuccess.com";
+            var mockNavigation = new Mock<INavigation>();
+            mockNavigation.Setup(n => n.GoToUrl(It.IsNotNull<Uri>()))
+                .Verifiable();
+
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.SetupProperty(x => x.Url);
+            mockDriver.Setup(x => x.Navigate()).Returns(mockNavigation.Object);
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
-            handler.NavigateToPage(uri);
-            Assert.Equal(uri, handler.WrappedDriver.Url);
+            handler.NavigateToPage("http://www.someSuccess.com/");
+
+            mockNavigation.Verify(d => d.GoToUrl(It.IsNotNull<Uri>()), Times.Once);
         }
 
         [Fact]
@@ -193,43 +208,77 @@ namespace IntelliTect.TestTools.Selenate.Tests
             Assert.Equal(testTitle, title);
         }
 
-        // These all are probably easier to do as integration tests
-        //[Fact]
-        //public void SwitchWindowInvokesSwitchToWindow()
-        //{
-        //    var mockNavigation = new Mock<ITargetLocator>();
-        //    mockNavigation
-        //        .Setup(n => n.Window(It.IsAny<string>()));
-
-        //    var mockDriver = new Mock<IWebDriver>();
-        //    mockDriver
-        //        .Setup(w => w.SwitchTo())
-        //        .Returns(mockNavigation.Object);
-        //}
-
-        //[Fact]
-        //public void SwitchAlertInvokesSwitchToAlert()
-        //{
-
-        //}
-
-        //[Fact]
-        //public void SwitchFrameInvokesSwitchToFrame()
-        //{
-
-        //}
-
-        //[Fact]
-        //public void TakeScreenshotTakesScreenshotWithExpectedLocation()
-        //{
-
-        //}
-
-        // Null checks here
         [Fact]
-        public void NullConstructorThrowsArgumentNullException()
+        public void SwitchWindowInvokesSwitchToWindow()
         {
-            Assert.Throws<ArgumentNullException>(() => new DriverHandler(null));
+            string windowTitle = "Testing!";
+            var mockDriver = new Mock<IWebDriver>();
+
+            var mockNavigation = new Mock<ITargetLocator>();
+            mockNavigation
+                .Setup(n => n.Window(It.IsAny<string>()))
+                .Returns(mockDriver.Object)
+                .Verifiable();
+
+            mockDriver
+                .Setup(w => w.SwitchTo())
+                .Returns(mockNavigation.Object);
+
+            mockDriver.Setup(w => w.Title).Returns(windowTitle);
+            mockDriver.Setup(h => h.WindowHandles).Returns(new ReadOnlyCollection<string>(new List<string> { windowTitle }));
+
+
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+            handler.SwitchToWindow(windowTitle);
+
+            mockNavigation.Verify(w => w.Window(It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact]
+        public void SwitchAlertInvokesSwitchToAlert()
+        {
+            var mockAlert = new Mock<IAlert>();
+
+            var mockNavigation = new Mock<ITargetLocator>();
+            mockNavigation
+                .Setup(n => n.Alert())
+                .Returns(mockAlert.Object)
+                .Verifiable();
+
+            var mockDriver = new Mock<IWebDriver>();
+            mockDriver
+                .Setup(w => w.SwitchTo())
+                .Returns(mockNavigation.Object);
+
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+            handler.SwitchToAlert();
+
+            mockNavigation.Verify(w => w.Alert(), Times.Once);
+        }
+
+        [Fact]
+        public void SwitchFrameInvokesSwitchToFrame()
+        {
+            var mockElement = new Mock<IWebElement>();
+            var mockDriver = new Mock<IWebDriver>();
+            mockDriver
+                .Setup(x => x.FindElement(It.IsAny<By>()))
+                .Returns(mockElement.Object);
+
+            var mockNavigation = new Mock<ITargetLocator>();
+            mockNavigation
+                .Setup(n => n.Frame(It.IsAny<IWebElement>()))
+                .Returns(mockDriver.Object)
+                .Verifiable();
+
+            mockDriver
+                .Setup(w => w.SwitchTo())
+                .Returns(mockNavigation.Object);
+
+            DriverHandler handler = new DriverHandler(mockDriver.Object);
+            handler.SwitchToIFrame(By.Id("Testing!"));
+
+            mockNavigation.Verify(w => w.Frame(It.IsAny<IWebElement>()), Times.Once);
         }
     }
 }

@@ -15,6 +15,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="driver"></param>
         public HandlerBase(IWebDriver driver)
         {
+            if (driver is null) throw new ArgumentNullException(nameof(driver));
             WrappedDriver = driver;
         }
 
@@ -50,6 +51,11 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         protected T SetTimeout<T>(TimeSpan timeout) where T : HandlerBase
         {
+            if (timeout.TotalMilliseconds < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Please provide a positive value.");
+            }
+
             Timeout = timeout;
             return (T)this;
         }
@@ -62,6 +68,11 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         protected T SetPollingInterval<T>(TimeSpan pollingInterval) where T : HandlerBase
         {
+            if (pollingInterval.TotalMilliseconds < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pollingInterval), "Please provide a positive value.");
+            }
+
             PollingInterval = pollingInterval;
             return (T)this;
         }
