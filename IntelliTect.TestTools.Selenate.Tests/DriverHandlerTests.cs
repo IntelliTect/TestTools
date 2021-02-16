@@ -87,7 +87,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 TimeSpan.FromSeconds(1),
                 handler
                     .GetType()
-                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler));
+                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(handler));
         }
 
         [Fact]
@@ -102,7 +103,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 TimeSpan.FromSeconds(1),
                 handler
                     .GetType()
-                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler));
+                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(handler));
         }
 
         [Fact]
@@ -115,7 +117,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
 
             Assert.Equal(
                 TimeSpan.FromMilliseconds(1), 
-                handler.GetType().GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler));
+                handler.GetType().GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(handler));
         }
 
         [Fact]
@@ -130,18 +133,22 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 TimeSpan.FromMilliseconds(1),
                 handler
                     .GetType()
-                    .GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(handler));
+                    .GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetValue(handler));
         }
 
         [Fact]
         public void NavigateToPageProperlySetsWebDriverUrl()
         {
             var mockNavigation = new Mock<INavigation>();
-            mockNavigation.Setup(n => n.GoToUrl(It.IsNotNull<Uri>()))
+            mockNavigation
+                .Setup(n => n.GoToUrl(It.IsNotNull<Uri>()))
                 .Verifiable();
 
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup(x => x.Navigate()).Returns(mockNavigation.Object);
+            mockDriver
+                .Setup(x => x.Navigate())
+                .Returns(mockNavigation.Object);
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
             handler.NavigateToPage(new Uri("http://www.someSuccess.com/"));
@@ -153,7 +160,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void NavigateToPageWithStringProperlySetsWebDriverUrl()
         {
             var mockNavigation = new Mock<INavigation>();
-            mockNavigation.Setup(n => n.GoToUrl(It.IsNotNull<Uri>()))
+            mockNavigation
+                .Setup(n => n.GoToUrl(It.IsNotNull<Uri>()))
                 .Verifiable();
 
             var mockDriver = new Mock<IWebDriver>();
@@ -170,7 +178,9 @@ namespace IntelliTect.TestTools.Selenate.Tests
         {
             var mockElement = new Mock<IWebElement>();
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup(x => x.FindElement(It.IsAny<By>())).Returns(mockElement.Object);
+            mockDriver
+                .Setup(x => x.FindElement(It.IsAny<By>()))
+                .Returns(mockElement.Object);
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);
             ElementHandler elem = handler.FindElement(By.Id("Testing"));
@@ -224,8 +234,12 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 .Setup(w => w.SwitchTo())
                 .Returns(mockNavigation.Object);
 
-            mockDriver.Setup(w => w.Title).Returns(windowTitle);
-            mockDriver.Setup(h => h.WindowHandles).Returns(new ReadOnlyCollection<string>(new List<string> { windowTitle }));
+            mockDriver
+                .Setup(w => w.Title)
+                .Returns(windowTitle);
+            mockDriver
+                .Setup(h => h.WindowHandles)
+                .Returns(new ReadOnlyCollection<string>(new List<string> { windowTitle }));
 
 
             DriverHandler handler = new DriverHandler(mockDriver.Object);

@@ -7,16 +7,16 @@ namespace IntelliTect.TestTools.Selenate.Examples
     {
         public TestBase()
         {
-            _WebDriver = new WebDriverFactory(BrowserType.Chrome).GetDriver();
-            _DriverHandler = new DriverHandler(_WebDriver);
+            WebDriver = new WebDriverFactory(BrowserType.Chrome).GetDriver();
+            DriverHandler = new DriverHandler(WebDriver);
         }
 
-        protected readonly IWebDriver _WebDriver;
-        protected readonly DriverHandler _DriverHandler;
+        protected IWebDriver WebDriver { get; }
+        protected DriverHandler DriverHandler { get; }
 
         public void Dispose()
         {
-            _WebDriver.Dispose();
+            WebDriver.Dispose();
         }
     }
 }

@@ -7,7 +7,6 @@
     {
         Chrome,
         HeadlessChrome,
-        InternetExplorer,
         Firefox,
         Edge
     }

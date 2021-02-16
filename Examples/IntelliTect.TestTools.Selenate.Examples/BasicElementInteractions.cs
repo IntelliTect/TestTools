@@ -7,9 +7,9 @@ namespace IntelliTect.TestTools.Selenate.Examples
     {
         public BasicElementInteractions()
         {
-            _DynamicLoadingPage = new DynamicLoadingPages(_WebDriver);
-            _DynamicControlsPage = new DynamicControlsPage(_WebDriver);
-            _DropDownPage = new DropDownPage(_WebDriver);
+            _DynamicLoadingPage = new DynamicLoadingPages(WebDriver);
+            _DynamicControlsPage = new DynamicControlsPage(WebDriver);
+            _DropDownPage = new DropDownPage(WebDriver);
         }
 
         private readonly DynamicLoadingPages _DynamicLoadingPage;
@@ -21,7 +21,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void FindElementThatIsUnhiddenAfterPageLoad()
         {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_loading/1");
+            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_loading/1");
 
             _DynamicLoadingPage.StartButton.Click();
 
@@ -35,7 +35,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void ClearAndSendKeys()
         {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
+            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
             _DynamicControlsPage.EnableDisableButton.Click();
             _DynamicControlsPage.TextBox.SendKeys("Hello!");
             Assert.Equal("Hello!", _DynamicControlsPage.TextBox.GetAttribute("value"));
@@ -46,7 +46,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void FindElementThatIsCreatedAfterPageLoad()
         {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_loading/2");
+            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_loading/2");
 
             _DynamicLoadingPage.StartButton.Click();
 
@@ -60,7 +60,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void CheckForVisibleStates()
         {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
+            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
 
             Assert.True(_DynamicControlsPage.Checkbox.WaitForDisplayed());
             _DynamicControlsPage.RemoveAddButton.Click();
@@ -72,7 +72,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void CheckForElementEnabledStates()
         {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
+            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dynamic_controls");
 
             Assert.True(_DynamicControlsPage.TextBox.WaitForDisabled());
             _DynamicControlsPage.EnableDisableButton.Click();
@@ -84,7 +84,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void ManipulateSelectElement()
         {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dropdown");
+            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/dropdown");
             _DropDownPage.DropDownSelect.SelectByText("Option 2");
             Assert.Equal("Option 2", _DropDownPage.DropDownSelect.SelectedOption.Text);
         }

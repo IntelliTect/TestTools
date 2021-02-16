@@ -7,24 +7,16 @@ namespace IntelliTect.TestTools.Selenate.Tests
 {
     public class ElementHandlerTests
     {
-        // SetPollingIntervalMilliseconds
-        // SendText
-        // ReplaceText
-        // GetElementText
-        // WaitForVisibleState
-        // WaitForInvisibleState
-        // WaitForEnabledState
-        // WaitForDisabledState
-
         [Fact]
         public void ClickDoesNotThrowIfSuccessful()
         {
             var mockElement = new Mock<IWebElement>();
-            mockElement.Setup(c => c.Click())
+            mockElement
+                .Setup(c => c.Click())
                 .Verifiable();
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Returns(mockElement.Object);
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -37,8 +29,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void ClickThrowsIfUnsuccessful()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Throws<NoSuchElementException>();
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -50,11 +42,12 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void SendTextDoesNotThrowIfSuccessful()
         {
             var mockElement = new Mock<IWebElement>();
-            mockElement.Setup(c => c.SendKeys(It.IsAny<string>()))
+            mockElement
+                .Setup(c => c.SendKeys(It.IsAny<string>()))
                 .Verifiable();
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Returns(mockElement.Object);
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -67,8 +60,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void SendTextThrowsIfUnsuccessful()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Throws<NoSuchElementException>();
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -80,11 +73,12 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void ClearDoesNotThrowIfSuccessful()
         {
             var mockElement = new Mock<IWebElement>();
-            mockElement.Setup(c => c.Clear())
+            mockElement
+                .Setup(c => c.Clear())
                 .Verifiable();
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Returns(mockElement.Object);
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -97,8 +91,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void ClearThrowsIfUnsuccessful()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Throws<NoSuchElementException>();
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -115,8 +109,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 .Returns(true);
 
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Returns(mockElement.Object);
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -133,8 +127,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 .Returns(false);
 
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Returns(mockElement.Object);
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -146,8 +140,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void WaitForDisplayedReturnsFalseIfNoElement()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Throws<NoSuchElementException>();
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -177,8 +171,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void WaitForNotDisplayedReturnsTrueIfNoElement()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Throws<NoSuchElementException>();
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -244,8 +238,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void WaitForEnabledThrowsIfTimesOut()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Throws<NoSuchElementException>();
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -293,8 +287,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void WaitForDisabledThrowsIfTimesOut()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Throws<NoSuchElementException>();
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -311,8 +305,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 .Returns("Success");
 
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Returns(mockElement.Object);
 
             var element = SetupElementHandler(mockDriver.Object);
@@ -324,8 +318,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
         public void GetAttributeThrowsOnTimeout()
         {
             var mockDriver = new Mock<IWebDriver>();
-            mockDriver.Setup
-                (f => f.FindElement(It.IsAny<By>()))
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
                 .Throws<NoSuchElementException>();
 
             var element = SetupElementHandler(mockDriver.Object);

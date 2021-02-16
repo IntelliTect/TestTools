@@ -2,21 +2,20 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.IE;
 using System;
 using System.IO;
 
 namespace IntelliTect.TestTools.Selenate
 {
     /// <summary>
-    /// 
+    /// Class for instantiating "everyday" WebDrivers.
     /// </summary>
     public class WebDriverFactory
     {
         /// <summary>
-        /// 
+        /// The type of browser to drive with a Selenium WebDriver.
         /// </summary>
-        /// <param name="browserType"></param>
+        /// <param name="browserType">The type of WebDriver to instantiate to drive a specific browser.</param>
         public WebDriverFactory(BrowserType browserType)
         {
             BrowserType = browserType; 
@@ -25,6 +24,7 @@ namespace IntelliTect.TestTools.Selenate
         private BrowserType BrowserType { get; set; }
 
         /// <summary>
+        /// Gets the driver specified in the constructor. 
         /// Do not forget to dispose of your driver after each test or test collection
         /// </summary>
         public IWebDriver GetDriver()
@@ -40,18 +40,6 @@ namespace IntelliTect.TestTools.Selenate
                     chromeOptions.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOptions.AddUserProfilePreference("profile.password_manager_enabled", false);
                     driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions);
-                    break;
-                case BrowserType.InternetExplorer:
-                    InternetExplorerOptions ieCaps = new InternetExplorerOptions
-                    {
-                        EnablePersistentHover = true,
-                        EnsureCleanSession = true,
-                        EnableNativeEvents = true,
-                        IgnoreZoomLevel = true,
-                        IntroduceInstabilityByIgnoringProtectedModeSettings = true,
-                        RequireWindowFocus = false
-                    };
-                    driver = new InternetExplorerDriver(Directory.GetCurrentDirectory(), ieCaps);
                     break;
                 case BrowserType.Firefox:
                     FirefoxOptions ffOptions = new FirefoxOptions();

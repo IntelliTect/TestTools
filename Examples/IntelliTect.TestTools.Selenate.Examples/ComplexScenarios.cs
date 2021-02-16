@@ -10,7 +10,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
     {
         public ComplexScenarios()
         {
-            _Editor = new EditorPage(_WebDriver);
+            _Editor = new EditorPage(WebDriver);
         }
 
         private readonly EditorPage _Editor;
@@ -18,8 +18,8 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void ComplexWait()
         {
-            _DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/tinymce");
-            // Group together, as all must occur in order to succeed.
+            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/tinymce");
+            // Group together, as each menu click must occur with the prior one in order to succeed.
 
             Assert.True(_Editor.MenuBar.WaitForDisplayed());
 
@@ -48,7 +48,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
             bool OpenMenu(By originalLocator, By secondLocator)
             {
                 WebDriverWait wait = new WebDriverWait(
-                _DriverHandler.WrappedDriver,
+                DriverHandler.WrappedDriver,
                 TimeSpan.FromSeconds(5));
 
                 wait.IgnoreExceptionTypes(
