@@ -220,7 +220,7 @@ namespace IntelliTect.TestTools.TestFramework
             catch (Exception e)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return $"Unable to serialize object {obj?.GetType()} to JSON. Mark the relevant property with the [JsonIgnore] attribute: {e.Message}";
+                return $"Unable to serialize object {obj?.GetType()} to JSON. Mark the relevant property with the [JsonIgnore] attribute: {e}";
             }
             
         }
