@@ -7,23 +7,22 @@ using System.Reflection;
 namespace IntelliTect.TestTools.Selenate
 {
     /// <summary>
-    /// 
+    /// Main class for handling interactions with a specific IWebElement.
     /// </summary>
     public class ElementHandler : HandlerBase
     {
         /// <summary>
-        /// 
+        /// Takes an IWebDriver and a Selenium By locator used for operations with this element.
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="locator"></param>
         public ElementHandler(IWebDriver driver, By locator) : base(driver)
         {
-            //Driver = driver;
             Locator = locator;
         }
 
         /// <summary>
-        /// 
+        /// Takes an IWebDriver used for operations with this element. Must call SetLocator on this before operations will function.
         /// </summary>
         /// <param name="driver"></param>
         public ElementHandler(IWebDriver driver) : base(driver) { }
@@ -33,7 +32,7 @@ namespace IntelliTect.TestTools.Selenate
         private bool _IgnoreExceptions;
 
         /// <summary>
-        /// 
+        /// Sets the locator to use for operations within this instance.
         /// </summary>
         /// <param name="by"></param>
         /// <returns></returns>
@@ -44,7 +43,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Sets the timeout to use when retrying operations within this instance.
         /// </summary>
         /// <param name="timeout"></param>
         /// <returns></returns>
@@ -54,7 +53,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Sets the timeout in seconds to use when retrying operations within this instance.
         /// </summary>
         /// <param name="timeoutInSeconds"></param>
         /// <returns></returns>
@@ -64,7 +63,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Sets the polling interval to use when retrying operations within this instance.
         /// </summary>
         /// <param name="pollingInterval"></param>
         /// <returns></returns>
@@ -74,7 +73,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Sets the polling interval in seconds to use when retrying operations within this instance.
         /// </summary>
         /// <param name="pollIntervalInMilliseconds"></param>
         /// <returns></returns>
@@ -84,7 +83,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Ignores all exceptions of type WebDriverException when trying operations within this instance. This should be used as sparingly as possible.
         /// </summary>
         public ElementHandler IgnoreAllWebdriverExceptions(bool shouldIgnoreExceptions = true)
         {
@@ -93,7 +92,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Clicks on the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
         /// <returns></returns>
         public void Click()
@@ -115,7 +114,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Sends keys to the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
         /// <param name="textToSend"></param>
         public void SendKeys(string textToSend)
@@ -138,7 +137,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Clears text in the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
         public void Clear()
         {
@@ -157,6 +156,11 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
+        // Need to find what to actually do here.
+        // This should either be:
+        // 1. Deleted because the current element is found by all of the other methods that require it
+        // 2. Reworked to match IWebElement.FindElement() to allow element chaining (but that has its own issues and we'd have to keep track of every parent By.)
+        // 3. Just return "this" which seems unnecessary and superfluous
         /// <summary>
         /// 
         /// </summary>
@@ -177,7 +181,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Gets the existing text on the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
         /// <returns></returns>
         public string Text()
@@ -198,7 +202,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// 
+        /// Gets a specific attribute of the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
         /// <param name="attributeName"></param>
         /// <returns></returns>
@@ -219,9 +223,9 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// Waits for the element to be visible.
+        /// Waits for the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/> to be displayed. Will automatically retry if a known failure occurs.
         /// </summary>
-        /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
+        /// <returns>True if the element is displayed, false if the the element is not displayed or throws an ElementNotVisible or NoSuchElement exception</returns>
         public bool WaitForDisplayed()
         {
             IWait<IWebDriver> wait = ElementWait();
@@ -238,7 +242,8 @@ namespace IntelliTect.TestTools.Selenate
                     return elem.Displayed;
                 });
             }
-            catch (WebDriverTimeoutException)
+            catch (WebDriverTimeoutException ex)
+                when (ex.InnerException is not StaleElementReferenceException)
             {
                 return false;
             }
