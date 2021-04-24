@@ -10,7 +10,7 @@
             LogToDebug($"{TestCaseKey} - {CurrentTestBlock} - Debug: {message}");
         }
 
-        public void Error(string message)
+        public void Critical(string message)
         {
             LogToDebug($"{TestCaseKey} - {CurrentTestBlock} - Error: {message}");
         }
