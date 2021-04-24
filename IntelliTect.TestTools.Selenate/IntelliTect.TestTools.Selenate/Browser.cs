@@ -30,6 +30,7 @@ namespace IntelliTect.TestTools.Selenate
     /// Wrapper around a <see cref="IWebDriver"/> that provides numerous
     /// utilities for interacting with the underlying driver.
     /// </summary>
+    [Obsolete("This class is being deprecated in v2 in favor of a DriverHandler class.")]
     public class Browser : IDisposable
     {
         /// <summary>
