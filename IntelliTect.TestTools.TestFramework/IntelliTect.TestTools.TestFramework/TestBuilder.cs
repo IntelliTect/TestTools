@@ -23,6 +23,13 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
+        private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
+        private IServiceCollection Services { get; } = new ServiceCollection();
+        private HashSet<object> TestBlockResults { get; } = new HashSet<object>();
+        private string TestCaseName { get; set; }
+        private Exception TestBlockException { get; set; }
+
         /// <summary>
         /// Adds a test block (some related group of test actions) to the list of blocks to run for any given test case
         /// </summary>
@@ -120,6 +127,20 @@ namespace IntelliTect.TestTools.TestFramework
             var logger = Services.FirstOrDefault(d => d.ServiceType == typeof(ILogger));
             Services.Remove(logger);
             return this;
+        }
+
+        public TestCase Build()
+        {
+            TestCase testCase = new()
+            {
+                TestCaseName = TestCaseName
+            };
+            Services.AddSingleton(testCase);
+            var serviceProvider = Services.BuildServiceProvider();
+            // add service provider to test case
+            // add test blocks to test case
+            // add finally blocks to test case
+            return testCase;
         }
 
         public void ExecuteTestCase()
@@ -357,12 +378,5 @@ namespace IntelliTect.TestTools.TestFramework
 
             logger?.Debug($"Test block completed successfully.");
         }
-
-        private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
-        private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
-        private IServiceCollection Services { get; } = new ServiceCollection();
-        private HashSet<object> TestBlockResults { get; } = new HashSet<object>();
-        private string TestCaseName { get; set; }
-        private Exception TestBlockException { get; set; }
     }
 }

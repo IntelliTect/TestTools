@@ -24,6 +24,8 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         public string ResourceReferenceProperty { get; set; }
+        public Exception TestBlockException { get; set; }
+        public AggregateException FinallyBlockExceptions { get; set; }
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
