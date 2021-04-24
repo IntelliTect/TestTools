@@ -11,7 +11,7 @@ namespace IntelliTect.TestTools.Selenate.Examples.Pages
         }
 
         public ElementHandler DropDown => new ElementHandler(_Driver, By.Id("dropdown"));
-        public SelectElement DropDownSelect => new SelectElement(DropDown.FindElement());
+        public SelectElement DropDownSelect => new SelectElement(DropDown.GetWebElement());
 
         private IWebDriver _Driver;
     }

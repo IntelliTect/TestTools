@@ -165,7 +165,7 @@ namespace IntelliTect.TestTools.Selenate
         /// 
         /// </summary>
         /// <returns></returns>
-        public IWebElement FindElement()
+        public IWebElement GetWebElement()
         {
             IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(

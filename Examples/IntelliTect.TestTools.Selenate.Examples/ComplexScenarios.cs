@@ -1,5 +1,6 @@
 ﻿using IntelliTect.TestTools.Selenate.Examples.Pages;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using System;
 using Xunit;
@@ -11,9 +12,11 @@ namespace IntelliTect.TestTools.Selenate.Examples
         public ComplexScenarios()
         {
             _Editor = new EditorPage(WebDriver);
+            _Slider = new SliderPage(WebDriver);
         }
 
         private readonly EditorPage _Editor;
+        private readonly SliderPage _Slider;
 
         [Fact]
         public void ComplexWait()
@@ -64,9 +67,25 @@ namespace IntelliTect.TestTools.Selenate.Examples
         }
 
         [Fact]
-        public void Actions()
+        public void DragAndDrop()
         {
+            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/horizontal_slider");
 
+            Assert.True(_Slider.Slider.WaitForDisplayed(),
+                "Slider did not appear when we expected it to.");
+
+            var slider = _Slider.Slider.GetWebElement();
+
+            Actions actions = new Actions(DriverHandler.WrappedDriver);
+            actions.MoveToElement(slider, 0, 0)
+                .ClickAndHold()
+                .MoveByOffset(slider.Size.Width / 2, 0)
+                .Release()
+                .Perform();
+
+            decimal sliderNum = Convert.ToDecimal(_Slider.Number.Text());
+            Assert.True(sliderNum > 0,
+                $"Expected slider number to be larger than 0, but was actually {sliderNum}");
         }
     }
 }
