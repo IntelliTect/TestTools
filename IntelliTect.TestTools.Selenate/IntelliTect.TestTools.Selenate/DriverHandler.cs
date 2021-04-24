@@ -27,7 +27,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the maximum time that this instance will retry a specific interaction with a WebDriver before throwing.
         /// </summary>
-        /// <param name="timeout"></param>
+        /// <param name="timeout">Duration to retry an action before throwing.</param>
         /// <returns>this</returns>
         public DriverHandler SetTimeout(TimeSpan timeout)
         {
@@ -37,7 +37,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the maximum time in seconds that this instance will retry a specific interaction with a WebDriver before throwing.
         /// </summary>
-        /// <param name="timeoutInSeconds"></param>
+        /// <param name="timeoutInSeconds">Duration to retry an action before throwing.</param>
         /// <returns>this</returns>
         public DriverHandler SetTimeoutSeconds(int timeoutInSeconds)
         {
@@ -47,7 +47,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the amount of time this instance will wait in between retrying a specific interaction.
         /// </summary>
-        /// <param name="pollingInterval"></param>
+        /// <param name="pollingInterval">Time to wait in between retrying an action.</param>
         /// <returns>this</returns>
         public DriverHandler SetPollingInterval(TimeSpan pollingInterval)
         {
@@ -57,7 +57,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the amount of time in milliseconds this instance will wait in between retrying a specific interaction.
         /// </summary>
-        /// <param name="pollIntervalInMilliseconds"></param>
+        /// <param name="pollIntervalInMilliseconds">Time to wait in between retrying an action.</param>
         /// <returns>this</returns>
         public DriverHandler SetPollingIntervalMilliseconds(int pollIntervalInMilliseconds)
         {
@@ -138,7 +138,6 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns>This driver focused on the new window</returns>
         public DriverHandler SwitchToWindow(string title)
         {
-
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(typeof(NoSuchWindowException));
             wait.Until(w => {

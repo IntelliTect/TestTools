@@ -1,8 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.Linq;
-using System.Reflection;
 
 namespace IntelliTect.TestTools.Selenate
 {
@@ -14,8 +12,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Takes an IWebDriver and a Selenium By locator used for operations with this element.
         /// </summary>
-        /// <param name="driver"></param>
-        /// <param name="locator"></param>
+        /// <param name="driver">The WebDriver to wrap.</param>
+        /// <param name="locator">Method for locating an element.</param>
         public ElementHandler(IWebDriver driver, By locator) : base(driver)
         {
             Locator = locator;
@@ -24,7 +22,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Takes an IWebDriver used for operations with this element. Must call SetLocator on this before operations will function.
         /// </summary>
-        /// <param name="driver"></param>
+        /// <param name="driver">The WebDriver to wrap.</param>
         public ElementHandler(IWebDriver driver) : base(driver) { }
 
         public  By Locator { get; private set; }
@@ -34,8 +32,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the locator to use for operations within this instance.
         /// </summary>
-        /// <param name="by"></param>
-        /// <returns></returns>
+        /// <param name="by">Method to find an element.</param>
+        /// <returns>this</returns>
         public ElementHandler SetLocator(By by)
         {
             Locator = by;
@@ -45,8 +43,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the timeout to use when retrying operations within this instance.
         /// </summary>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
+        /// <param name="timeout">Duration to retry an action before throwing.</param>
+        /// <returns>this</returns>
         public ElementHandler SetTimeout(TimeSpan timeout)
         {
             return SetTimeout<ElementHandler>(timeout);
@@ -55,8 +53,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the timeout in seconds to use when retrying operations within this instance.
         /// </summary>
-        /// <param name="timeoutInSeconds"></param>
-        /// <returns></returns>
+        /// <param name="timeoutInSeconds">Duration to retry an action before throwing.</param>
+        /// <returns>this</returns>
         public ElementHandler SetTimeoutSeconds(int timeoutInSeconds)
         {
             return SetTimeout<ElementHandler>(TimeSpan.FromSeconds(timeoutInSeconds));
@@ -65,8 +63,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the polling interval to use when retrying operations within this instance.
         /// </summary>
-        /// <param name="pollingInterval"></param>
-        /// <returns></returns>
+        /// <param name="pollingInterval">Time to wait in between retrying an action.</param>
+        /// <returns>this</returns>
         public ElementHandler SetPollingInterval(TimeSpan pollingInterval)
         {
             return SetPollingInterval<ElementHandler>(pollingInterval);
@@ -75,8 +73,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Sets the polling interval in seconds to use when retrying operations within this instance.
         /// </summary>
-        /// <param name="pollIntervalInMilliseconds"></param>
-        /// <returns></returns>
+        /// <param name="pollIntervalInMilliseconds">Time to wait in between retrying an action.</param>
+        /// <returns>this</returns>
         public ElementHandler SetPollingIntervalMilliseconds(int pollIntervalInMilliseconds)
         {
             return SetPollingInterval<ElementHandler>(TimeSpan.FromMilliseconds(pollIntervalInMilliseconds));
@@ -85,6 +83,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Ignores all exceptions of type WebDriverException when trying operations within this instance. This should be used as sparingly as possible.
         /// </summary>
+        /// <returns>this</returns>
         public ElementHandler IgnoreAllWebdriverExceptions(bool shouldIgnoreExceptions = true)
         {
             _IgnoreExceptions = shouldIgnoreExceptions;
@@ -92,9 +91,8 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// Clicks on the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
+        /// Clicks on the element found by <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
-        /// <returns></returns>
         public void Click()
         {
             IWait<IWebDriver> wait = ElementWait();
@@ -114,9 +112,9 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// Sends keys to the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
+        /// Sends keys to the element found by <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
-        /// <param name="textToSend"></param>
+        /// <param name="textToSend">Text to send to the element.</param>
         public void SendKeys(string textToSend)
         {
             IWait<IWebDriver> wait = ElementWait();
@@ -137,7 +135,7 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// Clears text in the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
+        /// Clears text in the element found by <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
         public void Clear()
         {
@@ -156,15 +154,11 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
-        // Need to find what to actually do here.
-        // This should either be:
-        // 1. Deleted because the current element is found by all of the other methods that require it
-        // 2. Reworked to match IWebElement.FindElement() to allow element chaining (but that has its own issues and we'd have to keep track of every parent By.)
-        // 3. Just return "this" which seems unnecessary and superfluous
         /// <summary>
-        /// 
+        /// Finds and returns the element found by <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>.
+        /// Subsequent actions will not automatically retry on the returned IWebElement.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The IWebElement found.</returns>
         public IWebElement GetWebElement()
         {
             IWait<IWebDriver> wait = ElementWait();
@@ -183,7 +177,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Gets the existing text on the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The text associated to the found element.</returns>
         public string Text()
         {
             IWait<IWebDriver> wait = ElementWait();
@@ -204,8 +198,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Gets a specific attribute of the element found by locator <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/>. Will automatically retry if a known failure occurs.
         /// </summary>
-        /// <param name="attributeName"></param>
-        /// <returns></returns>
+        /// <param name="attributeName">The element attribute to search for.</param>
+        /// <returns>The value of the found attribute.</returns>
         public string GetAttribute(string attributeName)
         {
             IWait<IWebDriver> wait = ElementWait();
@@ -250,9 +244,9 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// Waits for the element to be visible.
+        /// Waits for the element found by <see cref="SetLocator(By)"/> or <seealso cref="ElementHandler(IWebDriver, By)"/> to be NOT displayed.
         /// </summary>
-        /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
+        /// <returns>True if the element is NOT displayed, false if the the element is displayed or throws an ElementNotVisible or NoSuchElement exception</returns>
         public bool WaitForNotDisplayed()
         {
             IWait<IWebDriver> wait = ElementWait();
@@ -281,7 +275,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <summary>
         /// Waits for the element to be enabled.
         /// </summary>
-        /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
+        /// <returns>True if the element is enabled, false if the the element is not disabled.</returns>
         public bool WaitForEnabled()
         {
             IWait<IWebDriver> wait = ElementWait();
@@ -307,9 +301,9 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
-        /// Waits for the element to be enabled.
+        /// Waits for the element to be disabled.
         /// </summary>
-        /// <returns>True if the element is visible, false if the the element is not visible or throws an ElementNotVisible or NoSuchElement exception</returns>
+        /// <returns>True if the element is disabled, false if the the element is enabled.</returns>
         public bool WaitForDisabled()
         {
             IWait<IWebDriver> wait = ElementWait();

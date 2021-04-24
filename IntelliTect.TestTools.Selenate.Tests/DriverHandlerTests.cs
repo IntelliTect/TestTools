@@ -10,7 +10,6 @@ namespace IntelliTect.TestTools.Selenate.Tests
 {
     public class DriverHandlerTests
     {
-        // Null checks here
         [Fact]
         public void NullConstructorThrowsArgumentNullException()
         {
@@ -74,7 +73,6 @@ namespace IntelliTect.TestTools.Selenate.Tests
             Assert.Throws<ArgumentNullException>(() => handler.NavigateToPage(uri));
         }
 
-        // More complex scenarios here
         [Fact]
         public void SetTimeoutChangesDefaultValue()
         {
