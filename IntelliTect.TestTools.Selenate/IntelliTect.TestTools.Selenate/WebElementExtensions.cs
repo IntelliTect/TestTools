@@ -10,6 +10,7 @@ namespace IntelliTect.TestTools.SelenateExtensions
     /// <summary>
     /// Extension methods for <see cref="IWebElement"/>
     /// </summary>
+    [Obsolete("These extensions are being deprecated in v2 in favor of a more robust ElementHandler and ElementsHandler classes.")]
     public static class WebElementExtensions
     {
         /// <summary>
