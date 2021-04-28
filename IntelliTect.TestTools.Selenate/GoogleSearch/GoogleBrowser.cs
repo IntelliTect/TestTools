@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 
 namespace GoogleSearch
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     public class GoogleBrowser : Browser
+#pragma warning restore CS0618 // Type or member is obsolete
     {
         public GoogleBrowser(BrowserType browser) : base(browser)
         {
