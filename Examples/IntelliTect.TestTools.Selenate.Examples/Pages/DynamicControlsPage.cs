@@ -1,4 +1,5 @@
 ﻿using OpenQA.Selenium;
+using System;
 
 namespace IntelliTect.TestTools.Selenate.Examples.Pages
 {
@@ -6,7 +7,7 @@ namespace IntelliTect.TestTools.Selenate.Examples.Pages
     {
         public DynamicControlsPage(IWebDriver driver)
         {
-            _Driver = driver;
+            _Driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
 
         public ElementHandler RemoveAddButton => new ElementHandler(_Driver, By.CssSelector("button[onclick='swapCheckbox()']"));

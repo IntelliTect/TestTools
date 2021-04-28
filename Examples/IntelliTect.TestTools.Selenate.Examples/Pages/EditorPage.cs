@@ -1,4 +1,5 @@
 ﻿using OpenQA.Selenium;
+using System;
 
 namespace IntelliTect.TestTools.Selenate.Examples.Pages
 {
@@ -6,7 +7,7 @@ namespace IntelliTect.TestTools.Selenate.Examples.Pages
     {
         public EditorPage(IWebDriver driver)
         {
-            _Driver = driver;
+            _Driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
 
         public ElementHandler MenuBar => new ElementHandler(_Driver, By.CssSelector("div[role='menubar']"));

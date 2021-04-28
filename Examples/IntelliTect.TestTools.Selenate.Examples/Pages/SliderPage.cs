@@ -1,7 +1,5 @@
 ﻿using OpenQA.Selenium;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace IntelliTect.TestTools.Selenate.Examples.Pages
 {
@@ -9,7 +7,7 @@ namespace IntelliTect.TestTools.Selenate.Examples.Pages
     {
         public SliderPage(IWebDriver driver)
         {
-            _Driver = driver;
+            _Driver = driver ?? throw new ArgumentNullException(nameof(driver));
         }
 
         public ElementHandler Slider => new ElementHandler(_Driver, By.CssSelector("input[type='range']"));
