@@ -21,7 +21,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void ComplexWait()
         {
-            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/tinymce");
+            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/tinymce");
             // Group together, as each menu click must occur with the prior one in order to succeed.
 
             Assert.True(_Editor.MenuBar.WaitForDisplayed());
@@ -69,7 +69,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void DragAndDrop()
         {
-            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/horizontal_slider");
+            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/horizontal_slider");
 
             Assert.True(_Slider.Slider.WaitForDisplayed(),
                 "Slider did not appear when we expected it to.");

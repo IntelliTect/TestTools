@@ -9,7 +9,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void NavigateAndGetWindowTitle()
         {
-            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/");
+            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/");
 
             Assert.Equal("The Internet", DriverHandler.GetWindowTitle());
         }
@@ -17,7 +17,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void Click()
         {
-            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/")
+            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/")
                 .FindElement(By.CssSelector("a[href='/abtest']"))
                 .Click();
 
@@ -28,7 +28,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void FindAlert()
         {
-            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/javascript_alerts")
+            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/javascript_alerts")
                 .FindElement(By.CssSelector("button[onclick='jsConfirm()']"))
                 .Click();
 
@@ -42,7 +42,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void FindWindow()
         {
-            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/windows")
+            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/windows")
                 .FindElement(By.CssSelector("a[href='/windows/new']"))
                 .Click();
 
@@ -56,7 +56,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
         [Fact]
         public void FindFrame()
         {
-            DriverHandler.NavigateToPage("http://the-internet.herokuapp.com/nested_frames");
+            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/nested_frames");
 
             Assert.Equal("LEFT",
                 DriverHandler.SwitchToIFrame(
