@@ -140,6 +140,7 @@ namespace IntelliTect.TestTools.TestFramework
             // add service provider to test case
             // add test blocks to test case
             // add finally blocks to test case
+            // validate inputs and outputs (maybe do that first?)
             return testCase;
         }
 
