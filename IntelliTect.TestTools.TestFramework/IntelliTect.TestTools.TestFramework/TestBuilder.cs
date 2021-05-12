@@ -11,13 +11,13 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
-        public TestBuilder([CallerMemberName]string testCaseKey = null)
+        public TestBuilder([CallerMemberName] string testCaseKey = null)
         {
             TestCaseName = testCaseKey;
-            AddLogger<Log>();
+            AddLogger<DebugLogger>();
         }
 
-        public TestBuilder OverrideTestCaseKey([CallerMemberName]string testCaseKey = null)
+        public TestBuilder OverrideTestCaseKey([CallerMemberName] string testCaseKey = null)
         {
             TestCaseName = testCaseKey;
             return this;
@@ -86,7 +86,7 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        public TestBuilder AddDependencyService<TServiceType,TImplementationType>()
+        public TestBuilder AddDependencyService<TServiceType, TImplementationType>()
         {
             Services.AddScoped(typeof(TServiceType), typeof(TImplementationType));
             return this;
@@ -131,12 +131,26 @@ namespace IntelliTect.TestTools.TestFramework
 
         public TestCase Build()
         {
-            TestCase testCase = new()
-            {
-                TestCaseName = TestCaseName
-            };
+            TestCase testCase = new();
+            //TestCase testCase = new()
+            //{
+            //    TestCaseName = TestCaseName
+            //};
             Services.AddSingleton(testCase);
             var serviceProvider = Services.BuildServiceProvider();
+            // Add attribute for something like [OtherTestFramework] or [OtherTestType]
+            StackTrace sf = new();
+            StackFrame[] frames = sf.GetFrames();
+            foreach (var f in frames)
+            {
+                TestCaseAttribute testAttribute = (TestCaseAttribute)f.GetMethod().GetCustomAttributes().FirstOrDefault(a => a is TestCaseAttribute);
+
+                if (testAttribute is { })
+                {
+                    TestCaseName = testAttribute.TestCaseName ?? f.GetMethod().Name;
+                }
+            }
+
             // add service provider to test case
             // add test blocks to test case
             // add finally blocks to test case
@@ -210,16 +224,16 @@ namespace IntelliTect.TestTools.TestFramework
                     TestBlockException = tempException;
                 }
 
-                if(TestBlockException == null)
+                if (TestBlockException == null)
                 {
                     logger?.Info("Test case finished successfully.");
                 }
                 else
                 {
-                    logger?.Error($"Test case failed: {TestBlockException}");
+                    logger?.Critical($"Test case failed: {TestBlockException}");
                 }
             }
-            
+
             serviceProvider.Dispose();
 
             if (TestBlockException != null)
@@ -244,17 +258,17 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 return $"Unable to serialize object {obj?.GetType()} to JSON. Mark the relevant property with the [JsonIgnore] attribute: {e}";
             }
-            
+
         }
 
         private object GetTestBlock(IServiceScope scope, Type tbType)
         {
             var tb = scope.ServiceProvider.GetService(tbType);
-            if(tb == null)
+            if (tb == null)
             {
                 TestBlockException = new InvalidOperationException($"Unable to find test block: {tbType.FullName}.");
             }
-            
+
             return tb;
         }
 
@@ -270,7 +284,7 @@ namespace IntelliTect.TestTools.TestFramework
                     continue;
                 }
                 object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
-                if(propertyValue == null)
+                if (propertyValue == null)
                 {
                     TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
                     break;
@@ -315,7 +329,7 @@ namespace IntelliTect.TestTools.TestFramework
                     {
                         object foundResult = TestBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
                             ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
-                        if(foundResult == null)
+                        if (foundResult == null)
                         {
                             TestBlockException = new InvalidOperationException($"Unable to find an object or service for Execute parameter {executeParams[i].Name} of type {executeParams[i].ParameterType.FullName} on test block {tb.TestBlockType.FullName}.");
                             break;
@@ -339,11 +353,11 @@ namespace IntelliTect.TestTools.TestFramework
             PropertyInfo[] props = testBlockInstance.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
             object[] allArgs = new object[props.Length + executeArgs.Length];
 
-            for(int i = 0; i < props.Length; i++)
+            for (int i = 0; i < props.Length; i++)
             {
                 allArgs[i] = props[i].GetValue(testBlockInstance);
             }
-            
+
             executeArgs.CopyTo(allArgs, props.Length);
             foreach (var arg in allArgs)
             {

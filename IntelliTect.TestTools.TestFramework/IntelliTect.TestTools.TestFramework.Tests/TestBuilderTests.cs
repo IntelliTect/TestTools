@@ -7,13 +7,16 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     public class TestBuilderTests
     {
         [Fact]
+        [TestCase]
         public void FetchByObjectInstanceForExecuteArg()
         {
             TestBuilder builder = new TestBuilder();
             builder
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>()
-                .ExecuteTestCase();
+                .Build()
+                //.ExecuteTestCase()
+                ;
         }
 
         [Fact]
@@ -342,7 +345,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithExecuteArg : ITestBlock
+    public class ExampleTestBlockWithExecuteArg : TestBlock
     {
         public void Execute(string input)
         {
@@ -350,7 +353,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithProperty : ITestBlock
+    public class ExampleTestBlockWithProperty : TestBlock
     {
         public string Input { get; set; }
 
@@ -360,7 +363,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithConstructor : ITestBlock
+    public class ExampleTestBlockWithConstructor : TestBlock
     {
         public ExampleTestBlockWithConstructor(string input)
         {
@@ -375,7 +378,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         private string Input { get; }
     }
 
-    public class ExampleTestBlockWithMultipleDependencies : ITestBlock
+    public class ExampleTestBlockWithMultipleDependencies : TestBlock
     {
         public string InputText { get; set; }
 
@@ -386,7 +389,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithExecuteArgForOwnType : ITestBlock
+    public class ExampleTestBlockWithExecuteArgForOwnType : TestBlock
     {
         public void Execute(ExampleDataThing input)
         {
@@ -395,7 +398,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithExecuteArgForInterface : ITestBlock
+    public class ExampleTestBlockWithExecuteArgForInterface : TestBlock
     {
         public void Execute(IExampleDataInterface input)
         {
@@ -404,7 +407,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithPropertyForOwnType : ITestBlock
+    public class ExampleTestBlockWithPropertyForOwnType : TestBlock
     {
         public ExampleDataThing Input { get; set; }
 
@@ -414,7 +417,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithConstructorForOwnType : ITestBlock
+    public class ExampleTestBlockWithConstructorForOwnType : TestBlock
     {
         public ExampleTestBlockWithConstructorForOwnType(ExampleDataThing input)
         {
@@ -429,7 +432,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         private ExampleDataThing Input { get; }
     }
 
-    public class ExampleTestBlockForFactoryWithExecuteArg : ITestBlock
+    public class ExampleTestBlockForFactoryWithExecuteArg : TestBlock
     {
         public void Execute(ExampleDataThing input)
         {
@@ -438,7 +441,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockForFactoryWithProperty : ITestBlock
+    public class ExampleTestBlockForFactoryWithProperty : TestBlock
     {
         public ExampleDataThing Input { get; set; }
 
@@ -448,7 +451,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockForFactoryWithConstructor : ITestBlock
+    public class ExampleTestBlockForFactoryWithConstructor : TestBlock
     {
         public ExampleTestBlockForFactoryWithConstructor(ExampleDataThing input)
         {
@@ -463,7 +466,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         private ExampleDataThing Input { get; }
     }
 
-    public class ExampleTestBlockWithPropertyWithNoSetter : ITestBlock
+    public class ExampleTestBlockWithPropertyWithNoSetter : TestBlock
     {
         public string Input { get; }
 
@@ -473,7 +476,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithMultipleExecuteMethods : ITestBlock
+    public class ExampleTestBlockWithMultipleExecuteMethods : TestBlock
     {
         public void Execute()
         {
@@ -486,7 +489,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleLoggerUsage : ITestBlock
+    public class ExampleLoggerUsage : TestBlock
     {
         public void Execute(ILogger log)
         {
@@ -495,7 +498,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleTestBlockWithReturn : ITestBlock
+    public class ExampleTestBlockWithReturn : TestBlock
     {
         public bool Execute(bool valueToReturn)
         {
@@ -503,7 +506,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
     }
 
-    public class ExampleFinallyBlock : ITestBlock
+    public class ExampleFinallyBlock : TestBlock
     {
         public void Execute(bool result)
         {
@@ -521,7 +524,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             throw new NotImplementedException();
         }
 
-        public void Error(string message)
+        public void Critical(string message)
         {
             throw new NotImplementedException();
         }

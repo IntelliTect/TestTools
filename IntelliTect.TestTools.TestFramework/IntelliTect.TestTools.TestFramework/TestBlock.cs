@@ -4,11 +4,11 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBlock : ITestBlock
     {
-        public TestBlock(ILogger log)
-        {
-            Log = log ?? throw new ArgumentNullException(nameof(log));
-        }
+        //public TestBlock(ILogger log)
+        //{
+        //    Log = log ?? new DebugLogger();
+        //}
 
-        public ILogger Log { get; }
+        public ILogger Log { get; } = new DebugLogger();
     }
 }

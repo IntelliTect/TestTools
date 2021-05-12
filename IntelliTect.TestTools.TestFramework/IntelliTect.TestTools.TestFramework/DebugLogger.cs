@@ -1,6 +1,6 @@
 ﻿namespace IntelliTect.TestTools.TestFramework
 {
-    public class Log : ILogger
+    public class DebugLogger : ILogger
     {
         public string TestCaseKey { get; set; }
         public string CurrentTestBlock { get; set; }
