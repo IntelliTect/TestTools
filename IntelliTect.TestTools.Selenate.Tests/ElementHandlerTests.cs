@@ -329,8 +329,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
 
         private ElementHandler SetupElementHandler(IWebDriver driver)
         {
-            return new ElementHandler(driver)
-                .SetLocator(By.Id("test"))
+            return new ElementHandler(driver, By.Id("test"))
                 .SetTimeout(TimeSpan.FromMilliseconds(20))
                 .SetPollingIntervalMilliseconds(10);
         }

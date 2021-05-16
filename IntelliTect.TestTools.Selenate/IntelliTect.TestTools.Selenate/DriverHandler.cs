@@ -17,12 +17,9 @@ namespace IntelliTect.TestTools.Selenate
         /// Constructor to wrap a specific instace of a WebDriver
         /// </summary>
         /// <param name="driver">The WebDriver to wrap</param>
-        public DriverHandler(IWebDriver driver) : base(driver)
-        {
+        public DriverHandler(IWebDriver driver) : base(driver) {  }
 
-        }
-
-        private FileInfo ScreenshotLocation { get; set; }
+        private FileInfo? ScreenshotLocation { get; set; }
 
         /// <summary>
         /// Sets the maximum time that this instance will retry a specific interaction with a WebDriver before throwing.

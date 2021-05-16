@@ -34,8 +34,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
                     new ReadOnlyCollection<IWebElement>(
                         new List<IWebElement> { mockElement1.Object, mockElement2.Object }));
 
-            return new ElementsHandler(mockDriver.Object)
-                .SetLocator(By.Id("test"))
+            return new ElementsHandler(mockDriver.Object, By.Id("test"))
                 .SetTimeout(TimeSpan.FromMilliseconds(20))
                 .SetPollingIntervalMilliseconds(10);
         }

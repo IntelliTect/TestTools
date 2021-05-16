@@ -24,7 +24,7 @@ namespace IntelliTect.TestTools.Selenate.Examples.Pages
             }
         }
 
-        private ElementHandler _HelloWorldLabel;
+        private ElementHandler? _HelloWorldLabel;
         private IWebDriver _Driver;
     }
 }
