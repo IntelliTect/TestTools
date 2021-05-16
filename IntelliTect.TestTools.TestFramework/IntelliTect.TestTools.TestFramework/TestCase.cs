@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace IntelliTect.TestTools.TestFramework
 {
@@ -7,6 +8,7 @@ namespace IntelliTect.TestTools.TestFramework
     {
         public string TestCaseName { get; set; }
         public string TestMethodName { get; set; }
+        public string TestCaseId { get; set; }
         private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new();
         private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new();
         private IServiceProvider Services { get; }
@@ -15,9 +17,10 @@ namespace IntelliTect.TestTools.TestFramework
         // TestCaseAttributes
         public bool Passed { get; set; }
 
-        //public void ExecuteTestCase()
-        //{
-
-        //}
+        public void ExecuteTestCase()
+        {
+            //string testing = null;
+            //TestCaseName = testMethodName;
+        }
     }
 }

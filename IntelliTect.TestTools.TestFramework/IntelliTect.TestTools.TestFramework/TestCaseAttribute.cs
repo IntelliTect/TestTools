@@ -6,10 +6,10 @@ namespace IntelliTect.TestTools.TestFramework
     [AttributeUsage(AttributeTargets.Method)]
     public class TestCaseAttribute : Attribute
     {
-        public TestCaseAttribute(string id = null, string name = null)
+        public TestCaseAttribute(string name = null, string id = null)
         {
-            TestCaseId = id;
             TestCaseName = name;
+            TestCaseId = id;
         }
 
         public string TestCaseId { get; set; }

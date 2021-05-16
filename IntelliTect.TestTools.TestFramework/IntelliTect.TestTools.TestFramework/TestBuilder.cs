@@ -129,7 +129,7 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        public TestCase Build()
+        public TestCase Build([CallerMemberName] string testCaseNameOverride = "")
         {
             TestCase testCase = new();
             //TestCase testCase = new()
