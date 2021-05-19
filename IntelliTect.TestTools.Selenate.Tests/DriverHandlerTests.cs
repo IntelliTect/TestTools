@@ -85,7 +85,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 TimeSpan.FromSeconds(1),
                 handler
                     .GetType()
-                    .GetProperty("Timeout1", BindingFlags.Instance | BindingFlags.NonPublic)?
+                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic)?
                     .GetValue(handler));
         }
 
