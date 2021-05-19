@@ -19,12 +19,6 @@ namespace IntelliTect.TestTools.Selenate
             Locator = locator;
         }
 
-        /// <summary>
-        /// Takes an IWebDriver used for operations with this element. Must call SetLocator on this before operations will function.
-        /// </summary>
-        /// <param name="driver">The WebDriver to wrap.</param>
-        public ElementHandler(IWebDriver driver) : base(driver) { }
-
         public  By Locator { get; private set; }
 
         private bool _IgnoreExceptions;
@@ -166,12 +160,14 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(NoSuchElementException)
                 );
 
+#pragma warning disable CS8603 // Possible null reference return. Needed for proper WebDriverWait behavior
             return wait.Until(d =>
             {
                 IWebElement elem = d.FindElement(Locator);
                 if (elem.Displayed) return elem;
                 return null;
             });
+#pragma warning restore CS8603 // Possible null reference return.
         }
 
         /// <summary>

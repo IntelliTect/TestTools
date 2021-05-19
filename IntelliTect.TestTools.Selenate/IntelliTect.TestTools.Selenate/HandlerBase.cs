@@ -23,7 +23,7 @@ namespace IntelliTect.TestTools.Selenate
         /// The WebDriver this instance is wrapping.
         /// </summary>
         public IWebDriver WrappedDriver { get; }
-        protected TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(5);
+        protected TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(15);
         protected TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(100);
         protected DefaultWait<IWebDriver> Wait => 
             new DefaultWait<IWebDriver>(WrappedDriver) 

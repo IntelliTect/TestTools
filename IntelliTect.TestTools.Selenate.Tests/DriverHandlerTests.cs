@@ -11,12 +11,6 @@ namespace IntelliTect.TestTools.Selenate.Tests
     public class DriverHandlerTests
     {
         [Fact]
-        public void NullConstructorThrowsArgumentNullException()
-        {
-            Assert.Throws<ArgumentNullException>(() => new DriverHandler(null));
-        }
-
-        [Fact]
         public void SetTimeoutWithNegativeValueThrowsException()
         {
             var mockDriver = new Mock<IWebDriver>();
@@ -64,16 +58,6 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public void NavigateToPageWithNullThrowsException()
-        {
-            var mockDriver = new Mock<IWebDriver>();
-            DriverHandler handler = new DriverHandler(mockDriver.Object);
-            Uri uri = null;
-
-            Assert.Throws<ArgumentNullException>(() => handler.NavigateToPage(uri));
-        }
-
-        [Fact]
         public void SetTimeoutChangesDefaultValue()
         {
             var mockDriver = new Mock<IWebDriver>();
@@ -85,7 +69,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 TimeSpan.FromSeconds(1),
                 handler
                     .GetType()
-                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic)!
                     .GetValue(handler));
         }
 
@@ -101,7 +85,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 TimeSpan.FromSeconds(1),
                 handler
                     .GetType()
-                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetProperty("Timeout", BindingFlags.Instance | BindingFlags.NonPublic)!
                     .GetValue(handler));
         }
 
@@ -114,8 +98,8 @@ namespace IntelliTect.TestTools.Selenate.Tests
             handler.SetPollingInterval(TimeSpan.FromMilliseconds(1));
 
             Assert.Equal(
-                TimeSpan.FromMilliseconds(1), 
-                handler.GetType().GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic)
+                TimeSpan.FromMilliseconds(1),
+                handler.GetType().GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .GetValue(handler));
         }
 
@@ -131,7 +115,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 TimeSpan.FromMilliseconds(1),
                 handler
                     .GetType()
-                    .GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .GetProperty("PollingInterval", BindingFlags.Instance | BindingFlags.NonPublic)!
                     .GetValue(handler));
         }
 

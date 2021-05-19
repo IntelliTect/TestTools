@@ -10,6 +10,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.TestFramework.Tests", "IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework.Tests\IntelliTect.TestTools.TestFramework.Tests.csproj", "{E64B6292-F8AF-475F-B45E-9BAB7D695579}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0114A621-A999-40EC-87C8-AF915A6E2DEC}"
+	ProjectSection(SolutionItems) = preProject
+		testframework-pipeline.yml = testframework-pipeline.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -20,12 +20,6 @@ namespace IntelliTect.TestTools.Selenate
             Locator = locator;
         }
 
-        /// <summary>
-        /// Constructor to wrap a specific instace of a WebDriver when interacting with WebElements
-        /// </summary>
-        /// <param name="driver">The WebDriver to wrap.</param>
-        public ElementsHandler(IWebDriver driver) : base(driver) { }
-
         public By Locator { get; private set; }
 
         /// <summary>
