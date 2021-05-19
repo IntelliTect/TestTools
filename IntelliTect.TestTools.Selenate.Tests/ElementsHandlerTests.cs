@@ -21,7 +21,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
             Assert.False(SetupMockedData().ContainsText("TestingA"));
         }
 
-        private ElementsHandler SetupMockedData()
+        private static ElementsHandler SetupMockedData()
         {
             var mockElement1 = new Mock<IWebElement>();
             mockElement1.SetupGet(e1 => e1.Text).Returns("Testing1");

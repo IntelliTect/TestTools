@@ -327,7 +327,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
             Assert.Throws<WebDriverTimeoutException>(() => element.GetAttribute("Test"));
         }
 
-        private ElementHandler SetupElementHandler(IWebDriver driver)
+        private static ElementHandler SetupElementHandler(IWebDriver driver)
         {
             return new ElementHandler(driver, By.Id("test"))
                 .SetTimeout(TimeSpan.FromMilliseconds(20))
