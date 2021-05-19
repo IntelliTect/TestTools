@@ -3,6 +3,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Globalization;
 using Xunit;
 
 namespace IntelliTect.TestTools.Selenate.Examples
@@ -50,7 +51,7 @@ namespace IntelliTect.TestTools.Selenate.Examples
             // Group both calls together in a single wait so Selenium retries both.
             bool OpenMenu(By originalLocator, By secondLocator)
             {
-                WebDriverWait wait = new WebDriverWait(
+                WebDriverWait wait = new(
                 DriverHandler.WrappedDriver,
                 TimeSpan.FromSeconds(5));
 
@@ -76,14 +77,14 @@ namespace IntelliTect.TestTools.Selenate.Examples
 
             var slider = _Slider.Slider.GetWebElement();
 
-            Actions actions = new Actions(DriverHandler.WrappedDriver);
+            Actions actions = new(DriverHandler.WrappedDriver);
             actions.MoveToElement(slider, 0, 0)
                 .ClickAndHold()
                 .MoveByOffset(slider.Size.Width / 2, 0)
                 .Release()
                 .Perform();
 
-            decimal sliderNum = Convert.ToDecimal(_Slider.Number.Text());
+            decimal sliderNum = Convert.ToDecimal(_Slider.Number.Text(), CultureInfo.InvariantCulture);
             Assert.True(sliderNum > 0,
                 $"Expected slider number to be larger than 0, but was actually {sliderNum}");
         }

@@ -26,7 +26,7 @@ namespace IntelliTect.TestTools.Selenate
         protected TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(15);
         protected TimeSpan PollingInterval { get; set; } = TimeSpan.FromMilliseconds(100);
         protected DefaultWait<IWebDriver> Wait => 
-            new DefaultWait<IWebDriver>(WrappedDriver) 
+            new(WrappedDriver) 
             { 
                 Timeout = Timeout, 
                 PollingInterval = PollingInterval 

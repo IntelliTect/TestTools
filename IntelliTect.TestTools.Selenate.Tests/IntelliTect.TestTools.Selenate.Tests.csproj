@@ -7,9 +7,13 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
+    <NoWarn>CA1303;CA2234</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="IntelliTect.Analyzers" Version="0.1.8">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
     <PackageReference Include="Moq" Version="4.15.2" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
