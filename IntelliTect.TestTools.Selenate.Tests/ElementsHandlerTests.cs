@@ -16,7 +16,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public void GetTextDoesNotThrowIfNotFound()
+        public void GetTextReturnsFalseWhenUnableToFindElementWithText()
         {
             Assert.False(SetupMockedData().ContainsText("TestingA"));
         }

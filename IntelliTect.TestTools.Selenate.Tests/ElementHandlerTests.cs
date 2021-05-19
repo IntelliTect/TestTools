@@ -8,7 +8,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
     public class ElementHandlerTests
     {
         [Fact]
-        public void ClickDoesNotThrowIfSuccessful()
+        public void ClickIsInvokedOnElementWhenFound()
         {
             var mockElement = new Mock<IWebElement>();
             mockElement
@@ -39,7 +39,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public void SendTextDoesNotThrowIfSuccessful()
+        public void SendTextIsInvokedOnElementWhenFoundl()
         {
             var mockElement = new Mock<IWebElement>();
             mockElement
@@ -70,7 +70,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public void ClearDoesNotThrowIfSuccessful()
+        public void ClearIsInvokedOnElementWhenFound()
         {
             var mockElement = new Mock<IWebElement>();
             mockElement
