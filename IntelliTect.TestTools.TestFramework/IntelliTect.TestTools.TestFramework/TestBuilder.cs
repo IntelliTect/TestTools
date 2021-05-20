@@ -11,24 +11,24 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
-        public TestBuilder([CallerMemberName] string testCaseKey = null)
+        public TestBuilder(/*[CallerMemberName] string testCaseKey = null*/)
         {
-            TestCaseName = testCaseKey;
+            //TestCaseName = testCaseKey;
             AddLogger<DebugLogger>();
         }
 
-        public TestBuilder OverrideTestCaseKey([CallerMemberName] string testCaseKey = null)
+        public TestBuilder OverrideTestCaseKey(/*[CallerMemberName] string testCaseKey = null*/)
         {
-            TestCaseName = testCaseKey;
+            //TestCaseName = testCaseKey;
             return this;
         }
 
-        private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
-        private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[] TestBlockParameters)>();
+        private List<(Type TestBlockType, object[]? TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
+        private List<(Type TestBlockType, object[]? TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
         private IServiceCollection Services { get; } = new ServiceCollection();
         private HashSet<object> TestBlockResults { get; } = new HashSet<object>();
-        private string TestCaseName { get; set; }
-        private Exception TestBlockException { get; set; }
+        private string TestCaseName { get; set; } = "";
+        private Exception? TestBlockException { get; set; }
 
         /// <summary>
         /// Adds a test block (some related group of test actions) to the list of blocks to run for any given test case
@@ -129,16 +129,18 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        public TestCase Build([CallerMemberName] string testCaseNameOverride = "")
+        public TestCase Build()
         {
             TestCase testCase = new();
             //TestCase testCase = new()
             //{
             //    TestCaseName = TestCaseName
             //};
-            Services.AddSingleton(testCase);
-            var serviceProvider = Services.BuildServiceProvider();
-            // Add attribute for something like [OtherTestFramework] or [OtherTestType]
+
+            //var serviceProvider = Services.BuildServiceProvider();
+
+            TestCaseAttribute attr = new StackTrace().GetFrames().FirstOrDefault(f => f.GetMethod().GetCustomAttributes().FirstOrDefault(a => a is TestCaseAttribute));
+
             StackTrace sf = new();
             StackFrame[] frames = sf.GetFrames();
             foreach (var f in frames)
@@ -155,8 +157,17 @@ namespace IntelliTect.TestTools.TestFramework
             // add test blocks to test case
             // add finally blocks to test case
             // validate inputs and outputs (maybe do that first?)
+
+            Services.AddSingleton(testCase);
             return testCase;
         }
+
+        // Legacy support
+        //public void ExecuteTestCase()
+        //{
+        //    TestCase tc = Build();
+        //    tc.ExecuteTestCase();
+        //}
 
         public void ExecuteTestCase()
         {

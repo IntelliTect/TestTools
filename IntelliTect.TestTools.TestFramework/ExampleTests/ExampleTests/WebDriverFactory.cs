@@ -5,7 +5,9 @@ using System.IO;
 
 namespace ExampleTests
 {
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable; Driver should be disposed by DI container, not the factory
     public class WebDriverFactory
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
     {
         public WebDriverFactory(string browserType)
         {
@@ -24,7 +26,7 @@ namespace ExampleTests
             return _Driver;
         }
 
-        private IWebDriver _Driver;
+        private IWebDriver? _Driver;
         private string _BrowserType;
     }
 }

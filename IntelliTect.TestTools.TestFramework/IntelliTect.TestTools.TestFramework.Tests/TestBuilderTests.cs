@@ -10,7 +10,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [TestCase]
         public void FetchByObjectInstanceForExecuteArg()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>()
@@ -22,7 +22,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByObjectInstanceForTestBlockProperty()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithProperty>()
@@ -32,7 +32,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByObjectInstanceForTestBlockConstructor()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithConstructor>()
@@ -42,7 +42,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByObjectInstanceForMultipleDependencies()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance("Testing")
                 .AddDependencyInstance(1234)
@@ -53,7 +53,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void PassExecuteArgumentsViaAddTestBlockParams()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
                 .ExecuteTestCase();
@@ -62,7 +62,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void MismatchedCountAddTestBlockParamsAndExecuteArgsFails()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
 
             Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
@@ -71,7 +71,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void MismatchedTypeAddTestBlockParamsAndExecuteArgsFails()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1234);
 
             Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
@@ -81,7 +81,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByServiceForConstructor()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<ExampleDataThing>()
                 .AddTestBlock<ExampleTestBlockWithConstructorForOwnType>()
@@ -91,7 +91,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByServiceForProperty()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<ExampleDataThing>()
                 .AddTestBlock<ExampleTestBlockWithPropertyForOwnType>()
@@ -101,7 +101,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByServiceForExecuteArg()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<ExampleDataThing>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
@@ -111,7 +111,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByImplementationForExecuteArg()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance<IExampleDataInterface>(new ExampleDataThing())
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
@@ -121,7 +121,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByImplementationAndTypeForExecuteArg()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<IExampleDataInterface, ExampleDataThing>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
@@ -132,7 +132,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByFactoryForConstructor()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
                 .AddTestBlock<ExampleTestBlockForFactoryWithConstructor>()
@@ -142,7 +142,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByFactoryForProperty()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
                 .AddTestBlock<ExampleTestBlockForFactoryWithProperty>()
@@ -152,7 +152,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void FetchByFactoryForExecuteArg()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
                 .AddTestBlock<ExampleTestBlockForFactoryWithExecuteArg>()
@@ -163,7 +163,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void AddTwoServicesOfSameTypeToServiceAndFetch()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<ExampleDataThing>()
                 .AddDependencyService<ExampleDataThing>()
@@ -175,7 +175,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void AddTwoInstancesOfSameTypeToServiceAndFetch()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance(new ExampleDataThing { Testing = "Testing2" })
                 .AddDependencyInstance(new ExampleDataThing { Testing = "Testing" })
@@ -186,7 +186,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void TestBlockWithPropertyWithNoSetterDoesNotThrow()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithPropertyWithNoSetter>()
@@ -196,7 +196,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void TestBlockWithMultipleExecuteMethodsThrows()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance("Testing")
                 .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>();
@@ -207,7 +207,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void TestBlockThatFailsThrowsCorrectException()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>("Bad Value");
 
@@ -224,7 +224,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void AddLoggerReturnsCorrectLogger()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddLogger<ExampleLogger>()
                 .AddTestBlock<ExampleLoggerUsage>();
@@ -235,7 +235,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void AddFinallyBlockThrowsExpectedException()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddTestBlock<ExampleTestBlockWithReturn>(false)
                 .AddFinallyBlock<ExampleFinallyBlock>()
@@ -247,7 +247,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void AddFinallyBlockDoesNotThrowIfExceptionOccursInFinally()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddTestBlock<ExampleTestBlockWithReturn>(true)
                 .AddFinallyBlock<ExampleFinallyBlock>()
@@ -258,7 +258,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void AddFinallyBlockExecutesAfterException()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyInstance(true)
                 .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>()
@@ -270,7 +270,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void OverridingLoggerDoesNotThrow()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .RemoveLogger()
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
@@ -280,7 +280,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void RemovingLoggerTwiceDoesNotThrow()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .RemoveLogger()
                 .RemoveLogger()
@@ -291,7 +291,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void AddingLoggerThanRemovingDoesNotThrow()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddLogger<ExampleLogger>()
                 .RemoveLogger()
@@ -302,7 +302,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void OverrideTestCaseNameWithConstructor()
         {
-            TestBuilder builder = new TestBuilder("Testing");
+            TestBuilder builder = new();
             builder
                 .AddLogger<ExampleLogger>()
                 .RemoveLogger()
@@ -313,7 +313,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void OverrideTestCaseNameWithMethod()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .OverrideTestCaseKey()
                 .AddLogger<ExampleLogger>()
@@ -325,9 +325,9 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void OverrideTestCaseNameWithMethodOverride()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
-                .OverrideTestCaseKey("Testing")
+                //.OverrideTestCaseKey("Testing")
                 .AddLogger<ExampleLogger>()
                 .RemoveLogger()
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
@@ -337,7 +337,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void PropertyWithNoMatchingTypeInDiThrowsInvalidOperation()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder.AddTestBlock<ExampleTestBlockWithProperty>();
 
             Exception ex = Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
