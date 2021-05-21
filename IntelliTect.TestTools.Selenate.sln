@@ -1,16 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.Selenate", "IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate\IntelliTect.TestTools.Selenate.csproj", "{51D4DE10-75ED-4C06-B4A3-2A44FC6D1289}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleSearch", "IntelliTect.TestTools.Selenate\GoogleSearch\GoogleSearch.csproj", "{57BA36E7-7CE6-4355-8838-972150F7555C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BD5A2B96-0600-4CD3-BB0C-800A78DBEFA3}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		IntelliTect.TestTools.Selenate\Directory.Build.props = IntelliTect.TestTools.Selenate\Directory.Build.props
+		selenate-pipeline.yml = selenate-pipeline.yml
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.Selenate.Tests", "IntelliTect.TestTools.Selenate.Tests\IntelliTect.TestTools.Selenate.Tests.csproj", "{120A45DF-6B34-429F-8CA9-7CFF107E7773}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.Selenate.Examples", "Examples\IntelliTect.TestTools.Selenate.Examples\IntelliTect.TestTools.Selenate.Examples.csproj", "{F7AE1AD5-B6FA-40AA-93FD-2A28CB707388}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,10 +26,14 @@ Global
 		{51D4DE10-75ED-4C06-B4A3-2A44FC6D1289}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51D4DE10-75ED-4C06-B4A3-2A44FC6D1289}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51D4DE10-75ED-4C06-B4A3-2A44FC6D1289}.Release|Any CPU.Build.0 = Release|Any CPU
-		{57BA36E7-7CE6-4355-8838-972150F7555C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{57BA36E7-7CE6-4355-8838-972150F7555C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{57BA36E7-7CE6-4355-8838-972150F7555C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{57BA36E7-7CE6-4355-8838-972150F7555C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{120A45DF-6B34-429F-8CA9-7CFF107E7773}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{120A45DF-6B34-429F-8CA9-7CFF107E7773}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{120A45DF-6B34-429F-8CA9-7CFF107E7773}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{120A45DF-6B34-429F-8CA9-7CFF107E7773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7AE1AD5-B6FA-40AA-93FD-2A28CB707388}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7AE1AD5-B6FA-40AA-93FD-2A28CB707388}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7AE1AD5-B6FA-40AA-93FD-2A28CB707388}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7AE1AD5-B6FA-40AA-93FD-2A28CB707388}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

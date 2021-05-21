@@ -2,18 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
-    <Version>1.3.0</Version>
-
-    <PackageReleaseNotes>Adding override to Browser.TakeScreenshot to hand in your own preferred path</PackageReleaseNotes>
-
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
-
-    <FileVersion>1.3.0.0</FileVersion>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>CA1303</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
