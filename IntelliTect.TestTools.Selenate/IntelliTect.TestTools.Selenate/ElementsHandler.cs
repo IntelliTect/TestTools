@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace IntelliTect.TestTools.Selenate
@@ -90,6 +91,28 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Checks if any element found by <see cref="Locator"/> matches a predicate.
+        /// </summary>
+        /// <param name="predicate">The criteria to attempt to match on.</param>
+        /// <returns></returns>
+        public IWebElement GetSingleExistingElement(Func<IWebElement, bool> predicate)
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            return wait.Until(d =>
+            {
+                var foundElems = d.FindElements(Locator);
+                if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No element found matching pattern: {Locator}");
+                var foundElem = foundElems.Where(predicate).ToList();
+                if (foundElem.Count != 1)
+                {
+                    throw new InvalidOperationException("The provided predicate did not match exactly one result.");
+                }
+                return foundElem[0];
+            });
         }
     }
 }
