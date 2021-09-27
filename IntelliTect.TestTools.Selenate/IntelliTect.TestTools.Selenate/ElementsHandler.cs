@@ -93,19 +93,26 @@ namespace IntelliTect.TestTools.Selenate
             }
         }
 
+        /// <summary>
+        /// Checks if any element found by <see cref="Locator"/> matches a predicate.
+        /// </summary>
+        /// <param name="predicate">The criteria to attempt to match on.</param>
+        /// <returns></returns>
         public IWebElement GetSingleExistingElement(Func<IWebElement, bool> predicate)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             return wait.Until(d =>
             {
-                var foundElems = d.FindElements(Locator).Where(predicate).ToList();
-                if(foundElems.Count != 1)
+                var foundElems = d.FindElements(Locator);
+                if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No element found matching pattern: {Locator}");
+                var foundElem = foundElems.Where(predicate).ToList();
+                if (foundElem.Count != 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(predicate), 
                         "The search criteria did not return exactly one result.");
                 }
-                return foundElems.Single();
+                return foundElem[0];
             });
         }
     }

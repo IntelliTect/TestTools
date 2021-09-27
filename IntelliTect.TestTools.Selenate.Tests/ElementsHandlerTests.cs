@@ -31,7 +31,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public void GetSpecificExistingElementThrowsWhenNoElementsAreFound()
+        public void GetSpecificExistingElementThrowsWhenNoElementsMatch()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => 
                 SetupMockedData()
@@ -40,12 +40,27 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
-        public void GetSpecificExistingElementThrowsWhenMultipleElementsAreFound()
+        public void GetSpecificExistingElementThrowsWhenMultipleElementsMatch()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 SetupMockedData()
                 .GetSingleExistingElement(x =>
                     x.Text.Contains("Testing", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        [Theory]
+        [InlineData("blarg")] // Returns an empty IReadOnlyCollection with current mock
+        [InlineData("null")] // Returns null. Note: this shouldn't be possible with vanilla selenium, but let's test for it just in case.
+        public void GetSpecificExistingElementThrowsWhenNoElementsAreFound(string id)
+        {
+            Exception ex = Assert.Throws<WebDriverTimeoutException>(() =>
+                SetupMockedData()
+                .SetLocator(By.Id(id))
+                .GetSingleExistingElement(x =>
+                    x.Text.Contains("Testing", StringComparison.OrdinalIgnoreCase)));
+
+            Assert.NotNull(ex.InnerException);
+            Assert.Equal(typeof(NoSuchElementException), ex.InnerException!.GetType());
         }
 
         private static ElementsHandler SetupMockedData()
@@ -59,10 +74,14 @@ namespace IntelliTect.TestTools.Selenate.Tests
             mockElement2.SetupGet(e2 => e2.Displayed).Returns(false);
             var mockDriver = new Mock<IWebDriver>();
             mockDriver.Setup
-                (f => f.FindElements(It.IsAny<By>()))
+                (f => f.FindElements(By.Id("test")))
                 .Returns(
                     new ReadOnlyCollection<IWebElement>(
                         new List<IWebElement> { mockElement1.Object, mockElement2.Object }));
+
+            mockDriver.Setup
+                (f => f.FindElements(By.Id("blarg")))
+                .Returns(new ReadOnlyCollection<IWebElement>(new List<IWebElement>()));
 
             return new ElementsHandler(mockDriver.Object, By.Id("test"))
                 .SetTimeout(TimeSpan.FromMilliseconds(20))
