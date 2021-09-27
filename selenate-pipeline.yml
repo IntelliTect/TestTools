@@ -13,7 +13,7 @@ variables:
   solution: '**/IntelliTect.TestTools.Selenate.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  version: '2.0.0'
+  version: '2.1.0'
 
 steps:
 - task: NuGetToolInstaller@0

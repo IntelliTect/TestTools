@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace IntelliTect.TestTools.Selenate
@@ -90,6 +91,22 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return false;
             }
+        }
+
+        public IWebElement GetSingleExistingElement(Func<IWebElement, bool> predicate)
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            return wait.Until(d =>
+            {
+                var foundElems = d.FindElements(Locator).Where(predicate).ToList();
+                if(foundElems.Count != 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(predicate), 
+                        "The search criteria did not return exactly one result.");
+                }
+                return foundElems.Single();
+            });
         }
     }
 }
