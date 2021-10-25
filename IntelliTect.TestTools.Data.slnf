@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "IntelliTect.TestTools.sln",
+    "projects": [
+      "IntelliTect.TestTools.Data.Test\\IntelliTect.TestTools.Data.Test.csproj",
+      "IntelliTect.TestTools.Data\\IntelliTect.TestTools.Data.csproj"
+    ]
+  }
+}

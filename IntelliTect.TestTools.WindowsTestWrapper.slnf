@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "IntelliTect.TestTools.sln",
+    "projects": [
+      "IntelliTect.TestTools.WindowsTestWrapper\\ExampleProjects\\Calculator.AutomatedTests\\Calculator.AutomatedTests.csproj",
+      "IntelliTect.TestTools.WindowsTestWrapper\\ExampleProjects\\Notepad.AutomatedTests\\NotepadExample.AutomatedTests.csproj",
+      "IntelliTect.TestTools.WindowsTestWrapper\\ExampleProjects\\SimpleWpfApp.AutomatedUiTests\\SimpleWpfAppExample.AutomatedUiTests.csproj",
+      "IntelliTect.TestTools.WindowsTestWrapper\\ExampleProjects\\SimpleWpfApp\\SimpleWpfAppExample.csproj",
+      "IntelliTect.TestTools.WindowsTestWrapper\\IntelliTect.TestTools.WindowsTestWrapper\\IntelliTect.TestTools.WindowsTestWrapper.csproj"
+    ]
+  }
+}
