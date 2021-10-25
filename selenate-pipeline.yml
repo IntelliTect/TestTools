@@ -10,7 +10,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/IntelliTect.TestTools.Selenate.sln'
+  solution: '**/IntelliTect.TestTools.Selenate.slnf'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   version: '2.1.0'
