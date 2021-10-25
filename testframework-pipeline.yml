@@ -10,7 +10,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/IntelliTect.TestTools.TestFramework.sln'
+  solution: '**/IntelliTect.TestTools.TestFramework.slnf'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   version: '1.2.1'
@@ -25,7 +25,7 @@ steps:
 - task: NuGetCommand@2
   displayName: 'Restore Solution'
   inputs:
-    restoreSolution: '$(solution)'
+    restoreSolution: '**/IntelliTect.TestTools.sln'
 
 - task: VSBuild@1
   displayName: 'Build Solution'

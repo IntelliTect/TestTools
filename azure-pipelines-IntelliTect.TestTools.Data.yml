@@ -10,7 +10,7 @@ trigger:
   paths:
     include:
       - IntelliTect.TestTools.Data/*
-      - IntelliTect.TestTools.Data.sln
+      - IntelliTect.TestTools.Data.slnf
       - Samples/IntelliTect.TestTools.Data.Sample/*
 
 variables:
@@ -29,13 +29,13 @@ steps:
   displayName: 'NuGet Restore'
   inputs:
     command: 'restore'
-    restoreSolution: '**/IntelliTect.TestTools.Data.sln'
+    restoreSolution: '**/IntelliTect.TestTools.sln'
     feedsToUse: 'select'
 
 - task: VSBuild@1
   displayName: 'Build'
   inputs:
-    solution: '**/IntelliTect.TestTools.Data.sln'
+    solution: '**/IntelliTect.TestTools.Data.slnf'
     clean: true
     configuration: '$(BuildConfiguration)'
     msbuildArgs: '/p:Version=$(version)'
