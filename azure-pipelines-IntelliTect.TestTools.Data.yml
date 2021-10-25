@@ -29,7 +29,7 @@ steps:
   displayName: 'NuGet Restore'
   inputs:
     command: 'restore'
-    restoreSolution: '**/IntelliTect.TestTools.Data.slnf'
+    restoreSolution: '**/IntelliTect.TestTools.sln'
     feedsToUse: 'select'
 
 - task: VSBuild@1
