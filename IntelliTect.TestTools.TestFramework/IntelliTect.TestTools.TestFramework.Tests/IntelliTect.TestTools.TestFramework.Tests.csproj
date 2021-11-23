@@ -25,4 +25,8 @@
     <ProjectReference Include="..\IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestData\" />
+  </ItemGroup>
+
 </Project>

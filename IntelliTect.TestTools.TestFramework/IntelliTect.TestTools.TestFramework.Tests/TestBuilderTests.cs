@@ -315,7 +315,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .OverrideTestCaseKey()
+                .AddTestCaseId(123456)
                 .AddLogger<ExampleLogger>()
                 .RemoveLogger()
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing")
