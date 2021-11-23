@@ -11,15 +11,32 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
-        public TestBuilder(/*[CallerMemberName] string testCaseKey = null*/)
+
+        public TestBuilder([CallerMemberName] string? testMethodName = null)
         {
-            //TestCaseName = testCaseKey;
+            TestMethodName = testMethodName ?? "undefined test method name";
             AddLogger<DebugLogger>();
         }
 
-        public TestBuilder OverrideTestCaseKey(/*[CallerMemberName] string testCaseKey = null*/)
+        /// <summary>
+        /// Used when a test case may be associated to a unique ID
+        /// </summary>
+        /// <param name="testCaseKey"></param>
+        /// <returns></returns>
+        public TestBuilder AddTestCaseId(int testCaseKey)
         {
-            //TestCaseName = testCaseKey;
+            TestCaseId = testCaseKey;
+            return this;
+        }
+
+        /// <summary>
+        /// Used to give a friendly name to the test case
+        /// </summary>
+        /// <param name="testCaseName"></param>
+        /// <returns></returns>
+        public TestBuilder AddTestCaseName(string testCaseName)
+        {
+            TestCaseName = testCaseName;
             return this;
         }
 
@@ -27,7 +44,9 @@ namespace IntelliTect.TestTools.TestFramework
         private List<(Type TestBlockType, object[]? TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
         private IServiceCollection Services { get; } = new ServiceCollection();
         private HashSet<object> TestBlockResults { get; } = new HashSet<object>();
-        private string TestCaseName { get; set; } = "";
+        private int TestCaseId { get; set; }
+        private string TestCaseName { get; set; }
+        private string TestMethodName { get; set; }
         private Exception? TestBlockException { get; set; }
 
         /// <summary>
@@ -132,25 +151,15 @@ namespace IntelliTect.TestTools.TestFramework
         public TestCase Build()
         {
             TestCase testCase = new();
-            //TestCase testCase = new()
-            //{
-            //    TestCaseName = TestCaseName
-            //};
+            testCase.TestMethodName = TestMethodName;
+            testCase.TestCaseName = TestCaseName;
+            testCase.TestCaseId = TestCaseId;
 
-            //var serviceProvider = Services.BuildServiceProvider();
-
-            TestCaseAttribute attr = new StackTrace().GetFrames().FirstOrDefault(f => f.GetMethod().GetCustomAttributes().FirstOrDefault(a => a is TestCaseAttribute));
-
-            StackTrace sf = new();
-            StackFrame[] frames = sf.GetFrames();
-            foreach (var f in frames)
+            List<object> tempValidation = new();
+            foreach(var tb in TestBlocksAndParams)
             {
-                TestCaseAttribute testAttribute = (TestCaseAttribute)f.GetMethod().GetCustomAttributes().FirstOrDefault(a => a is TestCaseAttribute);
-
-                if (testAttribute is { })
-                {
-                    TestCaseName = testAttribute.TestCaseName ?? f.GetMethod().Name;
-                }
+                // var properties = testBlockInstance.GetType().GetProperties();
+                //tempValidation.Add(tb.TestBlockType)
             }
 
             // add service provider to test case

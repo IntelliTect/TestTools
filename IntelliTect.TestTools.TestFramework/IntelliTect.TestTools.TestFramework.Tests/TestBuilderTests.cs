@@ -7,7 +7,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     public class TestBuilderTests
     {
         [Fact]
-        [TestCase]
+        //[TestCase]
         public void FetchByObjectInstanceForExecuteArg()
         {
             TestBuilder builder = new();

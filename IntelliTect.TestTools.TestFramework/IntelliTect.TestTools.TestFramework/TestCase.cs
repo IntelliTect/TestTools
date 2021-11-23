@@ -8,13 +8,13 @@ namespace IntelliTect.TestTools.TestFramework
     {
         public string TestCaseName { get; set; }
         public string TestMethodName { get; set; }
-        public string TestCaseId { get; set; }
-        //private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new();
-        //private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new();
-        //private IServiceProvider Services { get; }
+        public int TestCaseId { get; set; }
+        private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new();
+        private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new();
+        private IServiceProvider Services { get; }
         // Inputs
         // Outputs
-        // TestCaseAttributes
+        
         public bool Passed { get; set; }
 
         public static void ExecuteTestCase()
