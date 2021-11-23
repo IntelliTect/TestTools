@@ -14,7 +14,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         public TestBuilder([CallerMemberName] string? testMethodName = null)
         {
-            TestMethodName = testMethodName ?? "undefined test method name";
+            TestMethodName = testMethodName ?? "UndefinedTestMethodName";
             AddLogger<DebugLogger>();
         }
 
@@ -70,6 +70,9 @@ namespace IntelliTect.TestTools.TestFramework
         /// <returns>This</returns>
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
+            // Instead of keeping track of test blocks and parameters, would it make sense to add the parameter to the service provider?
+            // That would break the explicit link, but would simplify the logic.
+            // Consider and re-visit.
             TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
             Services.AddTransient(typeof(T));
             return this;
@@ -150,19 +153,70 @@ namespace IntelliTect.TestTools.TestFramework
 
         public TestCase Build()
         {
-            TestCase testCase = new();
-            testCase.TestMethodName = TestMethodName;
-            testCase.TestCaseName = TestCaseName;
-            testCase.TestCaseId = TestCaseId;
+            ServiceProvider? provider = Services.BuildServiceProvider();
 
-            List<object> tempValidation = new();
+            TestCase testCase = new()
+            {
+                TestMethodName = TestMethodName,
+                TestCaseName = TestCaseName,
+                TestCaseId = TestCaseId,
+                Services = provider
+            };
+
+            List<string> validationMessages = new();
+            // Probably need to profile all of this for performance at some point.
+            // Need to make sure if we're running hundreds or thousands of tests that we're not adding significant amount of time to that.
             foreach(var tb in TestBlocksAndParams)
             {
-                // var properties = testBlockInstance.GetType().GetProperties();
-                //tempValidation.Add(tb.TestBlockType)
+                // Step through this. How do we handle constructors?
+                // May need to explicitly call constructors out in case it's being handled by MS DI magic.
+                var type = tb.GetType();
+                ConstructorInfo[]? constructors = type.GetConstructors();
+                PropertyInfo[]? properties = type.GetProperties();
+                List<MethodInfo>? methods = type.GetMethods().Where(m => m.Name.ToUpperInvariant() == "EXECUTE").ToList();
+                if (methods.Count != 1)
+                {
+                    TestBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
+                        $"Please review test block {type}.");
+                    return null;
+                }
+                ParameterInfo[]? executeParams = methods[0].GetParameters();
+
+
+                List<object> inputs = new();
+                inputs.AddRange(constructors);
+                inputs.AddRange(properties);
+                inputs.AddRange(executeParams);
+
+                Type? executeReturns = methods[0].ReturnType;
+                List<object> outputs = new();
+                outputs.AddRange(tb.TestBlockParameters);
+                outputs.Add(executeReturns);
+
+                foreach (var i in inputs)
+                {
+                    object? blockInput = provider.GetService(i.GetType());
+                    if (blockInput is null)
+                    {
+                        blockInput = outputs.FirstOrDefault(o => o.GetType() == i.GetType());
+                    }
+                    if (blockInput is null)
+                    {
+                        validationMessages.Add($"TestBlock: {type} - Unable to satisfy input: {i.GetType()}");
+                    }
+                }
             }
 
-            // add service provider to test case
+            if(validationMessages.Count > 0)
+            {
+                string message = "";
+                foreach(var vm in validationMessages)
+                {
+                    message += vm;
+                    message += "\r\n";
+                }
+                throw new InvalidOperationException(message);
+            }
             // add test blocks to test case
             // add finally blocks to test case
             // validate inputs and outputs (maybe do that first?)
@@ -317,6 +371,8 @@ namespace IntelliTect.TestTools.TestFramework
         private MethodInfo GetExecuteMethod(object testBlockInstance)
         {
             List<MethodInfo> methods = testBlockInstance.GetType().GetMethods().Where(m => m.Name.ToUpperInvariant() == "EXECUTE").ToList();
+            // No longer need to do this check since we now do it in Build()
+            // UNLESS we end up supporting multiple Execute methods, then there may still be a need to double check at run-time?
             if (methods.Count != 1)
             {
                 TestBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
@@ -338,6 +394,8 @@ namespace IntelliTect.TestTools.TestFramework
             // Populate and log all of our Execute arguments
             if (executeArgs.Length > 0)
             {
+                // We should change this to just match on type instead of length of args
+                // That way you can override just a single parameter if desired. That seems to be the primary (albeit rare) use case here.
                 if (tb.TestBlockParameters != null && executeParams.Length == tb.TestBlockParameters.Length)
                 {
                     // Eventually need to add more validation around making sure the types match here.
