@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "IntelliTect.TestTools.sln",
+    "projects": [
+      "Examples\\IntelliTect.TestTools.Selenate.Examples\\IntelliTect.TestTools.Selenate.Examples.csproj",
+      "IntelliTect.TestTools.Selenate.Tests\\IntelliTect.TestTools.Selenate.Tests.csproj",
+      "IntelliTect.TestTools.Selenate\\IntelliTect.TestTools.Selenate\\IntelliTect.TestTools.Selenate.csproj"
+    ]
+  }
+}
