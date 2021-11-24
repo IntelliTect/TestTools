@@ -9,11 +9,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             ExampleDataThing = GetExampleObject;
         }
 
-        public Func<IServiceProvider, ExampleDataThing> ExampleDataThing { get; private set; }
+        public Func<IServiceProvider, ExampleInterface> ExampleDataThing { get; private set; }
 
-        private ExampleDataThing GetExampleObject(IServiceProvider service)
+        private ExampleInterface GetExampleObject(IServiceProvider service)
         {
-            return new ExampleDataThing { Testing = "TestingOverride" };
+            return new ExampleInterface { Testing = "TestingOverride" };
         }
     }
 }

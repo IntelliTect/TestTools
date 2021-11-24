@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.TestTools.TestFramework.Tests.TestData;
+using System;
 using Xunit;
 using Xunit.Sdk;
 
@@ -6,6 +7,102 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 {
     public class TestBuilderTests
     {
+        [Fact]
+        public void BuildWithMissingExecuteMethodThrowsInvalidOperationException()
+        {
+            TestBuilder builder = new();
+            InvalidOperationException result = Assert.Throws<InvalidOperationException>(() =>
+                builder
+                    .AddTestBlock<TestBlock>()
+                    .Build());
+            Assert.Contains(
+                "There must be one and only one Execute method",
+                result.Message, 
+                StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        [Fact]
+        public void BuildWithTwoExecuteMethodsThrowsInvalidOperationException()
+        {
+            //ExampleTestBlockWithMultipleExecuteMethods
+            TestBuilder builder = new();
+            InvalidOperationException result = Assert.Throws<InvalidOperationException>(() =>
+                builder
+                    .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>()
+                    .Build());
+            Assert.Contains(
+                "There must be one and only one Execute method",
+                result.Message, 
+                StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        [Fact]
+        public void BuildWithMissingDependencyInstanceThrowsInvalidOperationException()
+        {
+            TestBuilder builder = new();
+            InvalidOperationException result = Assert.Throws<InvalidOperationException>(() => 
+                builder
+                    .AddTestBlock<ExampleTestBlockWithExecuteArg>()
+                    .Build());
+            Assert.Contains(
+                "unable to satisfy input",
+                result.Message,
+                StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        [Fact]
+        public void BuildWithMismatchedDependencyInstanceThrowsInvalidOperationException()
+        {
+            TestBuilder builder = new();
+            InvalidOperationException result = Assert.Throws<InvalidOperationException>(() =>
+                builder
+                    .AddDependencyInstance(1)
+                    .AddTestBlock<ExampleTestBlockWithExecuteArg>()
+                    .Build());
+            Assert.Contains(
+                "unable to satisfy input",
+                result.Message,
+                StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        [Fact]
+        public void BuildWithMismatchedExecuteReturnThrowsInvalidOperationException()
+        {
+            TestBuilder builder = new();
+            InvalidOperationException result = Assert.Throws<InvalidOperationException>(() =>
+                builder
+                    .AddTestBlock<ExampleTestBlockWithReturn>(true)
+                    .AddTestBlock<ExampleTestBlockWithExecuteArg>()
+                    .Build());
+            Assert.Contains(
+                "unable to satisfy input",
+                result.Message,
+                StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        //[Fact]
+        //public void BuildWithMissingDependencyInstanceThrowsInvalidOperationException()
+        //{
+        //    TestBuilder builder = new();
+        //    InvalidOperationException result = Assert.Throws<InvalidOperationException>(() =>
+        //        builder
+        //            .AddTestBlock<ExampleTestBlockWithExecuteArg>()
+        //            .Build());
+        //    Assert.Contains(
+        //        "unable to satisfy input",
+        //        result.Message,
+        //        StringComparison.InvariantCultureIgnoreCase);
+        //}
+
+
+
+
+
+
+
+
+        // OLD TESTS
+        // REFACTOR AND MOVE AS NEEDED
         [Fact]
         //[TestCase]
         public void FetchByObjectInstanceForExecuteArg()
@@ -83,7 +180,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyService<ExampleDataThing>()
+                .AddDependencyService<ExampleInterface>()
                 .AddTestBlock<ExampleTestBlockWithConstructorForOwnType>()
                 .ExecuteTestCase();
         }
@@ -93,7 +190,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyService<ExampleDataThing>()
+                .AddDependencyService<ExampleInterface>()
                 .AddTestBlock<ExampleTestBlockWithPropertyForOwnType>()
                 .ExecuteTestCase();
         }
@@ -103,7 +200,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyService<ExampleDataThing>()
+                .AddDependencyService<ExampleInterface>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
                 .ExecuteTestCase();
         }
@@ -113,7 +210,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyInstance<IExampleDataInterface>(new ExampleDataThing())
+                .AddDependencyInstance<IExampleDataInterface>(new ExampleInterface())
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
                 .ExecuteTestCase();
         }
@@ -123,7 +220,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyService<IExampleDataInterface, ExampleDataThing>()
+                .AddDependencyService<IExampleDataInterface, ExampleInterface>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
                 .ExecuteTestCase();
         }
@@ -134,7 +231,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
+                .AddDependencyService<ExampleInterface>(new ExampleDataThingFactory().ExampleDataThing)
                 .AddTestBlock<ExampleTestBlockForFactoryWithConstructor>()
                 .ExecuteTestCase();
         }
@@ -144,7 +241,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
+                .AddDependencyService<ExampleInterface>(new ExampleDataThingFactory().ExampleDataThing)
                 .AddTestBlock<ExampleTestBlockForFactoryWithProperty>()
                 .ExecuteTestCase();
         }
@@ -154,7 +251,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyService<ExampleDataThing>(new ExampleDataThingFactory().ExampleDataThing)
+                .AddDependencyService<ExampleInterface>(new ExampleDataThingFactory().ExampleDataThing)
                 .AddTestBlock<ExampleTestBlockForFactoryWithExecuteArg>()
                 .ExecuteTestCase();
         }
@@ -165,8 +262,8 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyService<ExampleDataThing>()
-                .AddDependencyService<ExampleDataThing>()
+                .AddDependencyService<ExampleInterface>()
+                .AddDependencyService<ExampleInterface>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
                 .ExecuteTestCase();
         }
@@ -177,8 +274,8 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             TestBuilder builder = new();
             builder
-                .AddDependencyInstance(new ExampleDataThing { Testing = "Testing2" })
-                .AddDependencyInstance(new ExampleDataThing { Testing = "Testing" })
+                .AddDependencyInstance(new ExampleInterface { Testing = "Testing2" })
+                .AddDependencyInstance(new ExampleInterface { Testing = "Testing" })
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
                 .ExecuteTestCase();
         }
@@ -342,206 +439,6 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 
             Exception ex = Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
             Assert.Equal(typeof(InvalidOperationException), ex.InnerException.GetType());
-        }
-    }
-
-    public class ExampleTestBlockWithExecuteArg : TestBlock
-    {
-        public void Execute(string input)
-        {
-            Assert.Equal("Testing", input);
-        }
-    }
-
-    public class ExampleTestBlockWithProperty : TestBlock
-    {
-        public string Input { get; set; }
-
-        public void Execute()
-        {
-            Assert.Equal("Testing", Input);
-        }
-    }
-
-    public class ExampleTestBlockWithConstructor : TestBlock
-    {
-        public ExampleTestBlockWithConstructor(string input)
-        {
-            Input = input;
-        }
-
-        public void Execute()
-        {
-            Assert.Equal("Testing", Input);
-        }
-
-        private string Input { get; }
-    }
-
-    public class ExampleTestBlockWithMultipleDependencies : TestBlock
-    {
-        public string InputText { get; set; }
-
-        public void Execute(int inputNumber)
-        {
-            Assert.Equal("Testing", InputText);
-            Assert.Equal(1234, inputNumber);
-        }
-    }
-
-    public class ExampleTestBlockWithExecuteArgForOwnType : TestBlock
-    {
-        public void Execute(ExampleDataThing input)
-        {
-            if (input == null) throw new ArgumentNullException(nameof(input));
-            Assert.Equal("Testing", input.Testing);
-        }
-    }
-
-    public class ExampleTestBlockWithExecuteArgForInterface : TestBlock
-    {
-        public void Execute(IExampleDataInterface input)
-        {
-            if (input == null) throw new ArgumentNullException(nameof(input));
-            Assert.Equal("Testing", input.Testing);
-        }
-    }
-
-    public class ExampleTestBlockWithPropertyForOwnType : TestBlock
-    {
-        public ExampleDataThing Input { get; set; }
-
-        public void Execute()
-        {
-            Assert.Equal("Testing", Input.Testing);
-        }
-    }
-
-    public class ExampleTestBlockWithConstructorForOwnType : TestBlock
-    {
-        public ExampleTestBlockWithConstructorForOwnType(ExampleDataThing input)
-        {
-            Input = input;
-        }
-
-        public void Execute()
-        {
-            Assert.Equal("Testing", Input.Testing);
-        }
-
-        private ExampleDataThing Input { get; }
-    }
-
-    public class ExampleTestBlockForFactoryWithExecuteArg : TestBlock
-    {
-        public void Execute(ExampleDataThing input)
-        {
-            if (input == null) throw new ArgumentNullException(nameof(input));
-            Assert.Equal("TestingOverride", input.Testing);
-        }
-    }
-
-    public class ExampleTestBlockForFactoryWithProperty : TestBlock
-    {
-        public ExampleDataThing Input { get; set; }
-
-        public void Execute()
-        {
-            Assert.Equal("TestingOverride", Input.Testing);
-        }
-    }
-
-    public class ExampleTestBlockForFactoryWithConstructor : TestBlock
-    {
-        public ExampleTestBlockForFactoryWithConstructor(ExampleDataThing input)
-        {
-            Input = input;
-        }
-
-        public void Execute()
-        {
-            Assert.Equal("TestingOverride", Input.Testing);
-        }
-
-        private ExampleDataThing Input { get; }
-    }
-
-    public class ExampleTestBlockWithPropertyWithNoSetter : TestBlock
-    {
-        public string Input { get; }
-
-        public void Execute()
-        {
-            Assert.Null(Input);
-        }
-    }
-
-    public class ExampleTestBlockWithMultipleExecuteMethods : TestBlock
-    {
-        public void Execute()
-        {
-            Assert.True(true);
-        }
-
-        public void Execute(string input)
-        {
-            Assert.Equal("Tetsing", input);
-        }
-    }
-
-    public class ExampleLoggerUsage : TestBlock
-    {
-        public void Execute(ILogger log)
-        {
-            if (log == null) throw new ArgumentNullException(nameof(log));
-            log.Debug("This should throw");
-        }
-    }
-
-    public class ExampleTestBlockWithReturn : TestBlock
-    {
-        public bool Execute(bool valueToReturn)
-        {
-            return !valueToReturn;
-        }
-    }
-
-    public class ExampleFinallyBlock : TestBlock
-    {
-        public void Execute(bool result)
-        {
-            Assert.True(result, "Finally block did not receive correct input");
-        }
-    }
-
-    public class ExampleLogger : ILogger
-    {
-        public string TestCaseKey { get; set; }
-        public string CurrentTestBlock { get; set; }
-
-        public void Debug(string message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Critical(string message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Info(string message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void TestBlockInput(string input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void TestBlockOutput(string output)
-        {
-            throw new NotImplementedException();
         }
     }
 }

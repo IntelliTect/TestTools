@@ -170,50 +170,75 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 // Step through this. How do we handle constructors?
                 // May need to explicitly call constructors out in case it's being handled by MS DI magic.
-                var type = tb.GetType();
+                Type type = tb.TestBlockType;
                 ConstructorInfo[]? constructors = type.GetConstructors();
+                
+                if(constructors.Length > 1)
+                {
+                    throw new InvalidOperationException(
+                        $"TestBlock: {type} - Currently TestFramework supports zero or one constructors on test blocks.");
+                }
+
+                ParameterInfo[]? ctorParams = constructors[0].GetParameters();
                 PropertyInfo[]? properties = type.GetProperties();
                 List<MethodInfo>? methods = type.GetMethods().Where(m => m.Name.ToUpperInvariant() == "EXECUTE").ToList();
                 if (methods.Count != 1)
                 {
-                    TestBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
-                        $"Please review test block {type}.");
-                    return null;
+                    throw new InvalidOperationException(
+                        $"TestBlock: {type} - There must be one and only one Execute method on a test block.");
                 }
                 ParameterInfo[]? executeParams = methods[0].GetParameters();
 
+                List<Type> inputs = new();
+                foreach(var c in ctorParams)
+                { 
+                    inputs.Add(c.ParameterType);
+                }
+                foreach(var p in properties)
+                {
+                    inputs.Add(p.PropertyType);
+                }
+                foreach(var e in executeParams)
+                {
+                    inputs.Add(e.ParameterType);
+                }
 
-                List<object> inputs = new();
-                inputs.AddRange(constructors);
-                inputs.AddRange(properties);
-                inputs.AddRange(executeParams);
-
-                Type? executeReturns = methods[0].ReturnType;
-                List<object> outputs = new();
-                outputs.AddRange(tb.TestBlockParameters);
-                outputs.Add(executeReturns);
+                Type executeReturns = methods[0].ReturnType;
+                List<Type> outputs = new();
+                if (tb.TestBlockParameters is not null)
+                {
+                    foreach(var p in tb.TestBlockParameters)
+                    {
+                        outputs.Add(p.GetType());
+                    }
+                }
+                if (executeReturns != typeof(void))
+                {
+                    outputs.Add(executeReturns);
+                }
 
                 foreach (var i in inputs)
                 {
-                    object? blockInput = provider.GetService(i.GetType());
+                    object? blockInput = provider.GetService(i);
                     if (blockInput is null)
                     {
-                        blockInput = outputs.FirstOrDefault(o => o.GetType() == i.GetType());
+                        blockInput = outputs.FirstOrDefault(o => o == i);
                     }
                     if (blockInput is null)
                     {
-                        validationMessages.Add($"TestBlock: {type} - Unable to satisfy input: {i.GetType()}");
+                        validationMessages.Add($"TestBlock: {type} - Unable to satisfy input: {i}");
                     }
                 }
             }
 
             if(validationMessages.Count > 0)
             {
+                // This might make sense as an AggregateException instead
                 string message = "";
                 foreach(var vm in validationMessages)
                 {
-                    message += vm;
                     message += "\r\n";
+                    message += vm;
                 }
                 throw new InvalidOperationException(message);
             }
@@ -223,6 +248,14 @@ namespace IntelliTect.TestTools.TestFramework
 
             Services.AddSingleton(testCase);
             return testCase;
+
+            //void AddType(object[] objectToAdd, IList<object> listToAdd)
+            //{
+            //    foreach(var o in objectToAdd)
+            //    {
+            //        listToAdd.Add(o.GetType());
+            //    }
+            //}
         }
 
         // Legacy support

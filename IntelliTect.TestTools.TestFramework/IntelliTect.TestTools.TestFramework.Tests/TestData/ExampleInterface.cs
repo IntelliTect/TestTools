@@ -5,7 +5,7 @@
         string Testing { get; set; }
     }
 
-    public class ExampleDataThing : IExampleDataInterface
+    public class ExampleInterface : IExampleDataInterface
     {
         public string Testing { get; set; } = "Testing";
     }
