@@ -9,6 +9,6 @@ namespace IntelliTect.TestTools.TestFramework
         //    Log = log ?? new DebugLogger();
         //}
 
-        public ILogger Log { get; } = new DebugLogger();
+        public ILogger Log { get; }
     }
 }

@@ -94,19 +94,6 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
         }
     }
 
-    public class ExampleTestBlockWithMultipleExecuteMethods : TestBlock
-    {
-        public void Execute()
-        {
-            Assert.True(true);
-        }
-
-        public void Execute(string input)
-        {
-            Assert.Equal("Tetsing", input);
-        }
-    }
-
     public class ExampleLoggerUsage : TestBlock
     {
         public void Execute(ILogger log)

@@ -6,6 +6,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public string TestCaseKey { get; set; }
         public string CurrentTestBlock { get; set; }
+        public IObjectSerializer Serializer { get; set; }
 
         public void Debug(string message)
         {

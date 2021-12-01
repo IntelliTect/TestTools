@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -24,7 +25,9 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         public string ResourceReferenceProperty { get; set; }
+        // Test the formatting of AggregateException vs List of type Exception
         public AggregateException FinallyBlockExceptions { get; set; }
+        public List<Exception> Testing { get; } = new();
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
