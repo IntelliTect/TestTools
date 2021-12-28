@@ -15,7 +15,7 @@ namespace IntelliTect.TestTools.TestFramework
         public TestBuilder([CallerMemberName] string? testMethodName = null)
         {
             TestMethodName = testMethodName ?? "UndefinedTestMethodName";
-            AddLogger<DebugLogger>();
+            AddLogger<DebugLogger, JsonSerializer>();
         }
 
         /// <summary>
@@ -70,19 +70,25 @@ namespace IntelliTect.TestTools.TestFramework
         /// <returns>This</returns>
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
-            // Instead of keeping track of test blocks and parameters, would it make sense to add the parameter to the service provider?
-            // That would break the explicit link, but would simplify the logic.
-            // Consider and re-visit.
-            TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
+            throw new NotImplementedException("Not yet supported in TestFramework v2.");
+            //TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
+            //Services.AddTransient(typeof(T));
+            //return this;
+        }
+
+        public TestBuilder AddFinallyBlock<T>() where T : ITestBlock
+        {
+            FinallyBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
             Services.AddTransient(typeof(T));
             return this;
         }
 
         public TestBuilder AddFinallyBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
-            FinallyBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
-            Services.AddTransient(typeof(T));
-            return this;
+            throw new NotImplementedException("Not yet supported in TestFramework v2.");
+            //FinallyBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
+            //Services.AddTransient(typeof(T));
+            //return this;
         }
 
         /// <summary>
@@ -142,6 +148,17 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        public TestBuilder AddLogger<TLogger, TObjectSerializer>() 
+            where TLogger : ILogger 
+            where TObjectSerializer : IObjectSerializer
+        {
+            RemoveSerializer();
+            RemoveLogger();
+            Services.AddSingleton(typeof(ILogger), typeof(TLogger));
+            Services.AddSingleton(typeof(IObjectSerializer), typeof(TObjectSerializer));
+            return this;
+        }
+
         public TestBuilder RemoveLogger()
         {
             ServiceDescriptor? logger = Services.FirstOrDefault(d => d.ServiceType == typeof(ILogger));
@@ -149,7 +166,8 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        // Maybe don't need this if we carry the serializer with the logger?
+        // Maybe don't need this since we have AddLogger<TLogger,TObjectSerializer>()
+        // If we remove this, we should consolidate RemoveSerializer into AddLogger<TL, TOS> OR make RemoveSerializer private
         public TestBuilder AddSerializer<T>() where T : IObjectSerializer
         {
             RemoveSerializer();
@@ -232,6 +250,11 @@ namespace IntelliTect.TestTools.TestFramework
                     // For now, we'll ditch them for v2 alpha.
                     // In the future it may make sense to keep them strictly as overrides:
                     // If a test block param is present, always use it for whatever type is matched. If no type is matched, we should fail here.
+                    // Do we even need this? The couple of cases we've used it has purely been for fewer lines of code, and not actually overriding anything.
+                    // For simplicity's sake, maybe we just ditch this.
+                    // Based on the ideas that best practices are to have tests be as simple as feasible,
+                    // and use POCO class to represent inputs and outputs
+                    // it's hard to imagine a case where we need this without introducing confusion for the test author.
                     //foreach (var p in tb.TestBlockParameters)
                     //{
                     //    externalDependencies.Add(p.GetType());

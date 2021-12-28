@@ -15,16 +15,26 @@ namespace IntelliTect.TestTools.TestFramework
         public int TestCaseId { get; set; }
         public ServiceProvider Services { get; set; }
         public bool ThrowOnFinallyBlockException { get; set; } = true;
+
+        // Inputs
+        public List<ParameterInfo> ConstructorParameters { get; } = new();
+        public List<PropertyInfo> Properties { get; } = new();
+        public MethodInfo ExecuteMethod { get; set; }
+        public List<ParameterInfo> ExecuteMethodParameters { get; } = new();
+        // Outputs?
+
         private List<(Type TestBlockType, object[] TestBlockParameters)> TestBlocksAndParams { get; } = new();
         private List<(Type TestBlockType, object[] TestBlockParameters)> FinallyBlocksAndParams { get; } = new();
-        // Inputs?
-        // Outputs?
+        private bool _DisposedValue;
+        
 
         // TEMPORARY TO TEST
         private Exception? TestBlockException { get; set; }
+        private List<Exception> FinallyBlockExceptions { get; } = new();
 
         // UNSURE IF NEEDED WITH NEW BUILD METHOD
         private List<object> TestBlockResults { get; } = new();
+        private ILogger? Log { get; set; }
         //private IObjectSerializer? Serializer { get; set; }
 
         public bool Passed { get; set; }
@@ -33,26 +43,48 @@ namespace IntelliTect.TestTools.TestFramework
         {
             using (var testCaseScope = Services.CreateScope())
             {
-                ILogger? logger = testCaseScope.ServiceProvider.GetService<ILogger>();
-                if (logger != null)
+                Log = testCaseScope.ServiceProvider.GetService<ILogger>();
+                if (Log is not null)
                 {
-                    logger.TestCaseKey = TestCaseName;
-                    logger.CurrentTestBlock = "N/A";
-                    logger.Serializer = testCaseScope.ServiceProvider.GetService<IObjectSerializer>();
+                    Log.TestCaseKey = TestCaseName;
+                    Log.CurrentTestBlock = "N/A";
                 }
 
-                logger?.Info($"Starting test case: {TestCaseName}");
+                Log?.Info($"Starting test case: {TestCaseName}");
 
+                foreach (var tb in TestBlocksAndParams)
+                {
+                    // If we do below, where we add the result back to the container, does it make sense to do...
+                    // using (var testBlockScope = Services.CreateScope())?
+                    // Then we resolve testblocks from *that* scope?
+                    // Will need to test things like:
+                    // null return
+                    // Duplicate returns from dif test blocks
+                    // Interface returns
+                    if (Log is { }) Log.CurrentTestBlock = tb.TestBlockType.ToString();
+                    if (!GetTestBlock(testCaseScope, tb.TestBlockType, false, out var testBlockInstance)) break;
+
+                    // AFTER EXECUTING A TEST, DOES THIS MAKE SENSE?
+                    // var result = RunTestBlocks()
+                    // if (result is not null) Services.Add(result);
+                }
+
+
+                // Do I actually need this inner scope?
+                // Everything should be given the correct scope when added in the TestBuilder
+                // And honestly, the only 'scoped' things should last the duration of the test case, i.e. inputs
                 using (var testBlockScope = Services.CreateScope())
                 {
                     foreach (var tb in TestBlocksAndParams)
                     {
-                        if (logger != null) logger.CurrentTestBlock = tb.TestBlockType.ToString();
-                        // Might be more concise to have these as out method parameters instead of if statements after every one
-                        var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType);
-                        if (TestBlockException != null) break;
+                        if (Log != null) Log.CurrentTestBlock = tb.TestBlockType.ToString();
+                        if (!GetTestBlock(testBlockScope, tb.TestBlockType, false, out var testBlockInstance)) break;
 
-                        SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
+                        // Might be more concise to have these as out method parameters instead of if statements after every one
+                        //var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType);
+                        //if (TestBlockException != null) break;
+
+                        SetTestBlockProperties(testBlockScope, testBlockInstance, Log);
                         if (TestBlockException != null) break;
 
                         MethodInfo execute = GetExecuteMethod(testBlockInstance);
@@ -61,9 +93,13 @@ namespace IntelliTect.TestTools.TestFramework
                         var executeArgs = GatherTestBlockArguments(testBlockScope, execute, tb);
                         if (TestBlockException != null) break;
 
-                        RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
+                        RunTestBlocks(testBlockInstance, execute, executeArgs, Log);
                         if (TestBlockException != null) break;
                     }
+
+                    // We consider a test passed if it makes it through all of its test blocks.
+                    // FinallyBlocks may do things differently depending on if the test failed or not.
+                    Passed = true;
 
                     // Need a much better way to handle Finally exceptions...
                     Exception tempException = TestBlockException;
@@ -71,13 +107,13 @@ namespace IntelliTect.TestTools.TestFramework
                     // Extract loop above since it's basically the same for finally blocks?
                     foreach (var fb in FinallyBlocksAndParams)
                     {
-                        if (logger != null) logger.CurrentTestBlock = fb.TestBlockType.ToString();
+                        if (Log != null) Log.CurrentTestBlock = fb.TestBlockType.ToString();
                         // Might be more concise to have these as out method parameters instead of if statements after every one
                         // Also these specific ones should not be overwriting TestBlockException
                         var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType);
                         if (TestBlockException != null) break;
 
-                        SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
+                        SetTestBlockProperties(testBlockScope, testBlockInstance, Log);
                         if (TestBlockException != null) break;
 
                         MethodInfo execute = GetExecuteMethod(testBlockInstance);
@@ -86,7 +122,7 @@ namespace IntelliTect.TestTools.TestFramework
                         var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb);
                         if (TestBlockException != null) break;
 
-                        RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
+                        RunTestBlocks(testBlockInstance, execute, executeArgs, Log);
                         if (TestBlockException != null) break;
                     }
                     TestBlockException = tempException;
@@ -94,11 +130,11 @@ namespace IntelliTect.TestTools.TestFramework
 
                 if (TestBlockException == null)
                 {
-                    logger?.Info("Test case finished successfully.");
+                    Log?.Info("Test case finished successfully.");
                 }
                 else
                 {
-                    logger?.Critical($"Test case failed: {TestBlockException}");
+                    Log?.Critical($"Test case failed: {TestBlockException}");
                 }
             }
 
@@ -109,6 +145,52 @@ namespace IntelliTect.TestTools.TestFramework
                 throw new TestCaseException("Test case failed.", TestBlockException);
             }
         }
+
+        private bool GetTestBlock(IServiceScope scope, Type testBlockType, bool isFinallyBlock, out object? testBlock)
+        {
+            var tb = scope.ServiceProvider.GetService(testBlockType);
+            if (tb is null)
+            {
+                testBlock = null;
+                if (isFinallyBlock)
+                {
+                    FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to find finally block: {testBlockType}"));
+                }
+                else
+                {
+                    TestBlockException = new InvalidOperationException($"Unable to find test block: {testBlockType}");
+                }
+                return false;
+            }
+            testBlock = tb;
+            SetTestBlockProperties(scope, testBlock);
+            return true;
+        }
+
+        // Seems like we can actually skip a lot of this since we do most of this logic in Build.
+        // Instead, maybe store all of the inputs and simplify this to the foreach?
+        private void SetTestBlockProperties(IServiceScope scope, object testBlockInstance)
+        {
+            // Populate all of our properties
+            var properties = testBlockInstance.GetType().GetProperties();
+            foreach (var prop in properties)
+            {
+                if (!prop.CanWrite)
+                {
+                    Log?.Debug($"Skipping property {prop}. No setter found.");
+                    continue;
+                }
+                object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                if (propertyValue == null)
+                {
+                    TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
+                    break;
+                }
+
+                prop.SetValue(testBlockInstance, propertyValue);
+            }
+        }
+
 
         // TEMPORARY
         // RE-WRITE ALL OF THIS NOW THAT WE BUILD FIRST
@@ -247,6 +329,35 @@ namespace IntelliTect.TestTools.TestFramework
             }
 
             logger?.Debug($"Test block completed successfully.");
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_DisposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                _DisposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~TestCase()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
