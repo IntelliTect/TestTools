@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace IntelliTect.TestTools.TestFramework
 {
@@ -36,7 +34,6 @@ namespace IntelliTect.TestTools.TestFramework
         // UNSURE IF NEEDED WITH NEW BUILD METHOD
         //private HashSet<object> TestBlockResults { get; } = new();
         private ITestCaseLogger? Log { get; set; }
-        //private IObjectSerializer? Serializer { get; set; }
 
         public bool Passed { get; set; }
 
