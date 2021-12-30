@@ -48,7 +48,6 @@ namespace IntelliTect.TestTools.TestFramework
         private List<InvalidOperationException> ValidationExceptions { get; } = new();
 
         private IServiceCollection Services { get; } = new ServiceCollection();
-        //private HashSet<object> TestBlockResults { get; } = new HashSet<object>();
         private int TestCaseId { get; set; }
         private string? TestCaseName { get; set; }
         private string TestMethodName { get; set; }

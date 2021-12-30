@@ -63,12 +63,12 @@ namespace IntelliTect.TestTools.TestFramework
                     // Duplicate returns from dif test blocks
                     // Interface returns
                     if (Log is not null) Log.CurrentTestBlock = tb.Type.ToString();
+
                     using (var testBlockScope = services.CreateScope())
                     {
                         if (!GetTestBlock(testBlockScope, tb.Type, false, out var testBlockInstance)) break;
                         if (testBlockInstance is null) throw new NullReferenceException();
                     }
-
 
 
 
