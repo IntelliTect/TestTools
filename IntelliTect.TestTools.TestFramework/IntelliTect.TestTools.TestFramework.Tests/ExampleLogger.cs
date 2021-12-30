@@ -2,11 +2,19 @@
 
 namespace IntelliTect.TestTools.TestFramework.Tests
 {
-    public class ExampleLogger : ILogger
+    public class ExampleLogger : ITestCaseLogger
     {
-        public string TestCaseKey { get; set; }
-        public string CurrentTestBlock { get; set; }
+        public ExampleLogger(TestCase tc, IObjectSerializer os)
+        {
+            CurrentTestCase = tc;
+            Serializer = os;
+        }
+
+        public string? TestCaseKey { get; set; }
+        public string? CurrentTestBlock { get; set; }
         public IObjectSerializer Serializer { get; set; }
+
+        public TestCase CurrentTestCase { get; }
 
         public void Debug(string message)
         {
@@ -23,12 +31,12 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             throw new NotImplementedException();
         }
 
-        public void TestBlockInput(string input)
+        public void TestBlockInput(object input)
         {
             throw new NotImplementedException();
         }
 
-        public void TestBlockOutput(string output)
+        public void TestBlockOutput(object output)
         {
             throw new NotImplementedException();
         }

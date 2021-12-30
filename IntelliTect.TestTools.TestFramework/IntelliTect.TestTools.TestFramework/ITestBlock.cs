@@ -2,6 +2,6 @@
 {
     public interface ITestBlock
     {
-        public ILogger Log { get; }
+        public ITestCaseLogger? Log { get; }
     }
 }

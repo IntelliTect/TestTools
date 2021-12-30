@@ -9,6 +9,7 @@ namespace IntelliTect.TestTools.TestFramework
         //    Log = log ?? new DebugLogger();
         //}
 
-        public ILogger Log { get; }
+        // NEED TO TEST HOW THIS WORKS WHEN THE LOGGER IS REMOVED!
+        public ITestCaseLogger? Log { get; }
     }
 }

@@ -35,29 +35,29 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
             ValidateAggregateException(result, 1);
         }
 
-        [Fact(Skip = "Functionality in progress.")]
-        public void BuildWithMismatchedDependencyInstanceAsTestBlockParamThrowsAggregateException()
-        {
-            // Arrange
-            TestBuilder builder = new();
-            builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1);
+        //[Fact(Skip = "Functionality in progress.")]
+        //public void BuildWithMismatchedDependencyInstanceAsTestBlockParamThrowsAggregateException()
+        //{
+        //    // Arrange
+        //    TestBuilder builder = new();
+        //    builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1);
 
-            // Act
-            var result = Assert.Throws<AggregateException>(() =>
-                builder.Build());
+        //    // Act
+        //    var result = Assert.Throws<AggregateException>(() =>
+        //        builder.Build());
 
-            // Assert
-            ValidateAggregateException(result, 1);
-        }
+        //    // Assert
+        //    ValidateAggregateException(result, 1);
+        //}
 
-        [Fact(Skip = "Functionality in progress.")]
-        public void BuildWithMismatchedCountDependencyInstanceAsTestBlockParamThrowsAggregateException()
-        {
-            TestBuilder builder = new();
-            builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
+        //[Fact(Skip = "Functionality in progress.")]
+        //public void BuildWithMismatchedCountDependencyInstanceAsTestBlockParamThrowsAggregateException()
+        //{
+        //    TestBuilder builder = new();
+        //    builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
 
-            Assert.Throws<TestCaseException>(() => builder.Build());
-        }
+        //    Assert.Throws<TestCaseException>(() => builder.Build());
+        //}
 
         [Fact]
         public void BuildWithMismatchedExecuteReturnThrowsAggregateException()

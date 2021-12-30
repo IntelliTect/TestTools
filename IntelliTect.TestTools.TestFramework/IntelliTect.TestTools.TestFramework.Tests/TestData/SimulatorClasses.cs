@@ -27,7 +27,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
 
     public class ExampleTestBlockWithPropertyForOwnType : TestBlock
     {
-        public ExampleInterface Input { get; set; }
+        public ExampleInterface Input { get; set; } = new();
 
         public void Execute()
         {
@@ -61,7 +61,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
 
     public class ExampleTestBlockForFactoryWithProperty : TestBlock
     {
-        public ExampleInterface Input { get; set; }
+        public ExampleInterface Input { get; set; } = new();
 
         public void Execute()
         {
@@ -86,7 +86,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
 
     public class ExampleTestBlockWithPropertyWithNoSetter : TestBlock
     {
-        public string Input { get; }
+        public string Input { get; } = "";
 
         public void Execute()
         {
@@ -96,7 +96,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
 
     public class ExampleLoggerUsage : TestBlock
     {
-        public void Execute(ILogger log)
+        public void Execute(ITestCaseLogger log)
         {
             if (log == null) throw new ArgumentNullException(nameof(log));
             log.Debug("This should throw");

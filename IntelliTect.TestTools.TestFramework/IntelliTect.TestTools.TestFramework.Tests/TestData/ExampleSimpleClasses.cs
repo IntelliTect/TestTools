@@ -12,7 +12,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
 
     public class ExampleTestBlockWithProperty : TestBlock
     {
-        public string Input { get; set; }
+        public string? Input { get; set; }
 
         public void Execute()
         {
@@ -37,7 +37,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
 
     public class ExampleTestBlockWithMultipleDependencies : TestBlock
     {
-        public string InputText { get; set; }
+        public string? InputText { get; set; }
 
         public void Execute(int inputNumber)
         {

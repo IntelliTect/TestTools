@@ -24,15 +24,14 @@ namespace IntelliTect.TestTools.TestFramework
             ResourceReferenceProperty = info.GetString("ResourceReferenceProperty");
         }
 
-        public string ResourceReferenceProperty { get; set; }
-        // Test the formatting of AggregateException vs List of type Exception
-        public AggregateException FinallyBlockExceptions { get; set; }
+        public string ResourceReferenceProperty { get; set; } = "";
+        public AggregateException? FinallyBlockExceptions { get; set; }
         public List<Exception> Testing { get; } = new();
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null) throw new ArgumentNullException(nameof(info));
+            if (info is null) throw new ArgumentNullException(nameof(info));
             info.AddValue("ResourceReferenceProperty", ResourceReferenceProperty);
             base.GetObjectData(info, context);
         }

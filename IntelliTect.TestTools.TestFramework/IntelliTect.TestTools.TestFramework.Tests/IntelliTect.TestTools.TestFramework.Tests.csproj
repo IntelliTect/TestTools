@@ -7,7 +7,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
     <NoWarn>
-      CA1303;CS1822;CS1822;<!-- Next ones are temporary. -->CS8620;CS8625;CS8600;CS8602;CS8618;CS8603;CS8604;CA1822
+      CA1303;
+      CA1822;
     </NoWarn>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

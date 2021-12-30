@@ -9,11 +9,11 @@
     <NoWarn>
       CA1303;
       <!-- The rest of these are temporary -->
-      CS8618;
+      <!--CS8618;
       CS8604;
       CS8603;
       CS8620;
-      CS8600;
+      CS8600;-->
     </NoWarn>
   </PropertyGroup>
 

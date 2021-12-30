@@ -1,10 +1,17 @@
 ﻿namespace IntelliTect.TestTools.TestFramework
 {
-    public class DebugLogger : ILogger
+    public class DebugLogger : ITestCaseLogger
     {
-        public string TestCaseKey { get; set; }
-        public string CurrentTestBlock { get; set; }
+        public DebugLogger(TestCase testCase, IObjectSerializer serializer)
+        {
+            CurrentTestCase = testCase;
+            Serializer = serializer;
+        }
+
         public IObjectSerializer Serializer { get; set; }
+        public TestCase CurrentTestCase { get; }
+        public string? TestCaseKey { get; set; }
+        public string? CurrentTestBlock { get; set; }
 
         public void Debug(string message)
         {

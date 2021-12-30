@@ -6,7 +6,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 {
     public class TestBase
     {
-        protected TestBuilder StartTestCaseWithMissingDependency(TestBuilder builder = null)
+        protected static TestBuilder StartTestCaseWithMissingDependency(TestBuilder? builder = null)
         {
             if(builder is null)
             {
@@ -18,7 +18,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
             return builder;
         }
 
-        protected void ValidateAggregateException(AggregateException result, int expectedInnerExceptions)
+        protected static void ValidateAggregateException(AggregateException result, int expectedInnerExceptions)
         {
 #pragma warning disable CA1062 // Validate arguments of public methods
             Assert.Equal(expectedInnerExceptions, result.InnerExceptions.Count);
