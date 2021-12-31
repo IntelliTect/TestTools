@@ -71,6 +71,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 
             // This is about 3x faster than the above and other FirstOrDefault calls.
             // Logic could be ensuring a HashSet and Array have the same values, then: if in Hashset, only then find from array?
+            // Need to figure out the memory implications of that.
             IterateOverAction(i => _PopulatedHashSet.Contains(5));
         }
 
