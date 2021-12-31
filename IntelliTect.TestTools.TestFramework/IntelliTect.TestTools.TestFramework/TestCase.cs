@@ -44,7 +44,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         public bool Passed { get; set; }
 
-        public void ExecuteTestCase()
+        public void Execute()
         {
             ServiceProvider services = ServiceCollection.BuildServiceProvider();
             using (var testCaseScope = services.CreateScope())
@@ -191,6 +191,8 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 // Only try to re-build the test block if we get an InvalidOperationException.
                 // That implies the block was found but could not be activated.
+                // Also... can this message be clearer? Not sure what will make sense to people.
+                Log?.Debug($"Unable to fetch block {block.Type} from DI service. Attempting to build it by type.");
                 if(TryBuildBlock(scope, block, out testBlock)) result = true;
             }
 
@@ -268,7 +270,7 @@ namespace IntelliTect.TestTools.TestFramework
                     Log?.Debug($"Skipping property {prop}. No setter found.");
                     continue;
                 }
-                object? arg = TestBlockOutput.FirstOrDefault(o => o.GetType() == c.ParameterType);
+                object? arg = TestBlockOutput.FirstOrDefault(o => o.GetType() == prop.PropertyType);
                 object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
                 if (propertyValue is null)
                 {

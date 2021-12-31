@@ -15,7 +15,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .AddDependencyService<SomeDependency>()
                 .AddTestBlock<SomeOtherTestBlockWithExec>()
                 .Build();
-            tc.ExecuteTestCase();
+            tc.Execute();
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .AddTestBlock<SomeTestBlock>()
                 .AddTestBlock<SomeOtherTestBlockWithExec>()
                 .Build();
-            tc.ExecuteTestCase();
+            tc.Execute();
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .AddTestBlock<SomeTestBlock>()
                 .AddTestBlock<SomeOtherTestBlockWithCtor>()
                 .Build();
-            tc.ExecuteTestCase();
+            tc.Execute();
         }
     }
 
