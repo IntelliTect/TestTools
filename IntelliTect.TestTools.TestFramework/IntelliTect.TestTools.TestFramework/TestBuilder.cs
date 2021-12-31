@@ -89,7 +89,9 @@ namespace IntelliTect.TestTools.TestFramework
         {
             MethodInfo execute = FindExecuteMethod(typeof(T));
             FinallyBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
-            FinallyBlocks.Add(new Block(typeof(T), execute));
+            Block b = new(typeof(T), execute);
+            b.IsFinallyBlock = true;
+            FinallyBlocks.Add(b);
             Services.AddTransient(typeof(T));
             return this;
         }
@@ -99,6 +101,7 @@ namespace IntelliTect.TestTools.TestFramework
             throw new NotImplementedException("Not yet supported in TestFramework v2.");
             //Block tb = new(typeof(T));
             //tb.ExecuteParams = testBlockArgs;
+            //b.IsFinallyBlock = true;
             //FinallyBlocks.Add(tb);
             //FinallyBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
             //Services.AddTransient(typeof(T));
@@ -114,7 +117,7 @@ namespace IntelliTect.TestTools.TestFramework
         public TestBuilder AddDependencyService<T>(Func<IServiceProvider, object> serviceFactory)
         {
             // When switching to rebuilding a testblock scope, this may need to change to Services.AddSingleton to persist between test blocks.
-            Services.AddScoped(typeof(T), serviceFactory);
+            Services.AddSingleton(typeof(T), serviceFactory);
             return this;
         }
 
@@ -126,14 +129,14 @@ namespace IntelliTect.TestTools.TestFramework
         public TestBuilder AddDependencyService<T>()
         {
             // When switching to rebuilding a testblock scope, this may need to change to Services.AddSingleton to persist between test blocks.
-            Services.AddScoped(typeof(T));
+            Services.AddSingleton(typeof(T));
             return this;
         }
 
         public TestBuilder AddDependencyService<TServiceType, TImplementationType>()
         {
             // When switching to rebuilding a testblock scope, this may need to change to Services.AddSingleton to persist between test blocks.
-            Services.AddScoped(typeof(TServiceType), typeof(TImplementationType));
+            Services.AddSingleton(typeof(TServiceType), typeof(TImplementationType));
             return this;
         }
 
@@ -224,6 +227,8 @@ namespace IntelliTect.TestTools.TestFramework
             }
 
             TestCase testCase = new(TestCaseName!, TestMethodName, TestCaseId, Services);
+            Services.AddSingleton(testCase);
+            //ServiceProvider provider = Services.BuildServiceProvider();
 
             // Probably need to profile all of this for performance at some point.
             // Need to make sure if we're running hundreds or thousands of tests that we're not adding significant amount of time to that.
@@ -247,6 +252,8 @@ namespace IntelliTect.TestTools.TestFramework
                 testCase.FinallyBlocks.Add(fb);
             }
 
+            CheckContainer(outputs/*, provider*/);
+
             if (ValidationExceptions.Count > 0)
             {
                 // This might make sense as an AggregateException instead
@@ -264,7 +271,6 @@ namespace IntelliTect.TestTools.TestFramework
             // add finally blocks to test case
             // validate inputs and outputs (maybe do that first?)
 
-            Services.AddSingleton(testCase);
             return testCase;
         }
 
@@ -292,13 +298,13 @@ namespace IntelliTect.TestTools.TestFramework
                     $"TestBlock: {tb.Type} - TestFramework supports zero or one constructors on test blocks.");
             }
 
-            ParameterInfo[]? ctorParams = constructors[0].GetParameters();
+            tb.ConstructorParams = constructors[0].GetParameters();
             tb.PropertyParams = tb.Type.GetProperties();
             tb.ExecuteParams = tb.ExecuteMethod.GetParameters();
             // Currently do not support Fields. Should we check for them anyway at least to throw?
 
             List<(Type TestBlock, Type Input)> inputs = new();
-            foreach (var c in ctorParams)
+            foreach (var c in tb.ConstructorParams)
             {
                 inputs.Add((tb.Type, c.ParameterType));
             }
@@ -332,28 +338,66 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 // Do we also need to match on implementation here?
                 ServiceDescriptor desc = new(i.Input, i.Input, ServiceLifetime.Scoped);
-                ServiceDescriptor? obj = Services.FirstOrDefault(x => x.ServiceType == desc.ServiceType);
+                CheckContainerForFirstLevelDependency(desc, outputs, $"TestBuilder error - TestBlock: {i.TestBlock} - Unable to satisfy test block input: {i.Input}.");
+                //ServiceDescriptor? obj = Services.FirstOrDefault(x => x.ServiceType == desc.ServiceType || x.ImplementationType == desc.ImplementationType);
                 // Don't think I need this because I'm matching on service type above, and NOT scope.
                 //if (obj is null)
                 //{
                 //    ServiceDescriptor singleDesc = new(i.Input, i.Input, ServiceLifetime.Singleton);
                 //    obj = Services.FirstOrDefault(x => x.ServiceType == singleDesc.ServiceType);
                 //}
-                if (obj is null)
-                {
-                    Type? output = outputs.FirstOrDefault(o => o.Output == i.Input).Output;
+                //if (obj is null)
+                //{
+                //    Type? output = outputs.FirstOrDefault(o => o.Output == i.Input).Output;
 
-                    if (output is null)
-                    {
-                        ValidationExceptions.Add(new InvalidOperationException($"TestBuilder error - TestBlock: {i.TestBlock} - Unable to satisfy test block input: {i.Input}."));
-                    }
-                }
+                //    if (output is null)
+                //    {
+                //        ValidationExceptions.Add(new InvalidOperationException($"TestBuilder error - TestBlock: {i.TestBlock} - Unable to satisfy test block input: {i.Input}."));
+                //    }
+                //}
             }
 
             Type executeReturns = tb.ExecuteMethod.ReturnType;
             if (executeReturns != typeof(void))
             {
                 outputs.Add((tb.Type, executeReturns));
+            }
+        }
+
+        private void CheckContainer(List<(Type TestBlock, Type? Output)> outputs/*, ServiceProvider provider*/)
+        {
+            foreach (var s in Services)
+            {
+                // This will NOT check that dependencies of dependencies are satisfied.
+                //ServiceDescriptor? obj = Services.FirstOrDefault(x => x == s);
+                CheckContainerForFirstLevelDependency(s, outputs, $"TestBuilder error - ServiceContainer - Unable to satisfy service: {s}.");
+                // Would need to do something like this, but then that would actually activate everything.
+                // Maybe best as a runtime error?
+                //var test = provider.GetService(s.ServiceType);
+
+                //if (obj is null)
+                //{
+                //    Type? output = outputs.FirstOrDefault(o => o.Output == s.ServiceType || o.Output == s.ImplementationType).Output;
+
+                //    if (output is null)
+                //    {
+                //        ValidationExceptions.Add(new InvalidOperationException($"TestBuilder error - ServiceContainer - Unable to satisfy service: {s}."));
+                //    }
+                //}
+            }
+        }
+
+        private void CheckContainerForFirstLevelDependency(ServiceDescriptor desc, List<(Type TestBlock, Type? Output)> outputs, string errorMessage)
+        {
+            ServiceDescriptor? obj = Services.FirstOrDefault(x => x.ServiceType == desc.ServiceType || x.ImplementationType == desc.ImplementationType);
+            if (obj is null)
+            {
+                Type? output = outputs.FirstOrDefault(o => o.Output == desc.ServiceType || o.Output == desc.ImplementationType).Output;
+
+                if (output is null)
+                {
+                    ValidationExceptions.Add(new InvalidOperationException(errorMessage));
+                }
             }
         }
 

@@ -12,11 +12,14 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         internal Type Type { get; set; }
+        internal bool IsFinallyBlock { get; set; }
+        // Test if this is faster than arrays.
+        //HashSet<ParameterInfo> ConstructorParams = new HashSet<ParameterInfo>(block.ConstructorParams);
         // May not need this since activating the test block from DI will auto-populate these.
-        //internal ParameterInfo[]? ConstructorParams { get; set; }
+        internal ParameterInfo[] ConstructorParams { get; set; } = Array.Empty<ParameterInfo>();
         internal MethodInfo ExecuteMethod { get; set; }
-        internal ParameterInfo[]? ExecuteParams { get; set; }
-        internal PropertyInfo[]? PropertyParams { get; set; }
+        internal ParameterInfo[] ExecuteParams { get; set; } = Array.Empty<ParameterInfo>();
+        internal PropertyInfo[] PropertyParams { get; set; } = Array.Empty<PropertyInfo>();
         internal object[]? ExecuteArgumentOverrides { get; set; }
         // Is this needed?
         //internal ParameterInfo[]? FieldParams { get; set; }

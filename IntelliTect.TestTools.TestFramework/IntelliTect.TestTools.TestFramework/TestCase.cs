@@ -1,24 +1,29 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace IntelliTect.TestTools.TestFramework
 {
     public class TestCase
     {
-        public TestCase(string testCaseName, string testMethodName, int testCaseId, IServiceCollection services)
+        public TestCase(string testCaseName, string testMethodName, int testCaseId, IServiceCollection services/*, ServiceProvider provider*/)
         {
             TestCaseName = testCaseName;
             TestMethodName = testMethodName;
             TestCaseId = testCaseId;
             ServiceCollection = services;
+            //Provider = provider;
         }
         // Switch to get; init; when this can be updated to .net5
         // Maybe target .net5 support for v3?
         public string TestCaseName { get; } 
         public string TestMethodName { get; }
         public int TestCaseId { get; }
+        // One of the below two properties will eventually be extraneous.
         public IServiceCollection ServiceCollection { get; }
+        //public ServiceProvider Provider { get; }
         public bool ThrowOnFinallyBlockException { get; set; } = true;
 
         // May make sense to make the below public if it's needed for debugging.
@@ -30,9 +35,11 @@ namespace IntelliTect.TestTools.TestFramework
         // TEMPORARY TO TEST
         private Exception? TestBlockException { get; set; }
         private List<Exception> FinallyBlockExceptions { get; } = new();
+        //private HashSet<object> ActivatedDependencies { get; } = new();
 
         // UNSURE IF NEEDED WITH NEW BUILD METHOD
-        //private HashSet<object> TestBlockResults { get; } = new();
+        // Also check if an array is faster
+        private HashSet<object> TestBlockOutput { get; } = new();
         private ITestCaseLogger? Log { get; set; }
 
         public bool Passed { get; set; }
@@ -64,30 +71,19 @@ namespace IntelliTect.TestTools.TestFramework
                     // Interface returns
                     if (Log is not null) Log.CurrentTestBlock = tb.Type.ToString();
 
-                    using (var testBlockScope = services.CreateScope())
-                    {
-                        if (!GetTestBlock(testBlockScope, tb.Type, false, out var testBlockInstance)) break;
-                        if (testBlockInstance is null) throw new NullReferenceException();
-                    }
+                    // Should we un-nest these?
+                    // Might be easier to break if any single one fails if we do.
+                    if (!TryGetBlock(testCaseScope, tb, out var testBlockInstance)) break;
 
+                    if (testBlockInstance is null) throw new NullReferenceException();
+                }
 
+                foreach (var fb in FinallyBlocks)
+                {
+                    if (Log is not null) Log.CurrentTestBlock = fb.Type.ToString();
 
-
-
-
-
-
-
-
-
-
-                    
-                    if (!GetTestBlock(testCaseScope, tb.Type, false, out var testBlockInstance2)) break;
-                    if (testBlockInstance2 is null) throw new NullReferenceException();
-
-                    // AFTER EXECUTING A TEST, DOES THIS MAKE SENSE?
-                    // var result = RunTestBlocks()
-                    // if (result is not null) Services.Add(result);
+                    if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance)) break;
+                    if (finallyBlockInstance is null) throw new NullReferenceException();
                 }
 
 
@@ -149,7 +145,7 @@ namespace IntelliTect.TestTools.TestFramework
                 //    TestBlockException = tempException;
                 //}
 
-                if (TestBlockException == null)
+                if (TestBlockException is null)
                 {
                     Log?.Info("Test case finished successfully.");
                 }
@@ -161,75 +157,162 @@ namespace IntelliTect.TestTools.TestFramework
 
             services.Dispose();
 
-            if (TestBlockException != null)
+            if (TestBlockException is not null)
             {
                 throw new TestCaseException("Test case failed.", TestBlockException);
             }
         }
 
-        private bool GetTestBlock(IServiceScope scope, Type testBlockType, bool isFinallyBlock, out object? testBlock)
+        // Does it make sense for testBlock to be nullable?
+        // On one hand, a return of 'true' implies it will never be null.
+        // On the other hand, if we modify this code and accidentaly remove/forgot a 'false' check,
+        // it would be nice to be forced to null check.
+        // Might be worth setting testBlock to be non-nullable and use temp vars as the nullable type?
+        private bool TryGetBlock(IServiceScope scope, Block block, out object? testBlock)
         {
-            var tb = scope.ServiceProvider.GetService(testBlockType);
-            if (tb is null)
+            bool result = false;
+            try
             {
-                testBlock = null;
-                if (isFinallyBlock)
+                testBlock = scope.ServiceProvider.GetService(block.Type);
+                if (testBlock is null)
                 {
-                    FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to find finally block: {testBlockType}"));
+                    HandleFinallyBlock(
+                        block,
+                        () => TestBlockException = new InvalidOperationException($"Unable to find test block: {block.Type}"),
+                        () => FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to find finally block: {block.Type}"))
+                    );
                 }
-                else
-                {
-                    TestBlockException = new InvalidOperationException($"Unable to find test block: {testBlockType}");
-                }
-                return false;
+                else result = true;
             }
-            testBlock = tb;
-            //SetTestBlockProperties(scope, testBlock);
+            catch(InvalidOperationException)
+            {
+                // Only try to re-build the test block if we get an InvalidOperationException.
+                // That implies the block was found but could not be activated.
+                if(TryBuildBlock(scope, block, out testBlock)) result = true;
+            }
+
+            // Recheck for null in case we missed a check above, even if all of the other
+            if(testBlock is not null)
+            {
+                if (TrySetBlockProperties(scope, block, testBlock))
+                {
+                    if (TryGetExecuteArguments(/*scope, block, testBlock*/)) result = true;
+                }
+                
+            }
+            else
+            {
+                // Do we need this here? Presumably an error was set in TryBuildBlock.
+                // Maybe check for an error and add one if none exists?
+            }
+
+            return result;
+        }
+
+        
+        private bool TryBuildBlock(IServiceScope scope, Block block, out object? testBlock)
+        {
+            object[] args = Array.Empty<object>();
+            foreach (var c in block.ConstructorParams)
+            {
+                object? arg = TestBlockOutput.FirstOrDefault(o => o.GetType() == c.ParameterType);
+
+                if(arg is null)
+                {
+                    try
+                    {
+                        arg = scope.ServiceProvider.GetService(c.ParameterType);
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        HandleFinallyBlock(
+                            block,
+                            () => TestBlockException = new InvalidOperationException(
+                                $"Test Block - {block.Type} - Error attempting to activate constructor argument: {c.ParameterType} for dependency {c.ParameterType}: {e}"),
+                            () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {c.ParameterType} for dependency {c.ParameterType}: {e}"))
+                        );
+                    }
+                    if (arg is null)
+                    {
+                        HandleFinallyBlock(
+                                block,
+                                () => TestBlockException = new InvalidOperationException(
+                                    $"Test Block - {block.Type} - Unable to find constructor argument: {c.ParameterType} for dependency {c.ParameterType}"),
+                                () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                                    $"Finally Block = {block.Type} - Unable to find constructor argument: {c.ParameterType} for dependency {c.ParameterType}"))
+                            );
+                        testBlock = null;
+                        return false;
+                    }
+                }
+                
+                args = args.Concat(new object[] { arg }).ToArray();
+            }
+            testBlock = Activator.CreateInstance(block.Type, args);
             return true;
         }
 
-        // Seems like we can actually skip a lot of this since we do most of this logic in Build.
-        // Instead, maybe store all of the inputs and simplify this to the foreach?
-        // Update: NEVERMIND. In Build, we only type check, we don't actually instantiate any objects.
-        //private void SetTestBlockProperties(IServiceScope scope, Block block, object blockInstance)
-        //{
-        //    if (block.PropertyParams is null) return;
-        //    foreach(var prop in block.PropertyParams)
-        //    {
-        //        if (!prop.CanWrite)
-        //        {
-        //            Log?.Debug($"Skipping property {prop}. No setter found.");
-        //            continue;
-        //        }
-        //        object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
-        //        if (propertyValue == null)
-        //        {
-        //            //TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
-        //            break;
-        //        }
+        private bool TrySetBlockProperties(IServiceScope scope, Block block, object blockInstance)
+        {
+            // Need to adopt the same pattern here has TryBuildBlock.
+            // Basically, let's check the test results first so we don't have to continually hammer the DI service.
+            bool result = false;
+            foreach (var prop in block.PropertyParams)
+            {
+                if (!prop.CanWrite)
+                {
+                    Log?.Debug($"Skipping property {prop}. No setter found.");
+                    continue;
+                }
+                object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                if (propertyValue is null)
+                {
+                    //TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
+                    break;
+                }
 
-        //        prop.SetValue(blockInstance, propertyValue);
-        //    }
+                prop.SetValue(blockInstance, propertyValue);
+            }
 
-        //    // Populate all of our properties
-        //    //PropertyInfo[]? properties = testBlockInstance.GetType().GetProperties();
-        //    //foreach (var prop in properties)
-        //    //{
-        //    //    if (!prop.CanWrite)
-        //    //    {
-        //    //        Log?.Debug($"Skipping property {prop}. No setter found.");
-        //    //        continue;
-        //    //    }
-        //    //    object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
-        //    //    if (propertyValue == null)
-        //    //    {
-        //    //        TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
-        //    //        break;
-        //    //    }
+            return result;
 
-        //    //    prop.SetValue(blockInstance, propertyValue);
-        //    //}
-        //}
+            // Populate all of our properties
+            //PropertyInfo[]? properties = testBlockInstance.GetType().GetProperties();
+            //foreach (var prop in properties)
+            //{
+            //    if (!prop.CanWrite)
+            //    {
+            //        Log?.Debug($"Skipping property {prop}. No setter found.");
+            //        continue;
+            //    }
+            //    object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+            //    if (propertyValue == null)
+            //    {
+            //        TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
+            //        break;
+            //    }
+
+            //    prop.SetValue(blockInstance, propertyValue);
+            //}
+        }
+
+        private static bool TryGetExecuteArguments(/*IServiceScope scope, Block block, object blockInstance*/)
+        {
+            return false;
+        }
+
+        private static void HandleFinallyBlock(Block block, Action testBlockAction, Action finallyBlockAction)
+        {
+            if (block.IsFinallyBlock)
+            {
+                finallyBlockAction();
+            }
+            else
+            {
+                testBlockAction();
+            }
+        }
 
 
         // TEMPORARY
