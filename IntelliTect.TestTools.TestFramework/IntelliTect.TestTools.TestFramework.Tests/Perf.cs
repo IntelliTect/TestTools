@@ -8,13 +8,16 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 {
     public class Perf
     {
-        private readonly int _Iterations = 50000000;
+        private readonly long _Iterations = 100000000;
         private HashSet<object> _HashSet = new();
-        private HashSet<object> _PopulatedHashSet = new(new object[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        private HashSet<int> _PopulatedHashSet = new(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         //private object[] _Array = Array.Empty<object>();
-        private object[] _PopulatedArray = new object[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        private int[] _PopulatedArray = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         private List<object> _List = new();
-        private List<object> _PopulatedList = new() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        private List<int> _PopulatedList = new() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        private Random _Rand = new();
+
+        // Next test: Profile each collection type with foreach and for loops
 
         [Fact]
         public void TestWithProvider()
@@ -65,26 +68,21 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void TestSearchThroughHashSet()
         {
-            // This is actually slower than the other examples.
-            // Might be wroth using hashset for 'contains' but then an array or list for fetching?
-            //IterateOverAction(i => _PopulatedHashSet.FirstOrDefault(h => h is 5));
-
-            // This is about 3x faster than the above and other FirstOrDefault calls.
-            // Logic could be ensuring a HashSet and Array have the same values, then: if in Hashset, only then find from array?
-            // Need to figure out the memory implications of that.
-            IterateOverAction(i => _PopulatedHashSet.Contains(5));
+            // So far, this is faster than FirstOrDefault calls, and List.BinarySearch.
+            // Fetching by index on an array is faster, but that presumes we know the index.
+            IterateOverAction(i => _PopulatedHashSet.TryGetValue(i, out _));
         }
 
         [Fact]
         public void TestSearchThroughArray()
         {
-            IterateOverAction(i => _PopulatedArray.FirstOrDefault(a => a is 5));
+            IterateOverAction(i => _ = _PopulatedArray[i]);
         }
 
         [Fact]
         public void TestSearchThroughList()
         {
-            IterateOverAction(i => _PopulatedList.FirstOrDefault(a => a is 5));
+            IterateOverAction(i => _PopulatedList.BinarySearch(i));
         }
 
         private void IterateOverAction(Action action)
@@ -99,7 +97,8 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         {
             for (int i = 0; i < _Iterations; i++)
             {
-                action(i);
+                int r = _Rand.Next(0, 10);
+                action(r);
             }
         }
     }

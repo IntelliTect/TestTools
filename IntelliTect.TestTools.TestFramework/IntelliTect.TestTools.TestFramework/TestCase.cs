@@ -214,7 +214,17 @@ namespace IntelliTect.TestTools.TestFramework
             return result;
         }
 
-        
+        // Notes for documentation:
+        // ... First level dependencies should be validated at build time.
+        // ... Second level dependencies are not and can fail.
+        // ... This mainly affects objects returned by test blocks.
+        // ... Best practice is to add as much as possible via AddDependency methods and *only* return items from test blocks that *have* to be.
+        // ... E.G. this is fine:
+        // ... ... TestBlock1 - returns bool
+        // ... ... TestBlock2 - needs bool
+        // ... This starts to get problematic and requires extra attention to ensure it's absolutely necesssary:
+        // ... ... TestBlock1 - returns bool
+        // ... ... TestBlock2 - needs ObjectA which needs bool
         private bool TryBuildBlock(IServiceScope scope, Block block, out object? testBlock)
         {
             object[] args = Array.Empty<object>();
@@ -233,9 +243,9 @@ namespace IntelliTect.TestTools.TestFramework
                         HandleFinallyBlock(
                             block,
                             () => TestBlockException = new InvalidOperationException(
-                                $"Test Block - {block.Type} - Error attempting to activate constructor argument: {c.ParameterType} for dependency {c.ParameterType}: {e}"),
+                                $"Test Block - {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"),
                             () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {c.ParameterType} for dependency {c.ParameterType}: {e}"))
+                                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"))
                         );
                     }
                     if (arg is null)
@@ -243,9 +253,9 @@ namespace IntelliTect.TestTools.TestFramework
                         HandleFinallyBlock(
                                 block,
                                 () => TestBlockException = new InvalidOperationException(
-                                    $"Test Block - {block.Type} - Unable to find constructor argument: {c.ParameterType} for dependency {c.ParameterType}"),
+                                    $"Test Block - {block.Type} - Unable to find constructor argument: {c.ParameterType}"),
                                 () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                    $"Finally Block = {block.Type} - Unable to find constructor argument: {c.ParameterType} for dependency {c.ParameterType}"))
+                                    $"Finally Block = {block.Type} - Unable to find constructor argument: {c.ParameterType}"))
                             );
                         testBlock = null;
                         return false;
@@ -262,7 +272,7 @@ namespace IntelliTect.TestTools.TestFramework
         {
             // Need to adopt the same pattern here has TryBuildBlock.
             // Basically, let's check the test results first so we don't have to continually hammer the DI service.
-            bool result = false;
+            //bool result = false;
             foreach (var prop in block.PropertyParams)
             {
                 if (!prop.CanWrite)
@@ -270,18 +280,43 @@ namespace IntelliTect.TestTools.TestFramework
                     Log?.Debug($"Skipping property {prop}. No setter found.");
                     continue;
                 }
-                object? arg = TestBlockOutput.FirstOrDefault(o => o.GetType() == prop.PropertyType);
-                object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                // This next chunk of code is exactly the same as TrySetBlockProperties.
+                // Extract out into its own 'ActivateDependency' method.
+                // Also: convert all TestBlockOutput.FirstOrDefault calls into HashSet.TryGetValue
+                object? propertyValue = TestBlockOutput.FirstOrDefault(o => o.GetType() == prop.PropertyType);
                 if (propertyValue is null)
                 {
-                    //TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
-                    break;
+                    try
+                    {
+                        propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                    }
+                    catch (InvalidOperationException e)
+                    {
+                        HandleFinallyBlock(
+                            block,
+                            () => TestBlockException = new InvalidOperationException(
+                                $"Test Block - {block.Type} - Error attempting to activate property: {prop.PropertyType}: {e}"),
+                            () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {prop.PropertyType}: {e}"))
+                        );
+                    }
+                    if (propertyValue is null)
+                    {
+                        HandleFinallyBlock(
+                                block,
+                                () => TestBlockException = new InvalidOperationException(
+                                    $"Test Block - {block.Type} - Unable to find constructor argument: {prop.PropertyType}"),
+                                () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                                    $"Finally Block = {block.Type} - Unable to find constructor argument: {prop.PropertyType}"))
+                            );
+                        return false;
+                    }
                 }
 
                 prop.SetValue(blockInstance, propertyValue);
             }
 
-            return result;
+            return true;
         }
 
         private static bool TryGetExecuteArguments(/*IServiceScope scope, Block block, object blockInstance*/)
