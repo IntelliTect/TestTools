@@ -87,6 +87,8 @@ namespace IntelliTect.TestTools.TestFramework
                 }
 
 
+
+
                 // Do I actually need this inner scope?
                 // Everything should be given the correct scope when added in the TestBuilder
                 // And honestly, the only 'scoped' things should last the duration of the test case, i.e. inputs
@@ -148,6 +150,7 @@ namespace IntelliTect.TestTools.TestFramework
                 if (TestBlockException is null)
                 {
                     Log?.Info("Test case finished successfully.");
+                    Passed = true;
                 }
                 else
                 {
@@ -265,6 +268,7 @@ namespace IntelliTect.TestTools.TestFramework
                     Log?.Debug($"Skipping property {prop}. No setter found.");
                     continue;
                 }
+                object? arg = TestBlockOutput.FirstOrDefault(o => o.GetType() == c.ParameterType);
                 object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
                 if (propertyValue is null)
                 {
@@ -276,25 +280,6 @@ namespace IntelliTect.TestTools.TestFramework
             }
 
             return result;
-
-            // Populate all of our properties
-            //PropertyInfo[]? properties = testBlockInstance.GetType().GetProperties();
-            //foreach (var prop in properties)
-            //{
-            //    if (!prop.CanWrite)
-            //    {
-            //        Log?.Debug($"Skipping property {prop}. No setter found.");
-            //        continue;
-            //    }
-            //    object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
-            //    if (propertyValue == null)
-            //    {
-            //        TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
-            //        break;
-            //    }
-
-            //    prop.SetValue(blockInstance, propertyValue);
-            //}
         }
 
         private static bool TryGetExecuteArguments(/*IServiceScope scope, Block block, object blockInstance*/)
