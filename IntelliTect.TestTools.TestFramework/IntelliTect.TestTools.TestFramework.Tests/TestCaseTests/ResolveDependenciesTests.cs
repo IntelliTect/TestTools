@@ -41,6 +41,18 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .Build();
             tc.Execute();
         }
+
+        [Fact]
+        public void TestingReturningTwoOfSameType()
+        {
+            // What happens here? Will the return override the prior?
+            TestBuilder builder = new();
+            TestCase tc = builder
+                .AddTestBlock<SomeTestBlock>()
+                .AddTestBlock<SomeTestBlock>()
+                .Build();
+            tc.Execute();
+        }
     }
 
     public class SomeTestBlock : ITestBlock

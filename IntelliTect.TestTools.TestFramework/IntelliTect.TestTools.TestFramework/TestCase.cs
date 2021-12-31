@@ -227,44 +227,51 @@ namespace IntelliTect.TestTools.TestFramework
         // ... ... TestBlock2 - needs ObjectA which needs bool
         private bool TryBuildBlock(IServiceScope scope, Block block, out object? testBlock)
         {
-            object[] args = Array.Empty<object>();
-            foreach (var c in block.ConstructorParams)
+            List<object> blockParams = new();
+            foreach (ParameterInfo? c in block.ConstructorParams)
             {
-                object? arg = TestBlockOutput.FirstOrDefault(o => o.GetType() == c.ParameterType);
-
-                if(arg is null)
+                object? obj = ActivateObject(scope, block, o => o.GetType() == c.ParameterType);
+                if (obj is null)
                 {
-                    try
-                    {
-                        arg = scope.ServiceProvider.GetService(c.ParameterType);
-                    }
-                    catch (InvalidOperationException e)
-                    {
-                        HandleFinallyBlock(
-                            block,
-                            () => TestBlockException = new InvalidOperationException(
-                                $"Test Block - {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"),
-                            () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"))
-                        );
-                    }
-                    if (arg is null)
-                    {
-                        HandleFinallyBlock(
-                                block,
-                                () => TestBlockException = new InvalidOperationException(
-                                    $"Test Block - {block.Type} - Unable to find constructor argument: {c.ParameterType}"),
-                                () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                    $"Finally Block = {block.Type} - Unable to find constructor argument: {c.ParameterType}"))
-                            );
-                        testBlock = null;
-                        return false;
-                    }
+                    testBlock = null;
+                    return false;
                 }
-                
-                args = args.Concat(new object[] { arg }).ToArray();
+
+                //object? arg = TestBlockOutput.FirstOrDefault(o => o.GetType() == c.ParameterType);
+
+                //if(arg is null)
+                //{
+                //    try
+                //    {
+                //        arg = scope.ServiceProvider.GetService(c.ParameterType);
+                //    }
+                //    catch (InvalidOperationException e)
+                //    {
+                //        HandleFinallyBlock(
+                //            block,
+                //            () => TestBlockException = new InvalidOperationException(
+                //                $"Test Block - {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"),
+                //            () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                //                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"))
+                //        );
+                //    }
+                //    if (arg is null)
+                //    {
+                //        HandleFinallyBlock(
+                //                block,
+                //                () => TestBlockException = new InvalidOperationException(
+                //                    $"Test Block - {block.Type} - Unable to find constructor argument: {c.ParameterType}"),
+                //                () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                //                    $"Finally Block = {block.Type} - Unable to find constructor argument: {c.ParameterType}"))
+                //            );
+                //        testBlock = null;
+                //        return false;
+                //    }
+                //}
+
+                blockParams.Add(obj);
             }
-            testBlock = Activator.CreateInstance(block.Type, args);
+            testBlock = Activator.CreateInstance(block.Type, blockParams);
             return true;
         }
 
@@ -273,47 +280,50 @@ namespace IntelliTect.TestTools.TestFramework
             // Need to adopt the same pattern here has TryBuildBlock.
             // Basically, let's check the test results first so we don't have to continually hammer the DI service.
             //bool result = false;
-            foreach (var prop in block.PropertyParams)
+            foreach (PropertyInfo? prop in block.PropertyParams)
             {
                 if (!prop.CanWrite)
                 {
                     Log?.Debug($"Skipping property {prop}. No setter found.");
                     continue;
                 }
+
+                object? obj = ActivateObject(scope, block, o => o.GetType() == prop.PropertyType);
+                if (obj is null) return false;
                 // This next chunk of code is exactly the same as TrySetBlockProperties.
                 // Extract out into its own 'ActivateDependency' method.
-                // Also: convert all TestBlockOutput.FirstOrDefault calls into HashSet.TryGetValue
-                object? propertyValue = TestBlockOutput.FirstOrDefault(o => o.GetType() == prop.PropertyType);
-                if (propertyValue is null)
-                {
-                    try
-                    {
-                        propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
-                    }
-                    catch (InvalidOperationException e)
-                    {
-                        HandleFinallyBlock(
-                            block,
-                            () => TestBlockException = new InvalidOperationException(
-                                $"Test Block - {block.Type} - Error attempting to activate property: {prop.PropertyType}: {e}"),
-                            () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {prop.PropertyType}: {e}"))
-                        );
-                    }
-                    if (propertyValue is null)
-                    {
-                        HandleFinallyBlock(
-                                block,
-                                () => TestBlockException = new InvalidOperationException(
-                                    $"Test Block - {block.Type} - Unable to find constructor argument: {prop.PropertyType}"),
-                                () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                    $"Finally Block = {block.Type} - Unable to find constructor argument: {prop.PropertyType}"))
-                            );
-                        return false;
-                    }
-                }
+                // Also: 
+                //object? propertyValue = TestBlockOutput.FirstOrDefault(o => o.GetType() == prop.PropertyType);
+                //if (propertyValue is null)
+                //{
+                //    try
+                //    {
+                //        propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
+                //    }
+                //    catch (InvalidOperationException e)
+                //    {
+                //        HandleFinallyBlock(
+                //            block,
+                //            () => TestBlockException = new InvalidOperationException(
+                //                $"Test Block - {block.Type} - Error attempting to activate property: {prop.PropertyType}: {e}"),
+                //            () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                //                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {prop.PropertyType}: {e}"))
+                //        );
+                //    }
+                //    if (propertyValue is null)
+                //    {
+                //        HandleFinallyBlock(
+                //                block,
+                //                () => TestBlockException = new InvalidOperationException(
+                //                    $"Test Block - {block.Type} - Unable to find constructor argument: {prop.PropertyType}"),
+                //                () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                //                    $"Finally Block = {block.Type} - Unable to find constructor argument: {prop.PropertyType}"))
+                //            );
+                //        return false;
+                //    }
+                //}
 
-                prop.SetValue(blockInstance, propertyValue);
+                prop.SetValue(blockInstance, obj);
             }
 
             return true;
@@ -322,6 +332,43 @@ namespace IntelliTect.TestTools.TestFramework
         private static bool TryGetExecuteArguments(/*IServiceScope scope, Block block, object blockInstance*/)
         {
             return false;
+        }
+
+        private object? ActivateObject(IServiceScope scope, Block block, Func<object, bool> predicate)
+        {
+            // Convert all TestBlockOutput.FirstOrDefault calls into HashSet.TryGetValue.
+            object? obj = TestBlockOutput.FirstOrDefault(predicate);
+
+            if (obj is null)
+            {
+                try
+                {
+                    // Figure out the right way to handle this.
+                    obj = scope.ServiceProvider.GetService(c.ParameterType);
+                }
+                catch (InvalidOperationException e)
+                {
+                    HandleFinallyBlock(
+                        block,
+                        () => TestBlockException = new InvalidOperationException(
+                            $"Test Block - {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"),
+                        () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                            $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"))
+                    );
+                }
+                if (obj is null)
+                {
+                    HandleFinallyBlock(
+                            block,
+                            () => TestBlockException = new InvalidOperationException(
+                                $"Test Block - {block.Type} - Unable to find constructor argument: {c.ParameterType}"),
+                            () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                                $"Finally Block = {block.Type} - Unable to find constructor argument: {c.ParameterType}"))
+                        );
+                }
+            }
+
+            return obj;
         }
 
         private static void HandleFinallyBlock(Block block, Action testBlockAction, Action finallyBlockAction)
