@@ -8,7 +8,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 {
     public class Perf
     {
-        private readonly long _Iterations = 100000000;
+        private readonly long _Iterations = 1000000;
         private readonly HashSet<object> _HashSet = new();
         private readonly HashSet<int> _PopulatedHashSet = new(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         //private object[] _Array = Array.Empty<object>();
@@ -97,13 +97,99 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         }
 
         [Fact]
-        public void Test()
+        public void TestForEachLoopThroughHashSet()
         {
-            Dictionary<Type, object> test = new() { { typeof(string), "x" } };
-            if(!test.TryGetValue(typeof(int), out object? obj))
+            IterateOverAction(i =>
             {
-                Assert.Equal(10, obj);
-            }
+                foreach(int p in _PopulatedHashSet)
+                {
+                    System.Diagnostics.Debug.WriteLine(p.GetType());
+                }
+            });
+        }
+
+        [Fact]
+        public void TestForLoopThroughHashSet()
+        {
+            IterateOverAction(i =>
+            {
+                for(int f = 0; f < _PopulatedHashSet.Count; f++)
+                {
+                    System.Diagnostics.Debug.WriteLine(_PopulatedHashSet.ElementAt(f).GetType());
+                }
+            });
+        }
+
+        [Fact]
+        public void TestForEachLoopThroughArray()
+        {
+            IterateOverAction(i =>
+            {
+                foreach (int p in _PopulatedArray)
+                {
+                    System.Diagnostics.Debug.WriteLine(p.GetType());
+                }
+            });
+        }
+
+        [Fact]
+        public void TestForLoopThroughArray()
+        {
+            IterateOverAction(i =>
+            {
+                for (int f = 0; f < _PopulatedArray.Length; f++)
+                {
+                    System.Diagnostics.Debug.WriteLine(_PopulatedArray[f].GetType());
+                }
+            });
+        }
+
+        [Fact]
+        public void TestForEachLoopThroughList()
+        {
+            IterateOverAction(i =>
+            {
+                foreach (int p in _PopulatedList)
+                {
+                    System.Diagnostics.Debug.WriteLine(p.GetType());
+                }
+            });
+        }
+
+        [Fact]
+        public void TestForLoopThroughList()
+        {
+            IterateOverAction(i =>
+            {
+                for (int f = 0; f < _PopulatedList.Count; f++)
+                {
+                    System.Diagnostics.Debug.WriteLine(_PopulatedList[f].GetType());
+                }
+            });
+        }
+
+        [Fact]
+        public void TestForEachLoopThroughDict()
+        {
+            IterateOverAction(i =>
+            {
+                foreach (KeyValuePair<int, int> p in _PopulatedDictionary)
+                {
+                    System.Diagnostics.Debug.WriteLine(p.GetType());
+                }
+            });
+        }
+
+        [Fact]
+        public void TestForLoopThroughDict()
+        {
+            IterateOverAction(i =>
+            {
+                for (int f = 0; f < _PopulatedDictionary.Count; f++)
+                {
+                    System.Diagnostics.Debug.WriteLine(_PopulatedDictionary[f].GetType());
+                }
+            });
         }
 
         private void IterateOverAction(Action action)
