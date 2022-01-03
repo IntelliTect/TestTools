@@ -9,13 +9,14 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     public class Perf
     {
         private readonly long _Iterations = 100000000;
-        private HashSet<object> _HashSet = new();
-        private HashSet<int> _PopulatedHashSet = new(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        private readonly HashSet<object> _HashSet = new();
+        private readonly HashSet<int> _PopulatedHashSet = new(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         //private object[] _Array = Array.Empty<object>();
-        private int[] _PopulatedArray = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        private List<object> _List = new();
-        private List<int> _PopulatedList = new() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        private Random _Rand = new();
+        private readonly int[] _PopulatedArray = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        private readonly List<object> _List = new();
+        private readonly List<int> _PopulatedList = new() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        private readonly Dictionary<int, int> _PopulatedDictionary = new() { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 7, 7 }, { 8, 8 }, { 9, 9 }, { 10, 10 } };
+        private readonly Random _Rand = new();
 
         // Next test: Profile each collection type with foreach and for loops
 
@@ -82,7 +83,27 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         [Fact]
         public void TestSearchThroughList()
         {
-            IterateOverAction(i => _PopulatedList.BinarySearch(i));
+            IterateOverAction(i =>
+            {
+                int index = _PopulatedList.BinarySearch(i);
+                _ = _PopulatedList[index];
+            });
+        }
+
+        [Fact]
+        public void TestSearchThroughDictionary()
+        {
+            IterateOverAction(i => _PopulatedDictionary.TryGetValue(i, out _));
+        }
+
+        [Fact]
+        public void Test()
+        {
+            Dictionary<Type, object> test = new() { { typeof(string), "x" } };
+            if(!test.TryGetValue(typeof(int), out object? obj))
+            {
+                Assert.Equal(10, obj);
+            }
         }
 
         private void IterateOverAction(Action action)

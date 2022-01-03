@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -40,6 +41,7 @@ namespace IntelliTect.TestTools.TestFramework
         // UNSURE IF NEEDED WITH NEW BUILD METHOD
         // Also check if an array is faster
         private HashSet<object> TestBlockOutput { get; } = new();
+        private Dictionary<Type, object> BlockOutput { get; } = new();
         private ITestCaseLogger? Log { get; set; }
 
         public bool Passed { get; set; }
@@ -73,84 +75,35 @@ namespace IntelliTect.TestTools.TestFramework
 
                     // Should we un-nest these?
                     // Might be easier to break if any single one fails if we do.
-                    if (!TryGetBlock(testCaseScope, tb, out var testBlockInstance)) break;
-
-                    if (testBlockInstance is null) throw new NullReferenceException();
+                    // Should we re-nest these and have two out args?
+                    if (!TryGetBlock(testCaseScope, tb, out object? testBlockInstance, out List<object> executeArgs)) break;
+                    if (testBlockInstance is null) break; // Need to set an exception here, too. OR get rid of this line and ignore the null check on the line below.
+                    Passed = TryRunBlock(tb, testBlockInstance, executeArgs);
                 }
 
                 foreach (var fb in FinallyBlocks)
                 {
                     if (Log is not null) Log.CurrentTestBlock = fb.Type.ToString();
 
-                    if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance)) break;
-                    if (finallyBlockInstance is null) throw new NullReferenceException();
+                    if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance, out List<object> executeArgs)) break;
+                    if (finallyBlockInstance is null) break; // Need to set an exception here, too. OR get rid of this line and ignore the null check on the line below.
+                    TryRunBlock(fb, finallyBlockInstance, executeArgs);
                 }
 
-
-
-
-                // Do I actually need this inner scope?
-                // Everything should be given the correct scope when added in the TestBuilder
-                // And honestly, the only 'scoped' things should last the duration of the test case, i.e. inputs
-                //using (var testBlockScope = services.CreateScope())
-                //{
-                //    foreach (var tb in TestBlocksAndParams)
-                //    {
-                //        if (Log != null) Log.CurrentTestBlock = tb.TestBlockType.ToString();
-                //        if (!GetTestBlock(testBlockScope, tb.TestBlockType, false, out var testBlockInstance)) break;
-
-                //        // Might be more concise to have these as out method parameters instead of if statements after every one
-                //        //var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType);
-                //        //if (TestBlockException != null) break;
-
-                //        SetTestBlockProperties(testBlockScope, testBlockInstance!, Log!);
-                //        if (TestBlockException != null) break;
-
-                //        MethodInfo? execute = GetExecuteMethod(testBlockInstance!);
-                //        if (TestBlockException != null) break;
-
-                //        var executeArgs = GatherTestBlockArguments(testBlockScope, execute!, tb);
-                //        if (TestBlockException != null) break;
-
-                //        RunTestBlocks(testBlockInstance!, execute!, executeArgs!, Log!);
-                //        if (TestBlockException != null) break;
-                //    }
-
-                //    // We consider a test passed if it makes it through all of its test blocks.
-                //    // FinallyBlocks may do things differently depending on if the test failed or not.
-                //    Passed = true;
-
-                //    // Need a much better way to handle Finally exceptions...
-                //    Exception? tempException = TestBlockException;
-                //    TestBlockException = null;
-                //    // Extract loop above since it's basically the same for finally blocks?
-                //    foreach (var fb in FinallyBlocksAndParams)
-                //    {
-                //        if (Log != null) Log.CurrentTestBlock = fb.TestBlockType.ToString();
-                //        // Might be more concise to have these as out method parameters instead of if statements after every one
-                //        // Also these specific ones should not be overwriting TestBlockException
-                //        var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType);
-                //        if (TestBlockException != null) break;
-
-                //        SetTestBlockProperties(testBlockScope, testBlockInstance, Log!);
-                //        if (TestBlockException != null) break;
-
-                //        MethodInfo? execute = GetExecuteMethod(testBlockInstance);
-                //        if (TestBlockException != null) break;
-
-                //        var executeArgs = GatherTestBlockArguments(testBlockScope, execute!, fb);
-                //        if (TestBlockException != null) break;
-
-                //        RunTestBlocks(testBlockInstance, execute!, executeArgs!, Log!);
-                //        if (TestBlockException != null) break;
-                //    }
-                //    TestBlockException = tempException;
-                //}
-
-                if (TestBlockException is null)
+                
+                // Do we need to do all of the below checks, or can we just do if (Passed) { }?
+                if (TestBlockException is null && Passed)
                 {
                     Log?.Info("Test case finished successfully.");
                     Passed = true;
+                }
+                else if (TestBlockException is { } && Passed)
+                {
+                    // Log
+                }
+                else if (TestBlockException is null && !Passed)
+                {
+                    // Create exception
                 }
                 else
                 {
@@ -171,13 +124,14 @@ namespace IntelliTect.TestTools.TestFramework
         // On the other hand, if we modify this code and accidentaly remove/forgot a 'false' check,
         // it would be nice to be forced to null check.
         // Might be worth setting testBlock to be non-nullable and use temp vars as the nullable type?
-        private bool TryGetBlock(IServiceScope scope, Block block, out object? testBlock)
+        private bool TryGetBlock(IServiceScope scope, Block block, out object? blockInstance, out List<object> executeArgs)
         {
             bool result = false;
+            executeArgs = new List<object>();
             try
             {
-                testBlock = scope.ServiceProvider.GetService(block.Type);
-                if (testBlock is null)
+                blockInstance = scope.ServiceProvider.GetService(block.Type);
+                if (blockInstance is null)
                 {
                     HandleFinallyBlock(
                         block,
@@ -185,7 +139,6 @@ namespace IntelliTect.TestTools.TestFramework
                         () => FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to find finally block: {block.Type}"))
                     );
                 }
-                else result = true;
             }
             catch(InvalidOperationException)
             {
@@ -193,22 +146,19 @@ namespace IntelliTect.TestTools.TestFramework
                 // That implies the block was found but could not be activated.
                 // Also... can this message be clearer? Not sure what will make sense to people.
                 Log?.Debug($"Unable to fetch block {block.Type} from DI service. Attempting to build it by type.");
-                if(TryBuildBlock(scope, block, out testBlock)) result = true;
+                // Because we ended up nesting TrySetProperties and TryGetExecuteArgs, we really don't want to set this to true yet.
+                // Maybe revisit if it's needed?
+                /*if(*/
+                _ = TryBuildBlock(scope, block, out blockInstance);/*) result = true;*/
             }
 
             // Recheck for null in case we missed a check above, even if all of the other
-            if(testBlock is not null)
+            if(blockInstance is not null)
             {
-                if (TrySetBlockProperties(scope, block, testBlock))
+                if (TrySetBlockProperties(scope, block, blockInstance))
                 {
-                    if (TryGetExecuteArguments(/*scope, block, testBlock*/)) result = true;
+                    if(TryGetExecuteArguments(scope, block, out executeArgs)) result = true;
                 }
-                
-            }
-            else
-            {
-                // Do we need this here? Presumably an error was set in TryBuildBlock.
-                // Maybe check for an error and add one if none exists?
             }
 
             return result;
@@ -225,61 +175,26 @@ namespace IntelliTect.TestTools.TestFramework
         // ... This starts to get problematic and requires extra attention to ensure it's absolutely necesssary:
         // ... ... TestBlock1 - returns bool
         // ... ... TestBlock2 - needs ObjectA which needs bool
-        private bool TryBuildBlock(IServiceScope scope, Block block, out object? testBlock)
+        private bool TryBuildBlock(IServiceScope scope, Block block, out object? blockInstance)
         {
             List<object> blockParams = new();
             foreach (ParameterInfo? c in block.ConstructorParams)
             {
-                object? obj = ActivateObject(scope, block, o => o.GetType() == c.ParameterType);
+                object? obj = ActivateObject(scope, block, c.ParameterType, "constructor argument");
                 if (obj is null)
                 {
-                    testBlock = null;
+                    blockInstance = null;
                     return false;
                 }
 
-                //object? arg = TestBlockOutput.FirstOrDefault(o => o.GetType() == c.ParameterType);
-
-                //if(arg is null)
-                //{
-                //    try
-                //    {
-                //        arg = scope.ServiceProvider.GetService(c.ParameterType);
-                //    }
-                //    catch (InvalidOperationException e)
-                //    {
-                //        HandleFinallyBlock(
-                //            block,
-                //            () => TestBlockException = new InvalidOperationException(
-                //                $"Test Block - {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"),
-                //            () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                //                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"))
-                //        );
-                //    }
-                //    if (arg is null)
-                //    {
-                //        HandleFinallyBlock(
-                //                block,
-                //                () => TestBlockException = new InvalidOperationException(
-                //                    $"Test Block - {block.Type} - Unable to find constructor argument: {c.ParameterType}"),
-                //                () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                //                    $"Finally Block = {block.Type} - Unable to find constructor argument: {c.ParameterType}"))
-                //            );
-                //        testBlock = null;
-                //        return false;
-                //    }
-                //}
-
                 blockParams.Add(obj);
             }
-            testBlock = Activator.CreateInstance(block.Type, blockParams);
+            blockInstance = Activator.CreateInstance(block.Type, blockParams);
             return true;
         }
 
         private bool TrySetBlockProperties(IServiceScope scope, Block block, object blockInstance)
         {
-            // Need to adopt the same pattern here has TryBuildBlock.
-            // Basically, let's check the test results first so we don't have to continually hammer the DI service.
-            //bool result = false;
             foreach (PropertyInfo? prop in block.PropertyParams)
             {
                 if (!prop.CanWrite)
@@ -288,40 +203,8 @@ namespace IntelliTect.TestTools.TestFramework
                     continue;
                 }
 
-                object? obj = ActivateObject(scope, block, o => o.GetType() == prop.PropertyType);
+                object? obj = ActivateObject(scope, block, prop.PropertyType, "property");
                 if (obj is null) return false;
-                // This next chunk of code is exactly the same as TrySetBlockProperties.
-                // Extract out into its own 'ActivateDependency' method.
-                // Also: 
-                //object? propertyValue = TestBlockOutput.FirstOrDefault(o => o.GetType() == prop.PropertyType);
-                //if (propertyValue is null)
-                //{
-                //    try
-                //    {
-                //        propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
-                //    }
-                //    catch (InvalidOperationException e)
-                //    {
-                //        HandleFinallyBlock(
-                //            block,
-                //            () => TestBlockException = new InvalidOperationException(
-                //                $"Test Block - {block.Type} - Error attempting to activate property: {prop.PropertyType}: {e}"),
-                //            () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                //                $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {prop.PropertyType}: {e}"))
-                //        );
-                //    }
-                //    if (propertyValue is null)
-                //    {
-                //        HandleFinallyBlock(
-                //                block,
-                //                () => TestBlockException = new InvalidOperationException(
-                //                    $"Test Block - {block.Type} - Unable to find constructor argument: {prop.PropertyType}"),
-                //                () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                //                    $"Finally Block = {block.Type} - Unable to find constructor argument: {prop.PropertyType}"))
-                //            );
-                //        return false;
-                //    }
-                //}
 
                 prop.SetValue(blockInstance, obj);
             }
@@ -329,31 +212,34 @@ namespace IntelliTect.TestTools.TestFramework
             return true;
         }
 
-        private static bool TryGetExecuteArguments(/*IServiceScope scope, Block block, object blockInstance*/)
+        private bool TryGetExecuteArguments(IServiceScope scope, Block block, out List<object> executeArgs)
         {
-            return false;
+            executeArgs = new List<object>();
+            foreach(ParameterInfo? ep in block.ExecuteParams)
+            {
+                object? obj = ActivateObject(scope, block, ep.ParameterType, "execute method argument");
+                if (obj is null) return false;
+                executeArgs.Add(obj);
+            }
+            return true;
         }
 
-        private object? ActivateObject(IServiceScope scope, Block block, Func<object, bool> predicate)
+        private object? ActivateObject(IServiceScope scope, Block block, Type objectType, string targetMember) // Probably need to come up with a better name than 'targetMember'.
         {
-            // Convert all TestBlockOutput.FirstOrDefault calls into HashSet.TryGetValue.
-            object? obj = TestBlockOutput.FirstOrDefault(predicate);
-
-            if (obj is null)
+            if(!BlockOutput.TryGetValue(objectType, out object? obj))
             {
                 try
                 {
-                    // Figure out the right way to handle this.
-                    obj = scope.ServiceProvider.GetService(c.ParameterType);
+                    obj = scope.ServiceProvider.GetService(objectType);
                 }
                 catch (InvalidOperationException e)
                 {
                     HandleFinallyBlock(
                         block,
                         () => TestBlockException = new InvalidOperationException(
-                            $"Test Block - {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"),
+                            $"Test Block - {block.Type} - Error attempting to activate {targetMember}: {objectType}: {e}"),
                         () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                            $"Finally Block = {block.Type} - Error attempting to activate constructor argument: {c.ParameterType}: {e}"))
+                            $"Finally Block = {block.Type} - Error attempting to activate {targetMember}: {objectType}: {e}"))
                     );
                 }
                 if (obj is null)
@@ -361,14 +247,52 @@ namespace IntelliTect.TestTools.TestFramework
                     HandleFinallyBlock(
                             block,
                             () => TestBlockException = new InvalidOperationException(
-                                $"Test Block - {block.Type} - Unable to find constructor argument: {c.ParameterType}"),
+                                $"Test Block - {block.Type} - Unable to find constructor argument: {objectType}"),
                             () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                $"Finally Block = {block.Type} - Unable to find constructor argument: {c.ParameterType}"))
+                                $"Finally Block = {block.Type} - Unable to find constructor argument: {objectType}"))
                         );
                 }
             }
 
             return obj;
+        }
+
+        private bool TryRunBlock(Block block, object blockInstance, List<object> executeArgs)
+        {
+            Log?.Info($"Starting test block {block.Type}");
+            bool result = false;
+            foreach (var arg in executeArgs)
+            {
+                Log?.TestBlockInput(arg);
+            }
+
+            try
+            {
+                object? output = block.ExecuteMethod.Invoke(blockInstance, executeArgs.ToArray());
+                if (output is not null)
+                {
+                    Log?.TestBlockOutput(output);
+                    BlockOutput.Remove(output.GetType());
+                    BlockOutput.Add(output.GetType(), output);
+                }
+                result = true;
+            }
+            catch (TargetInvocationException ex)
+            {
+                TestBlockException = ex.InnerException;
+            }
+            catch (ArgumentException ex)
+            {
+                TestBlockException = ex;
+            }
+            catch (TargetParameterCountException ex)
+            {
+                ex.Data.Add("AdditionalInfo", "Test block failed: Mismatched count between Execute method arguments and supplied dependencies.");
+                TestBlockException = ex;
+            }
+
+            if(result) Log?.Debug($"Test block completed successfully.");
+            return result;
         }
 
         private static void HandleFinallyBlock(Block block, Action testBlockAction, Action finallyBlockAction)
