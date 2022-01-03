@@ -19,7 +19,7 @@ namespace IntelliTect.TestTools.TestFramework
         }
         // Switch to get; init; when this can be updated to .net5
         // Maybe target .net5 support for v3?
-        public string TestCaseName { get; } 
+        public string TestCaseName { get; }
         public string TestMethodName { get; }
         public int TestCaseId { get; }
         // One of the below two properties will eventually be extraneous.
@@ -35,6 +35,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         // TEMPORARY TO TEST
         private Exception? TestBlockException { get; set; }
+        private List<Exception> TestBlockExceptions { get; } = new();
         private List<Exception> FinallyBlockExceptions { get; } = new();
         //private HashSet<object> ActivatedDependencies { get; } = new();
 
@@ -76,8 +77,10 @@ namespace IntelliTect.TestTools.TestFramework
                     // Should we un-nest these?
                     // Might be easier to break if any single one fails if we do.
                     // Should we re-nest these and have two out args?
-                    if (!TryGetBlock(testCaseScope, tb, out object? testBlockInstance, out List<object> executeArgs)) break;
-                    if (testBlockInstance is null) break; // Need to set an exception here, too. OR get rid of this line and ignore the null check on the line below.
+                    if (!TryGetBlock(testCaseScope, tb, out object testBlockInstance)) break;
+                    if (!TrySetBlockProperties(testCaseScope, tb, testBlockInstance)) break;
+                    if (!TryGetExecuteArguments(testCaseScope, tb, out List<object> executeArgs)) break;
+
                     Passed = TryRunBlock(tb, testBlockInstance, executeArgs);
                 }
 
@@ -85,12 +88,13 @@ namespace IntelliTect.TestTools.TestFramework
                 {
                     if (Log is not null) Log.CurrentTestBlock = fb.Type.ToString();
 
-                    if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance, out List<object> executeArgs)) break;
-                    if (finallyBlockInstance is null) break; // Need to set an exception here, too. OR get rid of this line and ignore the null check on the line below.
+                    if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance)) break;
+                    if (!TrySetBlockProperties(testCaseScope, fb, finallyBlockInstance)) break;
+                    if (!TryGetExecuteArguments(testCaseScope, fb, out List<object> executeArgs)) break;
                     TryRunBlock(fb, finallyBlockInstance, executeArgs);
                 }
 
-                
+
                 // Do we need to do all of the below checks, or can we just do if (Passed) { }?
                 if (TestBlockException is null && Passed)
                 {
@@ -124,14 +128,17 @@ namespace IntelliTect.TestTools.TestFramework
         // On the other hand, if we modify this code and accidentaly remove/forgot a 'false' check,
         // it would be nice to be forced to null check.
         // Might be worth setting testBlock to be non-nullable and use temp vars as the nullable type?
-        private bool TryGetBlock(IServiceScope scope, Block block, out object? blockInstance, out List<object> executeArgs)
+        private bool TryGetBlock(IServiceScope scope, Block block, out object blockInstance)
         {
+            Log?.Debug($"Attempting to activate block: {block.Type}");
             bool result = false;
-            executeArgs = new List<object>();
+            object? foundBlock = null;
             try
             {
-                blockInstance = scope.ServiceProvider.GetService(block.Type);
-                if (blockInstance is null)
+                foundBlock = scope.ServiceProvider.GetService(block.Type);
+                // What happens in the below scenario?
+                //blockInstance = scope.ServiceProvider.GetService(block.Type);
+                if (foundBlock is null)
                 {
                     HandleFinallyBlock(
                         block,
@@ -140,25 +147,32 @@ namespace IntelliTect.TestTools.TestFramework
                     );
                 }
             }
-            catch(InvalidOperationException)
+            catch (InvalidOperationException)
             {
                 // Only try to re-build the test block if we get an InvalidOperationException.
                 // That implies the block was found but could not be activated.
                 // Also... can this message be clearer? Not sure what will make sense to people.
                 Log?.Debug($"Unable to fetch block {block.Type} from DI service. Attempting to build it by type.");
-                // Because we ended up nesting TrySetProperties and TryGetExecuteArgs, we really don't want to set this to true yet.
-                // Maybe revisit if it's needed?
-                /*if(*/
-                _ = TryBuildBlock(scope, block, out blockInstance);/*) result = true;*/
+
+                if(!TryBuildBlock(scope, block, out foundBlock))
+                {
+                    HandleFinallyBlock(
+                        block,
+                        () => TestBlockException = new InvalidOperationException($"Unable to activate test block: {block.Type}"),
+                        () => FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to activate finally block: {block.Type}"))
+                    );
+                }
             }
 
-            // Recheck for null in case we missed a check above, even if all of the other
-            if(blockInstance is not null)
+            if(foundBlock is not null)
             {
-                if (TrySetBlockProperties(scope, block, blockInstance))
-                {
-                    if(TryGetExecuteArguments(scope, block, out executeArgs)) result = true;
-                }
+                blockInstance = foundBlock;
+                result = true;
+            }
+            else
+            {
+                // Is this the best way to do this?
+                blockInstance = new object();
             }
 
             return result;
@@ -215,7 +229,7 @@ namespace IntelliTect.TestTools.TestFramework
         private bool TryGetExecuteArguments(IServiceScope scope, Block block, out List<object> executeArgs)
         {
             executeArgs = new List<object>();
-            foreach(ParameterInfo? ep in block.ExecuteParams)
+            foreach (ParameterInfo? ep in block.ExecuteParams)
             {
                 object? obj = ActivateObject(scope, block, ep.ParameterType, "execute method argument");
                 if (obj is null) return false;
@@ -226,7 +240,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         private object? ActivateObject(IServiceScope scope, Block block, Type objectType, string targetMember) // Probably need to come up with a better name than 'targetMember'.
         {
-            if(!BlockOutput.TryGetValue(objectType, out object? obj))
+            if (!BlockOutput.TryGetValue(objectType, out object? obj))
             {
                 try
                 {
@@ -247,9 +261,9 @@ namespace IntelliTect.TestTools.TestFramework
                     HandleFinallyBlock(
                             block,
                             () => TestBlockException = new InvalidOperationException(
-                                $"Test Block - {block.Type} - Unable to find constructor argument: {objectType}"),
+                                $"Test Block - {block.Type} - Unable to find {targetMember}: {objectType}"),
                             () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                $"Finally Block = {block.Type} - Unable to find constructor argument: {objectType}"))
+                                $"Finally Block = {block.Type} - Unable to find {targetMember}: {objectType}"))
                         );
                 }
             }
@@ -291,7 +305,7 @@ namespace IntelliTect.TestTools.TestFramework
                 TestBlockException = ex;
             }
 
-            if(result) Log?.Debug($"Test block completed successfully.");
+            if (result) Log?.Debug($"Test block completed successfully.");
             return result;
         }
 

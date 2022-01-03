@@ -1,4 +1,5 @@
 ﻿using IntelliTect.TestTools.TestFramework.Tests.TestData;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +18,6 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         private readonly List<int> _PopulatedList = new() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         private readonly Dictionary<int, int> _PopulatedDictionary = new() { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 7, 7 }, { 8, 8 }, { 9, 9 }, { 10, 10 } };
         private readonly Random _Rand = new();
-
-        // Next test: Profile each collection type with foreach and for loops
 
         [Fact]
         public void TestWithProvider()
