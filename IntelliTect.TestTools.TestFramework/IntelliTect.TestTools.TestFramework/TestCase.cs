@@ -73,6 +73,7 @@ namespace IntelliTect.TestTools.TestFramework
                     // Duplicate returns from dif test blocks
                     // Interface returns
                     if (Log is not null) Log.CurrentTestBlock = tb.Type.ToString();
+                    Log?.Info($"Starting test block: {tb.Type}");
 
                     // Should we un-nest these?
                     // Might be easier to break if any single one fails if we do.
@@ -87,6 +88,7 @@ namespace IntelliTect.TestTools.TestFramework
                 foreach (var fb in FinallyBlocks)
                 {
                     if (Log is not null) Log.CurrentTestBlock = fb.Type.ToString();
+                    Log?.Info($"Starting finally block: {fb.Type}");
 
                     if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance)) break;
                     if (!TrySetBlockProperties(testCaseScope, fb, finallyBlockInstance)) break;
@@ -99,15 +101,11 @@ namespace IntelliTect.TestTools.TestFramework
                 if (TestBlockException is null && Passed)
                 {
                     Log?.Info("Test case finished successfully.");
-                    Passed = true;
                 }
-                else if (TestBlockException is { } && Passed)
+                else if ((TestBlockExceptions.Count > 0 && Passed)
+                    || (TestBlockExceptions.Count is 0 && !Passed))
                 {
-                    // Log
-                }
-                else if (TestBlockException is null && !Passed)
-                {
-                    // Create exception
+                    TestBlockExceptions.Add(new SystemException("Unknown error occured, please review logs."));
                 }
                 else
                 {
@@ -130,7 +128,11 @@ namespace IntelliTect.TestTools.TestFramework
         // Might be worth setting testBlock to be non-nullable and use temp vars as the nullable type?
         private bool TryGetBlock(IServiceScope scope, Block block, out object blockInstance)
         {
-            Log?.Debug($"Attempting to activate block: {block.Type}");
+            HandleFinallyBlock(
+                block,
+                () => Log?.Debug($"Attempting to activate test block: {block.Type}"),
+                () => Log?.Debug($"Attempting to activate finally block: {block.Type}")
+            );
             bool result = false;
             object? foundBlock = null;
             try
@@ -142,24 +144,24 @@ namespace IntelliTect.TestTools.TestFramework
                 {
                     HandleFinallyBlock(
                         block,
-                        () => TestBlockException = new InvalidOperationException($"Unable to find test block: {block.Type}"),
+                        () => TestBlockExceptions.Add(new InvalidOperationException($"Unable to find test block: {block.Type}")),
                         () => FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to find finally block: {block.Type}"))
                     );
                 }
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
                 // Only try to re-build the test block if we get an InvalidOperationException.
                 // That implies the block was found but could not be activated.
                 // Also... can this message be clearer? Not sure what will make sense to people.
-                Log?.Debug($"Unable to fetch block {block.Type} from DI service. Attempting to build it by type.");
+                Log?.Debug($"Unable to activate from DI service, attempting to re-build block: {block.Type}. Original error: {e}");
 
                 if(!TryBuildBlock(scope, block, out foundBlock))
                 {
                     HandleFinallyBlock(
                         block,
-                        () => TestBlockException = new InvalidOperationException($"Unable to activate test block: {block.Type}"),
-                        () => FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to activate finally block: {block.Type}"))
+                        () => TestBlockException = new InvalidOperationException($"Unable to re-build test block: {block.Type}"),
+                        () => FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to re-build finally block: {block.Type}"))
                     );
                 }
             }
@@ -172,6 +174,7 @@ namespace IntelliTect.TestTools.TestFramework
             else
             {
                 // Is this the best way to do this?
+                // Or should blockInstance be nullable?
                 blockInstance = new object();
             }
 
@@ -221,6 +224,7 @@ namespace IntelliTect.TestTools.TestFramework
                 if (obj is null) return false;
 
                 prop.SetValue(blockInstance, obj);
+                Log?.TestBlockInput(obj);
             }
 
             return true;
@@ -234,6 +238,7 @@ namespace IntelliTect.TestTools.TestFramework
                 object? obj = ActivateObject(scope, block, ep.ParameterType, "execute method argument");
                 if (obj is null) return false;
                 executeArgs.Add(obj);
+                Log?.TestBlockInput(obj);
             }
             return true;
         }
@@ -250,22 +255,23 @@ namespace IntelliTect.TestTools.TestFramework
                 {
                     HandleFinallyBlock(
                         block,
-                        () => TestBlockException = new InvalidOperationException(
-                            $"Test Block - {block.Type} - Error attempting to activate {targetMember}: {objectType}: {e}"),
+                        () => TestBlockExceptions.Add(new InvalidOperationException(
+                            $"Test Block - {block.Type} - Error attempting to activate {targetMember}: {objectType}: {e}")),
                         () => FinallyBlockExceptions.Add(new InvalidOperationException(
                             $"Finally Block = {block.Type} - Error attempting to activate {targetMember}: {objectType}: {e}"))
                     );
                 }
-                if (obj is null)
-                {
-                    HandleFinallyBlock(
-                            block,
-                            () => TestBlockException = new InvalidOperationException(
-                                $"Test Block - {block.Type} - Unable to find {targetMember}: {objectType}"),
-                            () => FinallyBlockExceptions.Add(new InvalidOperationException(
-                                $"Finally Block = {block.Type} - Unable to find {targetMember}: {objectType}"))
-                        );
-                }
+            }
+
+            if (obj is null)
+            {
+                HandleFinallyBlock(
+                        block,
+                        () => TestBlockExceptions.Add(new InvalidOperationException(
+                            $"Test Block - {block.Type} - Unable to find {targetMember}: {objectType}")),
+                        () => FinallyBlockExceptions.Add(new InvalidOperationException(
+                            $"Finally Block = {block.Type} - Unable to find {targetMember}: {objectType}"))
+                    );
             }
 
             return obj;

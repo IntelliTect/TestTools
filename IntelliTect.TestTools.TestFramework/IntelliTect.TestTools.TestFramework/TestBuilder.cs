@@ -18,6 +18,19 @@ namespace IntelliTect.TestTools.TestFramework
             AddLogger<DebugLogger, JsonSerializer>();
         }
 
+        //private List<(Type TestBlockType, object[]? TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
+        //private List<(Type TestBlockType, object[]? TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
+        // OR
+        private List<Block> TestBlocks { get; } = new();
+        private List<Block> FinallyBlocks { get; } = new();
+        private List<InvalidOperationException> ValidationExceptions { get; } = new();
+
+        private IServiceCollection Services { get; } = new ServiceCollection();
+        private int TestCaseId { get; set; }
+        private string? TestCaseName { get; set; }
+        private string TestMethodName { get; set; }
+        //private Exception? TestBlockException { get; set; }
+
         /// <summary>
         /// Used when a test case may be associated to a unique ID
         /// </summary>
@@ -40,32 +53,19 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        private List<(Type TestBlockType, object[]? TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
-        private List<(Type TestBlockType, object[]? TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
-        // OR
-        private List<Block> TestBlocks { get; } = new();
-        private List<Block> FinallyBlocks { get; } = new();
-        private List<InvalidOperationException> ValidationExceptions { get; } = new();
-
-        private IServiceCollection Services { get; } = new ServiceCollection();
-        private int TestCaseId { get; set; }
-        private string? TestCaseName { get; set; }
-        private string TestMethodName { get; set; }
-        //private Exception? TestBlockException { get; set; }
-
         /// <summary>
         /// Adds a test block (some related group of test actions) to the list of blocks to run for any given test case
         /// </summary>
         /// <typeparam name="T">The type of test block, as an ITestBlock, to run</typeparam>
         /// <returns>This</returns>
-        public TestBuilder AddTestBlock<T>() where T : ITestBlock
-        {
-            MethodInfo execute = FindExecuteMethod(typeof(T));
-            TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
-            TestBlocks.Add(new Block(typeof(T), execute));
-            Services.AddTransient(typeof(T));
-            return this;
-        }
+        //public TestBuilder AddTestBlock<T>() where T : ITestBlock
+        //{
+        //    MethodInfo execute = FindExecuteMethod(typeof(T));
+        //    TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
+        //    TestBlocks.Add(new Block(typeof(T), execute));
+        //    Services.AddTransient(typeof(T));
+        //    return this;
+        //}
 
         /// <summary>
         /// Adds a test block (some related group of test actions) with a list of arguments 
@@ -76,36 +76,34 @@ namespace IntelliTect.TestTools.TestFramework
         /// <returns>This</returns>
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
-            throw new NotImplementedException("Not yet supported in TestFramework v2.");
-            //Block tb = new(typeof(T));
-            //tb.ExecuteParams = testBlockArgs;
-            //TestBlocks.Add(tb);
-            //TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
-            //Services.AddTransient(typeof(T));
-            //return this;
-        }
-
-        public TestBuilder AddFinallyBlock<T>() where T : ITestBlock
-        {
             MethodInfo execute = FindExecuteMethod(typeof(T));
-            FinallyBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
-            Block b = new(typeof(T), execute);
-            b.IsFinallyBlock = true;
-            FinallyBlocks.Add(b);
+            Block tb = new(typeof(T), execute);
+            tb.ExecuteOverrides = testBlockArgs;
+            TestBlocks.Add(tb);
             Services.AddTransient(typeof(T));
             return this;
         }
 
-        public TestBuilder AddFinallyBlock<T>(params object[] testBlockArgs) where T : ITestBlock
+        //public TestBuilder AddFinallyBlock<T>() where T : ITestBlock
+        //{
+        //    MethodInfo execute = FindExecuteMethod(typeof(T));
+        //    Block fb = new(typeof(T), execute);
+        //    fb.ExecuteOverrides = testBlockArgs;
+        //    fb.IsFinallyBlock = true;
+        //    FinallyBlocks.Add(fb);
+        //    Services.AddTransient(typeof(T));
+        //    return this;
+        //}
+
+        public TestBuilder AddFinallyBlock<T>(params object[] finallyBlockArgs) where T : ITestBlock
         {
-            throw new NotImplementedException("Not yet supported in TestFramework v2.");
-            //Block tb = new(typeof(T));
-            //tb.ExecuteParams = testBlockArgs;
-            //b.IsFinallyBlock = true;
-            //FinallyBlocks.Add(tb);
-            //FinallyBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: testBlockArgs));
-            //Services.AddTransient(typeof(T));
-            //return this;
+            MethodInfo execute = FindExecuteMethod(typeof(T));
+            Block fb = new(typeof(T), execute);
+            fb.ExecuteOverrides = finallyBlockArgs;
+            fb.IsFinallyBlock = true;
+            FinallyBlocks.Add(fb);
+            Services.AddTransient(typeof(T));
+            return this;
         }
 
         /// <summary>
@@ -206,7 +204,7 @@ namespace IntelliTect.TestTools.TestFramework
         public void BuildWithProvider()
         {
             ServiceProvider provider = Services.BuildServiceProvider();
-            string result = provider.GetService<string>();
+            string? result = provider.GetService<string>();
             if (result is null) throw new NullReferenceException();
         }
 
