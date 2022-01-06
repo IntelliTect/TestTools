@@ -19,25 +19,25 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         private readonly Dictionary<int, int> _PopulatedDictionary = new() { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 7, 7 }, { 8, 8 }, { 9, 9 }, { 10, 10 } };
         private readonly Random _Rand = new();
 
-        [Fact]
-        public void TestWithProvider()
-        {
-            TestBuilder builder = new();
-            builder.AddDependencyInstance("Testing")
-                .AddTestBlock<ExampleTestBlockWithConstructor>();
+        //[Fact]
+        //public void TestWithProvider()
+        //{
+        //    TestBuilder builder = new();
+        //    builder.AddDependencyInstance("Testing")
+        //        .AddTestBlock<ExampleTestBlockWithConstructor>();
 
-            IterateOverAction(builder.BuildWithoutProvider);
-        }
+        //    IterateOverAction(builder.BuildWithProvider);
+        //}
 
-        [Fact]
-        public void TestWithoutProvider()
-        {
-            TestBuilder builder = new();
-            builder.AddDependencyInstance("Testing")
-                .AddTestBlock<ExampleTestBlockWithConstructor>();
+        //[Fact]
+        //public void TestWithoutProvider()
+        //{
+        //    TestBuilder builder = new();
+        //    builder.AddDependencyInstance("Testing")
+        //        .AddTestBlock<ExampleTestBlockWithConstructor>();
 
-            IterateOverAction(builder.BuildWithoutProvider);
-        }
+        //    IterateOverAction(builder.BuildWithoutProvider);
+        //}
 
         [Fact]
         public void TestAddToHashSet()

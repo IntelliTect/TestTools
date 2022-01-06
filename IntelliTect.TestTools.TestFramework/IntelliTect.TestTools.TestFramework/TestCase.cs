@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using IntelliTect.TestTools.TestFramework.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestCase
     {
-        public TestCase(string testCaseName, string testMethodName, int testCaseId, IServiceCollection services/*, ServiceProvider provider*/)
+        public TestCase(string testCaseName, string testMethodName, int testCaseId, IServiceCollection services)
         {
             TestCaseName = testCaseName;
             TestMethodName = testMethodName;
@@ -22,28 +23,20 @@ namespace IntelliTect.TestTools.TestFramework
         public string TestCaseName { get; }
         public string TestMethodName { get; }
         public int TestCaseId { get; }
-        // One of the below two properties will eventually be extraneous.
-        public IServiceCollection ServiceCollection { get; }
-        //public ServiceProvider Provider { get; }
         public bool ThrowOnFinallyBlockException { get; set; } = true;
 
-        // May make sense to make the below public if it's needed for debugging.
+        // May make sense to make some of the below public if it's needed for debugging.
+        // If so, definitely need to change them to internal/private sets.
+
         internal List<Block> TestBlocks { get; set; } = new();
         internal List<Block> FinallyBlocks { get; set; } = new();
-        //private bool _DisposedValue;
+        internal bool HasLogger { get; set; } = true;
 
-
-        // TEMPORARY TO TEST
-        private Exception? TestBlockException { get; set; }
-        private List<Exception> TestBlockExceptions { get; } = new();
-        private List<Exception> FinallyBlockExceptions { get; } = new();
-        //private HashSet<object> ActivatedDependencies { get; } = new();
-
-        // UNSURE IF NEEDED WITH NEW BUILD METHOD
-        // Also check if an array is faster
-        private HashSet<object> TestBlockOutput { get; } = new();
-        private Dictionary<Type, object> BlockOutput { get; } = new();
         private ITestCaseLogger? Log { get; set; }
+        private IServiceCollection ServiceCollection { get; }
+        private Dictionary<Type, object> BlockOutput { get; } = new();
+        private Exception? TestBlockException { get; set; }
+        private List<Exception> FinallyBlockExceptions { get; } = new();
 
         public bool Passed { get; set; }
 
@@ -55,13 +48,11 @@ namespace IntelliTect.TestTools.TestFramework
                 Log = testCaseScope.ServiceProvider.GetService<ITestCaseLogger>();
                 if (Log is not null)
                 {
-                    Log.TestCaseKey = TestCaseName;
+                    //Log.TestCaseKey = TestCaseName;
                     Log.CurrentTestBlock = "N/A";
                 }
 
                 Log?.Info($"Starting test case: {TestCaseName}");
-
-                if (TestBlocks is null) throw new NullReferenceException();
 
                 foreach (var tb in TestBlocks)
                 {
@@ -102,10 +93,10 @@ namespace IntelliTect.TestTools.TestFramework
                 {
                     Log?.Info("Test case finished successfully.");
                 }
-                else if ((TestBlockExceptions.Count > 0 && Passed)
-                    || (TestBlockExceptions.Count is 0 && !Passed))
+                else if ((TestBlockException is not null && Passed)
+                    || (TestBlockException is null && !Passed))
                 {
-                    TestBlockExceptions.Add(new SystemException("Unknown error occured, please review logs."));
+                    //TestBlockExceptions.Add(new SystemException("Unknown error occured, please review logs."));
                 }
                 else
                 {
@@ -144,7 +135,7 @@ namespace IntelliTect.TestTools.TestFramework
                 {
                     HandleFinallyBlock(
                         block,
-                        () => TestBlockExceptions.Add(new InvalidOperationException($"Unable to find test block: {block.Type}")),
+                        () => TestBlockException = new InvalidOperationException($"Unable to find test block: {block.Type}"),
                         () => FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to find finally block: {block.Type}"))
                     );
                 }
@@ -156,14 +147,7 @@ namespace IntelliTect.TestTools.TestFramework
                 // Also... can this message be clearer? Not sure what will make sense to people.
                 Log?.Debug($"Unable to activate from DI service, attempting to re-build block: {block.Type}. Original error: {e}");
 
-                if(!TryBuildBlock(scope, block, out foundBlock))
-                {
-                    HandleFinallyBlock(
-                        block,
-                        () => TestBlockException = new InvalidOperationException($"Unable to re-build test block: {block.Type}"),
-                        () => FinallyBlockExceptions.Add(new InvalidOperationException($"Unable to re-build finally block: {block.Type}"))
-                    );
-                }
+                _ = TryBuildBlock(scope, block, out foundBlock);
             }
 
             if(foundBlock is not null)
@@ -194,7 +178,7 @@ namespace IntelliTect.TestTools.TestFramework
         // ... ... TestBlock2 - needs ObjectA which needs bool
         private bool TryBuildBlock(IServiceScope scope, Block block, out object? blockInstance)
         {
-            List<object> blockParams = new();
+            List<object?> blockParams = new();
             foreach (ParameterInfo? c in block.ConstructorParams)
             {
                 object? obj = ActivateObject(scope, block, c.ParameterType, "constructor argument");
@@ -221,7 +205,22 @@ namespace IntelliTect.TestTools.TestFramework
                 }
 
                 object? obj = ActivateObject(scope, block, prop.PropertyType, "property");
-                if (obj is null) return false;
+                if (obj is null)
+                {
+                    // Seems like we need a better way to handle this.
+                    if (prop.PropertyType == typeof(ITestCaseLogger))
+                    {
+                        TestBlockException = null;
+                        if(FinallyBlockExceptions.Count > 0)
+                        {
+                            FinallyBlockExceptions.Remove(FinallyBlockExceptions.Last());
+                        }
+                        
+                        continue;
+                    }
+
+                    return false;
+                }
 
                 prop.SetValue(blockInstance, obj);
                 Log?.TestBlockInput(obj);
@@ -235,11 +234,27 @@ namespace IntelliTect.TestTools.TestFramework
             executeArgs = new List<object>();
             foreach (ParameterInfo? ep in block.ExecuteParams)
             {
-                object? obj = ActivateObject(scope, block, ep.ParameterType, "execute method argument");
-                if (obj is null) return false;
+                object? obj = null;
+                if(block.ExecuteArgumentOverrides.Count > 0)
+                {
+                    obj = executeArgs.FirstOrDefault(a => a.GetType() == ep.ParameterType);
+                    block.ExecuteArgumentOverrides.TryGetValue(obj.GetType(), out obj);
+                }
+
+                if(obj is null)
+                {
+                    obj = ActivateObject(scope, block, ep.ParameterType, "execute method argument");
+                }
+
+                if (obj is null)
+                {
+                    return false;
+                }
+
                 executeArgs.Add(obj);
                 Log?.TestBlockInput(obj);
             }
+
             return true;
         }
 
@@ -255,8 +270,8 @@ namespace IntelliTect.TestTools.TestFramework
                 {
                     HandleFinallyBlock(
                         block,
-                        () => TestBlockExceptions.Add(new InvalidOperationException(
-                            $"Test Block - {block.Type} - Error attempting to activate {targetMember}: {objectType}: {e}")),
+                        () => TestBlockException = new InvalidOperationException(
+                            $"Test Block - {block.Type} - Error attempting to activate {targetMember}: {objectType}: {e}"),
                         () => FinallyBlockExceptions.Add(new InvalidOperationException(
                             $"Finally Block = {block.Type} - Error attempting to activate {targetMember}: {objectType}: {e}"))
                     );
@@ -267,8 +282,8 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 HandleFinallyBlock(
                         block,
-                        () => TestBlockExceptions.Add(new InvalidOperationException(
-                            $"Test Block - {block.Type} - Unable to find {targetMember}: {objectType}")),
+                        () => TestBlockException = new InvalidOperationException(
+                            $"Test Block - {block.Type} - Unable to find {targetMember}: {objectType}"),
                         () => FinallyBlockExceptions.Add(new InvalidOperationException(
                             $"Finally Block = {block.Type} - Unable to find {targetMember}: {objectType}"))
                     );

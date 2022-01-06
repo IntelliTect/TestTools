@@ -46,11 +46,19 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
         }
     }
 
-    public class ExampleTestBlockWithReturn : TestBlock
+    public class ExampleTestBlockWithStringReturn : TestBlock
     {
-        public bool Execute(bool valueToReturn)
+        public string Execute()
         {
-            return !valueToReturn;
+            return "Testing";
+        }
+    }
+
+    public class ExampleTestBlockWithBoolReturn : TestBlock
+    {
+        public bool Execute(bool arg)
+        {
+            return !arg;
         }
     }
 }

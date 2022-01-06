@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 
-namespace IntelliTect.TestTools.TestFramework
+namespace IntelliTect.TestTools.TestFramework.Logging
 {
     public class JsonSerializer : IObjectSerializer
     {

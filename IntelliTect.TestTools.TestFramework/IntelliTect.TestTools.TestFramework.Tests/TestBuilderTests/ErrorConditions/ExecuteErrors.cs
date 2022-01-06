@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit;
 
-namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
+namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorConditions
 {
     public class ExecuteErrors
     {

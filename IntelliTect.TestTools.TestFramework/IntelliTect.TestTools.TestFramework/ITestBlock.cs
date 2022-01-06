@@ -1,7 +1,9 @@
-﻿namespace IntelliTect.TestTools.TestFramework
+﻿using IntelliTect.TestTools.TestFramework.Logging;
+
+namespace IntelliTect.TestTools.TestFramework
 {
     public interface ITestBlock
     {
-        public ITestCaseLogger? Log { get; }
+        ITestCaseLogger? Log { get; }
     }
 }

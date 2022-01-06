@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using IntelliTect.TestTools.TestFramework.Logging;
 
 namespace IntelliTect.TestTools.TestFramework
 {
@@ -15,21 +14,17 @@ namespace IntelliTect.TestTools.TestFramework
         public TestBuilder([CallerMemberName] string? testMethodName = null)
         {
             TestMethodName = testMethodName ?? "UndefinedTestMethodName";
-            AddLogger<DebugLogger, JsonSerializer>();
+            AddLogger<DebugLogger>();
         }
 
-        //private List<(Type TestBlockType, object[]? TestBlockParameters)> TestBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
-        //private List<(Type TestBlockType, object[]? TestBlockParameters)> FinallyBlocksAndParams { get; } = new List<(Type TestBlockType, object[]? TestBlockParameters)>();
-        // OR
-        private List<Block> TestBlocks { get; } = new();
-        private List<Block> FinallyBlocks { get; } = new();
-        private List<InvalidOperationException> ValidationExceptions { get; } = new();
-
-        private IServiceCollection Services { get; } = new ServiceCollection();
-        private int TestCaseId { get; set; }
         private string? TestCaseName { get; set; }
         private string TestMethodName { get; set; }
-        //private Exception? TestBlockException { get; set; }
+        private int TestCaseId { get; set; }
+        private List<Block> TestBlocks { get; } = new();
+        private List<Block> FinallyBlocks { get; } = new();
+        private IServiceCollection Services { get; } = new ServiceCollection();
+        private bool HasLogger { get; set; } = true;
+        private List<InvalidOperationException> ValidationExceptions { get; } = new();
 
         /// <summary>
         /// Used when a test case may be associated to a unique ID
@@ -54,55 +49,23 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         /// <summary>
-        /// Adds a test block (some related group of test actions) to the list of blocks to run for any given test case
-        /// </summary>
-        /// <typeparam name="T">The type of test block, as an ITestBlock, to run</typeparam>
-        /// <returns>This</returns>
-        //public TestBuilder AddTestBlock<T>() where T : ITestBlock
-        //{
-        //    MethodInfo execute = FindExecuteMethod(typeof(T));
-        //    TestBlocksAndParams.Add((TestBlockType: typeof(T), TestBlockParameters: null));
-        //    TestBlocks.Add(new Block(typeof(T), execute));
-        //    Services.AddTransient(typeof(T));
-        //    return this;
-        //}
-
-        /// <summary>
-        /// Adds a test block (some related group of test actions) with a list of arguments 
-        /// that must match the associated TestBlock.Execute() method to the list of blocks to run for any given test case
+        /// Adds a test block (some related group of test actions) with an optional list of arguments. 
+        /// Any argument passed here will override all other matched arguments for the blocks TestBlock.Execute() method.
         /// </summary>
         /// <typeparam name="T">The type of dependency a test block needs to execute</typeparam>
         /// <param name="testBlockArgs">The list of arguments to fulfill a set of Execute(params object[]) parameters</param>
         /// <returns>This</returns>
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
-            MethodInfo execute = FindExecuteMethod(typeof(T));
-            Block tb = new(typeof(T), execute);
-            tb.ExecuteOverrides = testBlockArgs;
+            Block tb = CreateBlock<T>(false, testBlockArgs);
             TestBlocks.Add(tb);
-            Services.AddTransient(typeof(T));
             return this;
         }
 
-        //public TestBuilder AddFinallyBlock<T>() where T : ITestBlock
-        //{
-        //    MethodInfo execute = FindExecuteMethod(typeof(T));
-        //    Block fb = new(typeof(T), execute);
-        //    fb.ExecuteOverrides = testBlockArgs;
-        //    fb.IsFinallyBlock = true;
-        //    FinallyBlocks.Add(fb);
-        //    Services.AddTransient(typeof(T));
-        //    return this;
-        //}
-
         public TestBuilder AddFinallyBlock<T>(params object[] finallyBlockArgs) where T : ITestBlock
         {
-            MethodInfo execute = FindExecuteMethod(typeof(T));
-            Block fb = new(typeof(T), execute);
-            fb.ExecuteOverrides = finallyBlockArgs;
-            fb.IsFinallyBlock = true;
+            Block fb = CreateBlock<T>(true, finallyBlockArgs);
             FinallyBlocks.Add(fb);
-            Services.AddTransient(typeof(T));
             return this;
         }
 
@@ -114,7 +77,6 @@ namespace IntelliTect.TestTools.TestFramework
         /// <returns></returns>
         public TestBuilder AddDependencyService<T>(Func<IServiceProvider, object> serviceFactory)
         {
-            // When switching to rebuilding a testblock scope, this may need to change to Services.AddSingleton to persist between test blocks.
             Services.AddSingleton(typeof(T), serviceFactory);
             return this;
         }
@@ -126,14 +88,12 @@ namespace IntelliTect.TestTools.TestFramework
         /// <returns>This</returns>
         public TestBuilder AddDependencyService<T>()
         {
-            // When switching to rebuilding a testblock scope, this may need to change to Services.AddSingleton to persist between test blocks.
             Services.AddSingleton(typeof(T));
             return this;
         }
 
         public TestBuilder AddDependencyService<TServiceType, TImplementationType>()
         {
-            // When switching to rebuilding a testblock scope, this may need to change to Services.AddSingleton to persist between test blocks.
             Services.AddSingleton(typeof(TServiceType), typeof(TImplementationType));
             return this;
         }
@@ -146,7 +106,6 @@ namespace IntelliTect.TestTools.TestFramework
         public TestBuilder AddDependencyInstance(object objToAdd)
         {
             if (objToAdd is null) throw new ArgumentNullException(nameof(objToAdd));
-            // Need to add some testing around this to see if it behaves in a similarly odd fashion as AddLogger when running tests in parallel
             Services.AddSingleton(objToAdd.GetType(), objToAdd);
             return this;
         }
@@ -163,81 +122,60 @@ namespace IntelliTect.TestTools.TestFramework
         {
             RemoveLogger();
             Services.AddSingleton(typeof(ITestCaseLogger), typeof(T));
+            HasLogger = true;
             return this;
         }
 
-        // Is this enough convenience to keep?
-        public TestBuilder AddLogger<TLogger, TObjectSerializer>() 
-            where TLogger : ITestCaseLogger 
-            where TObjectSerializer : IObjectSerializer
-        {
-            RemoveSerializer();
-            RemoveLogger();
-            Services.AddSingleton(typeof(ITestCaseLogger), typeof(TLogger));
-            Services.AddSingleton(typeof(IObjectSerializer), typeof(TObjectSerializer));
-            return this;
-        }
+        //// Is this enough convenience to keep?
+        //public TestBuilder AddLogger<TLogger, TObjectSerializer>() 
+        //    where TLogger : ITestCaseLogger 
+        //    where TObjectSerializer : IObjectSerializer
+        //{
+        //    RemoveSerializer();
+        //    RemoveLogger();
+        //    Services.AddSingleton(typeof(ITestCaseLogger), typeof(TLogger));
+        //    Services.AddSingleton(typeof(IObjectSerializer), typeof(TObjectSerializer));
+        //    return this;
+        //}
 
         public TestBuilder RemoveLogger()
         {
             ServiceDescriptor? logger = Services.FirstOrDefault(d => d.ServiceType == typeof(ITestCaseLogger));
             if (logger is { }) Services.Remove(logger);
+            HasLogger = false;
             return this;
         }
 
         // Maybe don't need this since we have AddLogger<TLogger,TObjectSerializer>()
         // If we remove this, we should consolidate RemoveSerializer into AddLogger<TL, TOS> OR make RemoveSerializer private
-        public TestBuilder AddSerializer<T>() where T : IObjectSerializer
-        {
-            RemoveSerializer();
-            Services.AddSingleton(typeof(IObjectSerializer), typeof(T));
-            return this;
-        }
+        //public TestBuilder AddSerializer<T>() where T : IObjectSerializer
+        //{
+        //    RemoveSerializer();
+        //    Services.AddSingleton(typeof(IObjectSerializer), typeof(T));
+        //    return this;
+        //}
 
-        public TestBuilder RemoveSerializer()
-        {
-            ServiceDescriptor? serializer = Services.FirstOrDefault(d => d.ServiceType == typeof(IObjectSerializer));
-            if(serializer is { }) Services.Remove(serializer);
-            return this;
-        }
-
-        public void BuildWithProvider()
-        {
-            ServiceProvider provider = Services.BuildServiceProvider();
-            string? result = provider.GetService<string>();
-            if (result is null) throw new NullReferenceException();
-        }
-
-        public void BuildWithoutProvider()
-        {
-            ServiceDescriptor desc = new(typeof(string), typeof(string), ServiceLifetime.Scoped);
-            ServiceDescriptor? test1 = Services.FirstOrDefault(x => {
-                return x.ServiceType == desc.ServiceType;
-            });
-            if (test1 is null) throw new NullReferenceException();
-        }
+        //public TestBuilder RemoveSerializer()
+        //{
+        //    ServiceDescriptor? serializer = Services.FirstOrDefault(d => d.ServiceType == typeof(IObjectSerializer));
+        //    if(serializer is { }) Services.Remove(serializer);
+        //    return this;
+        //}
 
         public TestCase Build()
         {
-            if(string.IsNullOrWhiteSpace(TestCaseName))
+            if (string.IsNullOrWhiteSpace(TestCaseName))
             {
                 TestCaseName = TestMethodName;
             }
 
             TestCase testCase = new(TestCaseName!, TestMethodName, TestCaseId, Services);
             Services.AddSingleton(testCase);
-            //ServiceProvider provider = Services.BuildServiceProvider();
 
             // Probably need to profile all of this for performance at some point.
             // Need to make sure if we're running hundreds or thousands of tests that we're not adding significant amount of time to that.
 
-            // NOTE: This does not verify order.
-            // If a test blocks asks for something that a subsequent test block returns,
-            // this will not catch that. That will fail at runtime.
-            // Need to pair with someone to brainstorm this.
-            // Could potentially try something like:
-            // foreach test block, add to a new list. Check returns foreach test block against that list as it's built?
-            List<(Type TestBlock, Type? Output)> outputs = new();
+            List<Type?> outputs = new();
             foreach (Block tb in TestBlocks)
             {
                 GatherDependencies(tb, outputs);
@@ -254,22 +192,27 @@ namespace IntelliTect.TestTools.TestFramework
 
             if (ValidationExceptions.Count > 0)
             {
-                // This might make sense as an AggregateException instead
-                //string message = "";
-                //foreach(var vm in validationMessages)
-                //{
-                //    message += "\r\n";
-                //    message += vm;
-                //}
-                //throw new InvalidOperationException(message);
                 throw new AggregateException(ValidationExceptions);
             }
 
-            // add test blocks to test case
-            // add finally blocks to test case
-            // validate inputs and outputs (maybe do that first?)
-
             return testCase;
+        }
+
+        private Block CreateBlock<T>(bool isFinally, params object[] args)
+        {
+            Services.AddTransient(typeof(T));
+
+            MethodInfo execute = FindExecuteMethod(typeof(T));
+            Block b = new(typeof(T), execute);
+            foreach (object? a in args)
+            {
+                // What happens if the value is null?
+                // May need to null check.
+                // Might need to better handle adding duplicates than the default Dictionary error
+                b.ExecuteArgumentOverrides.Add(a.GetType(), a);
+            }
+            b.IsFinallyBlock = isFinally;
+            return b;
         }
 
         private static MethodInfo FindExecuteMethod(Type type)
@@ -285,8 +228,8 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         private void GatherDependencies(
-            Block tb, 
-            List<(Type TestBlock, Type? Output)> outputs)
+            Block tb,
+            List<Type?> outputs)
         {
             ConstructorInfo[]? constructors = tb.Type.GetConstructors();
 
@@ -297,103 +240,74 @@ namespace IntelliTect.TestTools.TestFramework
             }
 
             tb.ConstructorParams = constructors[0].GetParameters();
-            tb.PropertyParams = tb.Type.GetProperties();
+            tb.PropertyParams = tb.Type.GetProperties(); // Should we check CanWrite here? We won't have the logger to be able to write out the info. Or I suppose we can add the logger here.
             tb.ExecuteParams = tb.ExecuteMethod.GetParameters();
             // Currently do not support Fields. Should we check for them anyway at least to throw?
 
-            List<(Type TestBlock, Type Input)> inputs = new();
+            HashSet<Type> inputs = new();
             foreach (var c in tb.ConstructorParams)
             {
-                inputs.Add((tb.Type, c.ParameterType));
+                inputs.Add(c.ParameterType);
             }
             foreach (var p in tb.PropertyParams)
             {
-                inputs.Add((tb.Type, p.PropertyType));
+                inputs.Add(p.PropertyType);
             }
             foreach (var e in tb.ExecuteParams)
             {
-                inputs.Add((tb.Type, e.ParameterType));
+                inputs.Add(e.ParameterType);
             }
 
-            //if (tb.ExecuteArgumentOverrides is not null)
-            //{
-                // Need to figure out how to handle test block parameters.
-                // For now, we'll ditch them for v2 alpha.
-                // In the future it may make sense to keep them strictly as overrides:
-                // If a test block param is present, always use it for whatever type is matched. If no type is matched, we should fail here.
-                // Do we even need this? The couple of cases we've used it has purely been for fewer lines of code, and not actually overriding anything.
-                // For simplicity's sake, maybe we just ditch this.
-                // Based on the ideas that best practices are to have tests be as simple as feasible,
-                // and use POCO class to represent inputs and outputs
-                // it's hard to imagine a case where we need this without introducing confusion for the test author.
-                //foreach (var p in tb.TestBlockParameters)
-                //{
-                //    externalDependencies.Add(p.GetType());
-                //}
-            //}
+            if (!HasLogger) inputs.RemoveWhere(i => i == typeof(ITestCaseLogger));
+            if (tb.ExecuteArgumentOverrides is not null)
+            {
+                if (tb.ExecuteArgumentOverrides.Count > tb.ExecuteParams.Length)
+                {
+                    ValidationExceptions.Add(new InvalidOperationException("TestBuilder error - TestBlock: {tb.Type} - Too many execute overrides were provided. More were handed in than parameters on Execute method."));
+                }
 
-            foreach ((Type TestBlock, Type Input) i in inputs)
+                foreach(var eao in tb.ExecuteArgumentOverrides)
+                {
+                    if (!tb.ExecuteParams.Any(ep => ep.ParameterType == eao.GetType()))
+                    {
+                        ValidationExceptions.Add(new InvalidOperationException($"TestBuilder error - TestBlock: {tb.Type} - Unable to find corresponding Execute parameter for override argument {eao}"));
+                    }
+                }
+            }
+
+            foreach (Type i in inputs)
             {
                 // Do we also need to match on implementation here?
-                ServiceDescriptor desc = new(i.Input, i.Input, ServiceLifetime.Scoped);
-                CheckContainerForFirstLevelDependency(desc, outputs, $"TestBuilder error - TestBlock: {i.TestBlock} - Unable to satisfy test block input: {i.Input}.");
-                //ServiceDescriptor? obj = Services.FirstOrDefault(x => x.ServiceType == desc.ServiceType || x.ImplementationType == desc.ImplementationType);
-                // Don't think I need this because I'm matching on service type above, and NOT scope.
-                //if (obj is null)
-                //{
-                //    ServiceDescriptor singleDesc = new(i.Input, i.Input, ServiceLifetime.Singleton);
-                //    obj = Services.FirstOrDefault(x => x.ServiceType == singleDesc.ServiceType);
-                //}
-                //if (obj is null)
-                //{
-                //    Type? output = outputs.FirstOrDefault(o => o.Output == i.Input).Output;
-
-                //    if (output is null)
-                //    {
-                //        ValidationExceptions.Add(new InvalidOperationException($"TestBuilder error - TestBlock: {i.TestBlock} - Unable to satisfy test block input: {i.Input}."));
-                //    }
-                //}
+                ServiceDescriptor desc = new(i, i, ServiceLifetime.Scoped);
+                CheckContainerForFirstLevelDependency(desc, outputs, $"TestBuilder error - TestBlock: {tb.Type} - Unable to satisfy test block input: {i}.");
             }
 
             Type executeReturns = tb.ExecuteMethod.ReturnType;
             if (executeReturns != typeof(void))
             {
-                outputs.Add((tb.Type, executeReturns));
+                outputs.Add(executeReturns);
             }
         }
 
-        private void CheckContainer(List<(Type TestBlock, Type? Output)> outputs/*, ServiceProvider provider*/)
+        private void CheckContainer(List<Type?> outputs/*, ServiceProvider provider*/)
         {
             foreach (var s in Services)
             {
-                // This will NOT check that dependencies of dependencies are satisfied.
-                //ServiceDescriptor? obj = Services.FirstOrDefault(x => x == s);
                 CheckContainerForFirstLevelDependency(s, outputs, $"TestBuilder error - ServiceContainer - Unable to satisfy service: {s}.");
-                // Would need to do something like this, but then that would actually activate everything.
-                // Maybe best as a runtime error?
-                //var test = provider.GetService(s.ServiceType);
-
-                //if (obj is null)
-                //{
-                //    Type? output = outputs.FirstOrDefault(o => o.Output == s.ServiceType || o.Output == s.ImplementationType).Output;
-
-                //    if (output is null)
-                //    {
-                //        ValidationExceptions.Add(new InvalidOperationException($"TestBuilder error - ServiceContainer - Unable to satisfy service: {s}."));
-                //    }
-                //}
             }
         }
 
-        private void CheckContainerForFirstLevelDependency(ServiceDescriptor desc, List<(Type TestBlock, Type? Output)> outputs, string errorMessage)
+        private void CheckContainerForFirstLevelDependency(ServiceDescriptor desc, List<Type?> outputs, string errorMessage)
         {
+            // This will NOT check that dependencies of dependencies are satisfied.
             ServiceDescriptor? obj = Services.FirstOrDefault(x => x.ServiceType == desc.ServiceType || x.ImplementationType == desc.ImplementationType);
             if (obj is null)
             {
-                Type? output = outputs.FirstOrDefault(o => o.Output == desc.ServiceType || o.Output == desc.ImplementationType).Output;
+                Type? output = outputs.FirstOrDefault(o => o == desc.ServiceType || o == desc.ImplementationType);
 
                 if (output is null)
                 {
+                    if (desc.ServiceType is ITestCaseLogger) return;
                     ValidationExceptions.Add(new InvalidOperationException(errorMessage));
                 }
             }

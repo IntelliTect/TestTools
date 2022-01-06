@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.TestTools.TestFramework.Logging;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;

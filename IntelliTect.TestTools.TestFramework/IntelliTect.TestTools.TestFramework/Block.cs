@@ -20,9 +20,8 @@ namespace IntelliTect.TestTools.TestFramework
         internal ParameterInfo[] ConstructorParams { get; set; } = Array.Empty<ParameterInfo>();
         internal MethodInfo ExecuteMethod { get; set; }
         internal ParameterInfo[] ExecuteParams { get; set; } = Array.Empty<ParameterInfo>();
-        internal object[] ExecuteOverrides { get; set; } = Array.Empty<object>();
+        internal Dictionary<Type, object> ExecuteArgumentOverrides { get; set; } = new();
         internal PropertyInfo[] PropertyParams { get; set; } = Array.Empty<PropertyInfo>();
-        internal object[]? ExecuteArgumentOverrides { get; set; }
         // Is this needed?
         //internal ParameterInfo[]? FieldParams { get; set; }
     }

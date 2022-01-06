@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.TestTools.TestFramework
+﻿namespace IntelliTect.TestTools.TestFramework.Logging
 {
     public interface IObjectSerializer
     {

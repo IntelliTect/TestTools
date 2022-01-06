@@ -2,15 +2,18 @@
 using System;
 using Xunit;
 
-namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
+namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorConditions
 {
     public class SingleDependencyErrors : TestBase
     {
+        // Make sure to check for out of order returns/dependencies
+
         [Fact]
         public void BuildWithMissingDependencyInstanceThrowsAggregateException()
         {
             // Arrange
-            TestBuilder builder = StartTestCaseWithMissingDependency();
+            TestBuilder builder = new();
+            builder.AddTestBlock<ExampleTestBlockWithExecuteArg>();
 
             // Act
             var result = Assert.Throws<AggregateException>(() =>
@@ -24,8 +27,9 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
         public void BuildWithMismatchedDependencyInstanceThrowsAggregateException()
         {
             // Arrange
-            TestBuilder builder = StartTestCaseWithMissingDependency()
-                .AddDependencyInstance(1);
+            TestBuilder builder = new TestBuilder()
+                .AddDependencyInstance(1)
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>();
 
             // Act
             var result = Assert.Throws<AggregateException>(() =>
@@ -35,29 +39,41 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
             ValidateAggregateException(result, 1);
         }
 
-        //[Fact(Skip = "Functionality in progress.")]
-        //public void BuildWithMismatchedDependencyInstanceAsTestBlockParamThrowsAggregateException()
-        //{
-        //    // Arrange
-        //    TestBuilder builder = new();
-        //    builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1);
+        [Fact]
+        public void BuildWithMismatchedDependencyInstanceAsTestBlockParamThrowsAggregateException()
+        {
+            // Arrange
+            TestBuilder builder = new();
+            builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1);
 
-        //    // Act
-        //    var result = Assert.Throws<AggregateException>(() =>
-        //        builder.Build());
+            // Act
+            var result = Assert.Throws<AggregateException>(() =>
+                builder.Build());
 
-        //    // Assert
-        //    ValidateAggregateException(result, 1);
-        //}
+            // Assert
+            // Throws two errors.
+            // One for the execute override not mapping to any type of the method parameter
+            // One for not having the available type in the service container
+            ValidateAggregateException(result, 2);
+        }
 
-        //[Fact(Skip = "Functionality in progress.")]
-        //public void BuildWithMismatchedCountDependencyInstanceAsTestBlockParamThrowsAggregateException()
-        //{
-        //    TestBuilder builder = new();
-        //    builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing", "Testing2");
+        [Fact]
+        public void BuildWithMismatchedCountDependencyInstanceAsTestBlockParamThrowsAggregateException()
+        {
+            // Arrange
+            TestBuilder builder = new();
+            builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing1", "Testing2");
 
-        //    Assert.Throws<TestCaseException>(() => builder.Build());
-        //}
+            // Act
+            var result = Assert.Throws<AggregateException>(() =>
+                builder.Build());
+
+            // Assert
+            // Throws two errors.
+            // One for the execute override not mapping to any type of the method parameter
+            // One for not having the available type in the service container
+            ValidateAggregateException(result, 2);
+        }
 
         [Fact]
         public void BuildWithMismatchedExecuteReturnThrowsAggregateException()
@@ -66,8 +82,26 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
             TestBuilder builder = new();
             builder
                 .AddDependencyInstance(true)
-                .AddTestBlock<ExampleTestBlockWithReturn>();
-            builder = StartTestCaseWithMissingDependency(builder);
+                .AddTestBlock<ExampleTestBlockWithBoolReturn>()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>();
+
+            // Act
+            var result = Assert.Throws<AggregateException>(() =>
+                builder.Build());
+
+            // Assert
+            ValidateAggregateException(result, 1);
+        }
+
+        [Fact]
+        public void BuildWithOutOfOrderReturnThrowsAggregateException()
+        {
+            // Arrange
+            TestBuilder builder = new();
+            builder
+                .AddDependencyInstance(true)
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>()
+                .AddTestBlock<ExampleTestBlockWithStringReturn>();
 
             // Act
             var result = Assert.Throws<AggregateException>(() =>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.TestTools.TestFramework.Logging;
+using System;
 
 namespace IntelliTect.TestTools.TestFramework.Tests
 {
@@ -6,7 +7,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         public ExampleLogger(TestCase tc, IObjectSerializer os)
         {
-            CurrentTestCase = tc;
+            TestCase = tc;
             Serializer = os;
         }
 
@@ -14,7 +15,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
         public string? CurrentTestBlock { get; set; }
         public IObjectSerializer Serializer { get; set; }
 
-        public TestCase CurrentTestCase { get; }
+        public TestCase TestCase { get; }
 
         public void Debug(string message)
         {
