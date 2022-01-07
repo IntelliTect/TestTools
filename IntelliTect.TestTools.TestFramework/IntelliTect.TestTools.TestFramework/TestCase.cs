@@ -1,7 +1,5 @@
-﻿using IntelliTect.TestTools.TestFramework.Logging;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

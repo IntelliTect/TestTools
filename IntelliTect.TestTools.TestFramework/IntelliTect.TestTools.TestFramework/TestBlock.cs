@@ -1,7 +1,4 @@
-﻿using IntelliTect.TestTools.TestFramework.Logging;
-using System;
-
-namespace IntelliTect.TestTools.TestFramework
+﻿namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBlock : ITestBlock
     {
