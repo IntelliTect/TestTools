@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.TestTools.TestFramework.Logging
+﻿namespace IntelliTect.TestTools.TestFramework
 {
     public interface ITestCaseLogger
     {

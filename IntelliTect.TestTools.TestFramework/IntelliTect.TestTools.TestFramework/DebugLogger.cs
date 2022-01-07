@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 
-namespace IntelliTect.TestTools.TestFramework.Logging
+namespace IntelliTect.TestTools.TestFramework
 {
     public class DebugLogger : ITestCaseLogger
     {
