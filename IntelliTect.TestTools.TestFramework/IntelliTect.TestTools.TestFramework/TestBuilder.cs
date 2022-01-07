@@ -24,7 +24,7 @@ namespace IntelliTect.TestTools.TestFramework
         private List<Block> FinallyBlocks { get; } = new();
         private IServiceCollection Services { get; } = new ServiceCollection();
         private bool HasLogger { get; set; } = true;
-        private List<InvalidOperationException> ValidationExceptions { get; } = new();
+        private List<Exception> ValidationExceptions { get; } = new();
 
         /// <summary>
         /// Used when a test case may be associated to a unique ID
@@ -116,8 +116,6 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        // We do this twice, once for Logger and once for Serializer
-        // May need to figure out how to genericize this
         public TestBuilder AddLogger<T>() where T : ITestCaseLogger
         {
             RemoveLogger();
@@ -125,18 +123,6 @@ namespace IntelliTect.TestTools.TestFramework
             HasLogger = true;
             return this;
         }
-
-        //// Is this enough convenience to keep?
-        //public TestBuilder AddLogger<TLogger, TObjectSerializer>() 
-        //    where TLogger : ITestCaseLogger 
-        //    where TObjectSerializer : IObjectSerializer
-        //{
-        //    RemoveSerializer();
-        //    RemoveLogger();
-        //    Services.AddSingleton(typeof(ITestCaseLogger), typeof(TLogger));
-        //    Services.AddSingleton(typeof(IObjectSerializer), typeof(TObjectSerializer));
-        //    return this;
-        //}
 
         public TestBuilder RemoveLogger()
         {
@@ -146,21 +132,12 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        // Maybe don't need this since we have AddLogger<TLogger,TObjectSerializer>()
-        // If we remove this, we should consolidate RemoveSerializer into AddLogger<TL, TOS> OR make RemoveSerializer private
-        //public TestBuilder AddSerializer<T>() where T : IObjectSerializer
-        //{
-        //    RemoveSerializer();
-        //    Services.AddSingleton(typeof(IObjectSerializer), typeof(T));
-        //    return this;
-        //}
-
-        //public TestBuilder RemoveSerializer()
-        //{
-        //    ServiceDescriptor? serializer = Services.FirstOrDefault(d => d.ServiceType == typeof(IObjectSerializer));
-        //    if(serializer is { }) Services.Remove(serializer);
-        //    return this;
-        //}
+        // Legacy support. Will get removed before final version is pushed out.
+        public void ExecuteTestCase()
+        {
+            TestCase tc = Build();
+            tc.Execute();
+        }
 
         public TestCase Build()
         {
@@ -209,7 +186,14 @@ namespace IntelliTect.TestTools.TestFramework
                 // What happens if the value is null?
                 // May need to null check.
                 // Might need to better handle adding duplicates than the default Dictionary error
-                b.ExecuteArgumentOverrides.Add(a.GetType(), a);
+                if(b.ExecuteArgumentOverrides.ContainsKey(a.GetType()))
+                {
+                    ValidationExceptions.Add(new ArgumentException($"An item with the same key has already been added. Key: {a.GetType()}"));
+                }
+                else
+                {
+                    b.ExecuteArgumentOverrides.Add(a.GetType(), a);
+                }
             }
             b.IsFinallyBlock = isFinally;
             return b;
@@ -220,6 +204,7 @@ namespace IntelliTect.TestTools.TestFramework
             List<MethodInfo>? executeMethod = type.GetMethods().Where(m => m.Name.ToUpperInvariant() == "EXECUTE").ToList();
             if (executeMethod.Count is not 1)
             {
+                // Don't add to validation messages we don't have any reasonable assurance what the dependencies should be.
                 throw new InvalidOperationException(
                     $"TestBlock: {type} - There must be one and only one Execute method on a test block.");
             }
@@ -235,12 +220,13 @@ namespace IntelliTect.TestTools.TestFramework
 
             if (constructors.Length > 1)
             {
+                // Don't add to validation messages we don't have any reasonable assurance what the dependencies should be.
                 throw new InvalidOperationException(
                     $"TestBlock: {tb.Type} - TestFramework supports zero or one constructors on test blocks.");
             }
 
             tb.ConstructorParams = constructors[0].GetParameters();
-            tb.PropertyParams = tb.Type.GetProperties(); // Should we check CanWrite here? We won't have the logger to be able to write out the info. Or I suppose we can add the logger here.
+            tb.PropertyParams = tb.Type.GetProperties();
             tb.ExecuteParams = tb.ExecuteMethod.GetParameters();
             // Currently do not support Fields. Should we check for them anyway at least to throw?
 
@@ -251,7 +237,10 @@ namespace IntelliTect.TestTools.TestFramework
             }
             foreach (var p in tb.PropertyParams)
             {
-                inputs.Add(p.PropertyType);
+                if(p.CanWrite)
+                {
+                    inputs.Add(p.PropertyType);
+                }
             }
             foreach (var e in tb.ExecuteParams)
             {
@@ -263,14 +252,22 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 if (tb.ExecuteArgumentOverrides.Count > tb.ExecuteParams.Length)
                 {
-                    ValidationExceptions.Add(new InvalidOperationException("TestBuilder error - TestBlock: {tb.Type} - Too many execute overrides were provided. More were handed in than parameters on Execute method."));
+                    ValidationExceptions.Add(new ArgumentException($"TestBuilder error - TestBlock: {tb.Type} - Too many execute overrides were provided. More were handed in than parameters on Execute method."));
                 }
-
-                foreach(var eao in tb.ExecuteArgumentOverrides)
+                else
                 {
-                    if (!tb.ExecuteParams.Any(ep => ep.ParameterType == eao.GetType()))
+                    foreach (KeyValuePair<Type, object> eao in tb.ExecuteArgumentOverrides)
                     {
-                        ValidationExceptions.Add(new InvalidOperationException($"TestBuilder error - TestBlock: {tb.Type} - Unable to find corresponding Execute parameter for override argument {eao}"));
+                        if (!tb.ExecuteParams.Any(ep => ep.ParameterType == eao.Key))
+                        {
+                            ValidationExceptions.Add(new ArgumentException($"TestBuilder error - TestBlock: {tb.Type} - Unable to find corresponding Execute parameter for override argument {eao}"));
+                        }
+                        else
+                        {
+                            // Input is satisfied by execute argument override.
+                            // No need to check later.
+                            inputs.Remove(eao.Key);
+                        }
                     }
                 }
             }
@@ -312,251 +309,5 @@ namespace IntelliTect.TestTools.TestFramework
                 }
             }
         }
-
-        // Legacy support
-        //public void ExecuteTestCase()
-        //{
-        //    TestCase tc = Build();
-        //    tc.ExecuteTestCase();
-        //}
-
-        //public void ExecuteTestCase()
-        //{
-        //    #region move to a Build() method and validate all dependencies are satisfied?
-        //    ServiceProvider serviceProvider = Services.BuildServiceProvider();
-        //    #endregion
-
-        //    using (var testCaseScope = serviceProvider.CreateScope())
-        //    {
-        //        var logger = testCaseScope.ServiceProvider.GetService<ILogger>();
-        //        if (logger != null)
-        //        {
-        //            logger.TestCaseKey = TestCaseName;
-        //            logger.CurrentTestBlock = "N/A";
-        //        }
-
-        //        logger?.Info("Starting test case.");
-
-        //        using (var testBlockScope = serviceProvider.CreateScope())
-        //        {
-        //            foreach (var tb in TestBlocksAndParams)
-        //            {
-        //                if (logger != null) logger.CurrentTestBlock = tb.TestBlockType.ToString();
-        //                // Might be more concise to have these as out method parameters instead of if statements after every one
-        //                var testBlockInstance = GetTestBlock(testBlockScope, tb.TestBlockType);
-        //                if (TestBlockException != null) break;
-
-        //                SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
-        //                if (TestBlockException != null) break;
-
-        //                MethodInfo execute = GetExecuteMethod(testBlockInstance);
-        //                if (TestBlockException != null) break;
-
-        //                var executeArgs = GatherTestBlockArguments(testBlockScope, execute, tb);
-        //                if (TestBlockException != null) break;
-
-        //                RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
-        //                if (TestBlockException != null) break;
-        //            }
-
-        //            // Need a much better way to handle Finally exceptions...
-        //            Exception tempException = TestBlockException;
-        //            TestBlockException = null;
-        //            // Extract loop above since it's basically the same for finally blocks?
-        //            foreach (var fb in FinallyBlocksAndParams)
-        //            {
-        //                if (logger != null) logger.CurrentTestBlock = fb.TestBlockType.ToString();
-        //                // Might be more concise to have these as out method parameters instead of if statements after every one
-        //                // Also these specific ones should not be overwriting TestBlockException
-        //                var testBlockInstance = GetTestBlock(testBlockScope, fb.TestBlockType);
-        //                if (TestBlockException != null) break;
-
-        //                SetTestBlockProperties(testBlockScope, testBlockInstance, logger);
-        //                if (TestBlockException != null) break;
-
-        //                MethodInfo execute = GetExecuteMethod(testBlockInstance);
-        //                if (TestBlockException != null) break;
-
-        //                var executeArgs = GatherTestBlockArguments(testBlockScope, execute, fb);
-        //                if (TestBlockException != null) break;
-
-        //                RunTestBlocks(testBlockInstance, execute, executeArgs, logger);
-        //                if (TestBlockException != null) break;
-        //            }
-        //            TestBlockException = tempException;
-        //        }
-
-        //        if (TestBlockException == null)
-        //        {
-        //            logger?.Info("Test case finished successfully.");
-        //        }
-        //        else
-        //        {
-        //            logger?.Critical($"Test case failed: {TestBlockException}");
-        //        }
-        //    }
-
-        //    serviceProvider.Dispose();
-
-        //    if (TestBlockException != null)
-        //    {
-        //        throw new TestCaseException("Test case failed.", TestBlockException);
-        //    }
-        //}
-
-        //        private static string GetObjectDataAsJsonString(object obj)
-        //        {
-        //            // JsonSerializer.Serialize has some different throw behavior between versions.
-        //            // One version threw an exception that occurred on a property, which happened to be a Selenium WebDriverException.
-        //            // In this one specific case, catch all exceptions and move on to provide standard behavior to all package consumers.
-        //            // TL;DR: we don't want logging failures to interrupt the test run.
-        //            try
-        //            {
-        //                return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
-        //            }
-        //#pragma warning disable CA1031 // Do not catch general exception types
-        //            catch (Exception e)
-        //#pragma warning restore CA1031 // Do not catch general exception types
-        //            {
-        //                return $"Unable to serialize object {obj?.GetType()} to JSON. Mark the relevant property with the [JsonIgnore] attribute: {e}";
-        //            }
-        //        }
-
-        //private object GetTestBlock(IServiceScope scope, Type tbType)
-        //{
-        //    var tb = scope.ServiceProvider.GetService(tbType);
-        //    if (tb == null)
-        //    {
-        //        TestBlockException = new InvalidOperationException($"Unable to find test block: {tbType.FullName}.");
-        //    }
-
-        //    return tb;
-        //}
-
-        //private void SetTestBlockProperties(IServiceScope scope, object testBlockInstance, ILogger logger)
-        //{
-        //    // Populate all of our properties
-        //    var properties = testBlockInstance.GetType().GetProperties();
-        //    foreach (var prop in properties)
-        //    {
-        //        if (!prop.CanWrite)
-        //        {
-        //            logger?.Debug($"Skipping property {prop}. No setter found.");
-        //            continue;
-        //        }
-        //        object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
-        //        if (propertyValue == null)
-        //        {
-        //            TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
-        //            break;
-        //        }
-
-        //        prop.SetValue(testBlockInstance, propertyValue);
-        //    }
-        //}
-
-        //private MethodInfo GetExecuteMethod(object testBlockInstance)
-        //{
-        //    List<MethodInfo> methods = testBlockInstance.GetType().GetMethods().Where(m => m.Name.ToUpperInvariant() == "EXECUTE").ToList();
-        //    // No longer need to do this check since we now do it in Build()
-        //    // UNLESS we end up supporting multiple Execute methods, then there may still be a need to double check at run-time?
-        //    if (methods.Count != 1)
-        //    {
-        //        TestBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
-        //            $"Please review test block {testBlockInstance.GetType()}.");
-        //        return null;
-        //    }
-
-        //    return methods[0];
-        //}
-
-        //private object[] GatherTestBlockArguments(IServiceScope scope, MethodInfo execute, (Type TestBlockType, object[] TestBlockParameters) tb)
-        //{
-        //    var executeParams = execute.GetParameters();
-
-        //    object[] executeArgs = new object[executeParams.Length];
-
-        //    // Is this the right order of checking? Or should we prioritize test block results first?
-        //    // Initial thought is that if someone is passing in explicit arguments, they probably have a good reason, so we should start there
-        //    // Populate and log all of our Execute arguments
-        //    if (executeArgs.Length > 0)
-        //    {
-        //        // We should change this to just match on type instead of length of args
-        //        // That way you can override just a single parameter if desired. That seems to be the primary (albeit rare) use case here.
-        //        if (tb.TestBlockParameters != null && executeParams.Length == tb.TestBlockParameters.Length)
-        //        {
-        //            // Eventually need to add more validation around making sure the types match here.
-        //            executeArgs = tb.TestBlockParameters;
-        //        }
-        //        else
-        //        {
-        //            for (int i = 0; i < executeArgs.Length; i++)
-        //            {
-        //                object foundResult = TestBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
-        //                    ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
-        //                if (foundResult == null)
-        //                {
-        //                    TestBlockException = new InvalidOperationException($"Unable to find an object or service for Execute parameter {executeParams[i].Name} of type {executeParams[i].ParameterType.FullName} on test block {tb.TestBlockType.FullName}.");
-        //                    break;
-        //                }
-
-        //                executeArgs[i] = foundResult;
-        //            }
-        //        }
-
-        //        // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
-        //        if (TestBlockException != null) return null;
-        //    }
-        //    return executeArgs;
-        //}
-
-        //private void RunTestBlocks(object testBlockInstance, MethodInfo execute, object[] executeArgs, ILogger logger)
-        //{
-        //    logger?.Debug($"Starting test block.");
-        //    // Log ALL inputs
-        //    // Is it worth distinguishing between Properties and Execute args?
-        //    PropertyInfo[] props = testBlockInstance.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
-        //    object[] allArgs = new object[props.Length + executeArgs.Length];
-
-        //    for (int i = 0; i < props.Length; i++)
-        //    {
-        //        allArgs[i] = props[i].GetValue(testBlockInstance);
-        //    }
-
-        //    executeArgs.CopyTo(allArgs, props.Length);
-        //    foreach (var arg in allArgs)
-        //    {
-        //        logger?.TestBlockInput(GetObjectDataAsJsonString(arg));
-        //    }
-
-        //    try
-        //    {
-        //        var result = execute.Invoke(testBlockInstance, executeArgs);
-        //        if (result != null)
-        //        {
-        //            logger?.TestBlockOutput(GetObjectDataAsJsonString(result));
-        //            TestBlockResults.Add(result);
-        //        }
-
-        //    }
-        //    catch (TargetInvocationException ex)
-        //    {
-        //        TestBlockException = ex.InnerException;
-        //        return;
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        TestBlockException = ex;
-        //        return;
-        //    }
-        //    catch (TargetParameterCountException ex)
-        //    {
-        //        ex.Data.Add("AdditionalInfo", "Test block failed: Mismatched count between Execute method arguments and supplied dependencies.");
-        //        TestBlockException = ex;
-        //        return;
-        //    }
-
-        //    logger?.Debug($"Test block completed successfully.");
-        //}
     }
 }

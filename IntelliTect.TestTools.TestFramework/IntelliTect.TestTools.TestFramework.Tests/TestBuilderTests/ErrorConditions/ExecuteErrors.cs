@@ -18,7 +18,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
 
             // Assert
             Assert.Contains(
-                ErrorMesssages.ExecuteError,
+                ErrorMessages.ExecuteError,
                 result.Message,
                 StringComparison.InvariantCultureIgnoreCase);
         }
@@ -36,7 +36,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
 
             // Assert
             Assert.Contains(
-                ErrorMesssages.ExecuteError,
+                ErrorMessages.ExecuteError,
                 result.Message,
                 StringComparison.InvariantCultureIgnoreCase);
         }

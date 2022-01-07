@@ -39,41 +39,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
             ValidateAggregateException(result, 1);
         }
 
-        [Fact]
-        public void BuildWithMismatchedDependencyInstanceAsTestBlockParamThrowsAggregateException()
-        {
-            // Arrange
-            TestBuilder builder = new();
-            builder.AddTestBlock<ExampleTestBlockWithExecuteArg>(1);
-
-            // Act
-            var result = Assert.Throws<AggregateException>(() =>
-                builder.Build());
-
-            // Assert
-            // Throws two errors.
-            // One for the execute override not mapping to any type of the method parameter
-            // One for not having the available type in the service container
-            ValidateAggregateException(result, 2);
-        }
-
-        [Fact]
-        public void BuildWithMismatchedCountDependencyInstanceAsTestBlockParamThrowsAggregateException()
-        {
-            // Arrange
-            TestBuilder builder = new();
-            builder.AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing1", "Testing2");
-
-            // Act
-            var result = Assert.Throws<AggregateException>(() =>
-                builder.Build());
-
-            // Assert
-            // Throws two errors.
-            // One for the execute override not mapping to any type of the method parameter
-            // One for not having the available type in the service container
-            ValidateAggregateException(result, 2);
-        }
+        
 
         [Fact]
         public void BuildWithMismatchedExecuteReturnThrowsAggregateException()
