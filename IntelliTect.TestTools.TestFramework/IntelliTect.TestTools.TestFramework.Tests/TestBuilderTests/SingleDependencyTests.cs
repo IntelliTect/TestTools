@@ -11,8 +11,9 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
         [Fact]
         public void Testing()
         {
-            TestBuilder builder = new();
-            builder.AddTestBlock<ExampleTestBlockWithExecuteArg>();
+            TestBuilder builder = new TestBuilder()
+                .AddDependencyInstance("Testing")
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>();
 
             builder.Build();
         }

@@ -21,8 +21,6 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
         [Fact]
         public void RemovedLoggerDoesNotThrowWhenAttemptingToActivateProp()
         {
-            // Why did this pass?
-            // I would have expected it to fail in TestCase.ActivateObject
             TestCase tc = new TestBuilder()
                 .RemoveLogger()
                 .AddTestBlock<RemovedLogBlockProp>()
@@ -31,18 +29,16 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
             tc.Execute();
         }
 
-        [Fact]
-        public void RemovedLoggerDoesNotThrowWhenAttemptingToActivateCtor()
-        {
-            // Why did this pass?
-            // I would have expected it to fail in TestCase.ActivateObject
-            TestCase tc = new TestBuilder()
-                .RemoveLogger()
-                .AddTestBlock<RemovedLogBlockCtor>()
-                .Build();
+        //[Fact]
+        //public void RemovedLoggerDoesNotThrowWhenAttemptingToActivateCtor()
+        //{
+        //    TestCase tc = new TestBuilder()
+        //        .RemoveLogger()
+        //        .AddTestBlock<RemovedLogBlockCtor>()
+        //        .Build();
 
-            tc.Execute();
-        }
+        //    tc.Execute();
+        //}
 
         [Fact]
         public void CustomLoggerAddsWithoutError()

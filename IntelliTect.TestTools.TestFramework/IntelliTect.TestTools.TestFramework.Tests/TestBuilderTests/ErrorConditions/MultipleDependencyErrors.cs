@@ -39,22 +39,22 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
             ValidateAggregateException(result, 2);
         }
 
-        [Fact]
-        public void BuildWithMismatchedDependencyAsTestBlockParamThrowsAggregateException()
-        {
-            // Arrange
-            TestBuilder builder = new();
-            builder
-                .AddTestBlock<ExampleTestBlockWithExecuteArg>(true)
-                .AddTestBlock<ExampleTestBlockWithExecuteArg>(true);
+        //[Fact]
+        //public void BuildWithMismatchedDependencyAsTestBlockParamThrowsAggregateException()
+        //{
+        //    // Arrange
+        //    TestBuilder builder = new();
+        //    builder
+        //        .AddTestBlock<ExampleTestBlockWithExecuteArg>(true)
+        //        .AddTestBlock<ExampleTestBlockWithExecuteArg>(true);
 
-            // Act
-            var result = Assert.Throws<AggregateException>(() =>
-                builder.Build());
+        //    // Act
+        //    var result = Assert.Throws<AggregateException>(() =>
+        //        builder.Build());
 
-            // Assert
-            ValidateAggregateException(result, 2);
-        }
+        //    // Assert
+        //    ValidateAggregateException(result, 2);
+        //}
 
         [Fact]
         public void BuildWithMismatchedTestBlockReturnThrowsAggregateException()

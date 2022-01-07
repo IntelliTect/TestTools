@@ -8,40 +8,40 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
 {
     public class ResolveDependenciesTests
     {
-        [Fact]
-        public void TestingMultpDep()
-        {
-            TestBuilder builder = new();
-            TestCase tc = builder
-                .AddDependencyService<SomeDependency>()
-                .AddTestBlock<SomeOtherTestBlockWithExec>()
-                .Build();
-            tc.Execute();
-        }
+        //[Fact]
+        //public void TestingMultpDep()
+        //{
+        //    TestBuilder builder = new();
+        //    TestCase tc = builder
+        //        .AddDependencyService<SomeDependency>()
+        //        .AddTestBlock<SomeOtherTestBlockWithExec>()
+        //        .Build();
+        //    tc.Execute();
+        //}
 
-        [Fact]
-        public void TestingExecDep()
-        {
-            TestBuilder builder = new();
-            TestCase tc = builder
-                .AddDependencyService<SomeDependency>()
-                .AddTestBlock<SomeTestBlock>()
-                .AddTestBlock<SomeOtherTestBlockWithExec>()
-                .Build();
-            tc.Execute();
-        }
+        //[Fact]
+        //public void TestingExecDep()
+        //{
+        //    TestBuilder builder = new();
+        //    TestCase tc = builder
+        //        .AddDependencyService<SomeDependency>()
+        //        .AddTestBlock<SomeTestBlock>()
+        //        .AddTestBlock<SomeOtherTestBlockWithExec>()
+        //        .Build();
+        //    tc.Execute();
+        //}
 
-        [Fact]
-        public void TestingCtorDep()
-        {
-            TestBuilder builder = new();
-            TestCase tc = builder
-                .AddDependencyService<SomeDependency>()
-                .AddTestBlock<SomeTestBlock>()
-                .AddTestBlock<SomeOtherTestBlockWithCtor>()
-                .Build();
-            tc.Execute();
-        }
+        //[Fact]
+        //public void TestingCtorDep()
+        //{
+        //    TestBuilder builder = new();
+        //    TestCase tc = builder
+        //        .AddDependencyService<SomeDependency>()
+        //        .AddTestBlock<SomeTestBlock>()
+        //        .AddTestBlock<SomeOtherTestBlockWithCtor>()
+        //        .Build();
+        //    tc.Execute();
+        //}
 
         [Fact]
         public void TestingReturningTwoOfSameType()
