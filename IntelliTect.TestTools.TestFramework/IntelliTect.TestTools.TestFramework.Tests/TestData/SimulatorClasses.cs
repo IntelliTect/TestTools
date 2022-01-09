@@ -1,7 +1,4 @@
-﻿using IntelliTect.TestTools.TestFramework.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 using Xunit;
 
 namespace IntelliTect.TestTools.TestFramework.Tests.TestData

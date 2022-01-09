@@ -1,13 +1,10 @@
-﻿using IntelliTect.TestTools.TestFramework.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
+﻿using Xunit;
 
 namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
 {
     public class LoggerTests
     {
+        // Add tests for having the logger ask for an IObjectSerializer
         [Fact]
         public void DefaultLoggerIsAddedOnCreate()
         {

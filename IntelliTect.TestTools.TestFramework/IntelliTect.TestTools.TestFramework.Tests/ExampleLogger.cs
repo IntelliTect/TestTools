@@ -1,19 +1,16 @@
-﻿using IntelliTect.TestTools.TestFramework.Logging;
-using System;
+﻿using System;
 
 namespace IntelliTect.TestTools.TestFramework.Tests
 {
     public class ExampleLogger : ITestCaseLogger
     {
-        public ExampleLogger(TestCase tc, IObjectSerializer os)
+        public ExampleLogger(TestCase tc)
         {
             TestCase = tc;
-            Serializer = os;
         }
 
         public string? TestCaseKey { get; set; }
         public string? CurrentTestBlock { get; set; }
-        public IObjectSerializer Serializer { get; set; }
 
         public TestCase TestCase { get; }
 

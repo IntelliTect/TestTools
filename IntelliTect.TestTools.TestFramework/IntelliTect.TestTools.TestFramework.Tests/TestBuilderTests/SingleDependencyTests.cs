@@ -1,7 +1,4 @@
 ﻿using IntelliTect.TestTools.TestFramework.Tests.TestData;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
@@ -9,7 +6,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
     public class SingleDependencyTests
     {
         [Fact]
-        public void Testing()
+        public void Testing1()
         {
             TestBuilder builder = new TestBuilder()
                 .AddDependencyInstance("Testing")
@@ -17,6 +14,17 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
 
             builder.Build();
         }
+
+        [Fact]
+        public void Testing2()
+        {
+            TestBuilder builder = new TestBuilder()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>("Testing");
+
+            TestCase tc = builder.Build();
+            tc.Execute();
+        }
+
         // Check for logger
         // Check for removed logger
 

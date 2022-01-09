@@ -46,7 +46,6 @@ namespace IntelliTect.TestTools.TestFramework
                 Log = testCaseScope.ServiceProvider.GetService<ITestCaseLogger>();
                 if (Log is not null)
                 {
-                    //Log.TestCaseKey = TestCaseName;
                     Log.CurrentTestBlock = "N/A";
                 }
 
@@ -235,18 +234,17 @@ namespace IntelliTect.TestTools.TestFramework
                 object? obj = null;
                 if(block.ExecuteArgumentOverrides.Count > 0)
                 {
-                    obj = executeArgs.FirstOrDefault(a => a.GetType() == ep.ParameterType);
-                    block.ExecuteArgumentOverrides.TryGetValue(obj.GetType(), out obj);
+                    //obj = executeArgs.FirstOrDefault(a => a.GetType() == ep.ParameterType);
+                    block.ExecuteArgumentOverrides.TryGetValue(ep.ParameterType, out obj);
                 }
 
                 if(obj is null)
                 {
                     obj = ActivateObject(scope, block, ep.ParameterType, "execute method argument");
-                }
-
-                if (obj is null)
-                {
-                    return false;
+                    if (obj is null)
+                    {
+                        return false;
+                    }
                 }
 
                 executeArgs.Add(obj);
