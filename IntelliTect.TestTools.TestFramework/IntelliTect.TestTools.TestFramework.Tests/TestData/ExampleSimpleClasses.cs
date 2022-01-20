@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace IntelliTect.TestTools.TestFramework.Tests.TestData
 {
@@ -58,7 +59,14 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
     {
         public bool Execute(bool arg)
         {
-            return !arg;
+            if (!arg)
+            {
+                throw new DivideByZeroException("Test failure");
+            }
+            else
+            {
+                return !arg;
+            }
         }
     }
 }
