@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
-        <LangVersion>9.0</LangVersion>
+        <TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
+        <LangVersion>10.0</LangVersion>
 
         <Authors>IntelliTect</Authors>
 
@@ -17,6 +17,11 @@
 	<ItemGroup Condition="'$(TargetFramework)'=='net5.0'">
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="[5.0.*, 6.0.0)" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="[5.0.*, 6.0.0)" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="[6.0.*, 7.0.0)" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="[6.0.*, 7.0.0)" />
     </ItemGroup>
 
     <!-- https://github.com/dotnet/sourcelink/issues/572 -->

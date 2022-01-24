@@ -7,7 +7,7 @@ trigger:
       - IntelliTect.TestTools.TestFramework/*
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2022'
 
 variables:
   solution: '**/IntelliTect.TestTools.TestFramework.slnf'
@@ -16,11 +16,8 @@ variables:
   version: '1.2.1'
 
 steps:
-- task: NuGetToolInstaller@0
+- task: NuGetToolInstaller@1
   displayName: 'Use latest NuGet'
-  inputs:
-    versionSpec: '5.x'
-    checkLatest: true
 
 - task: NuGetCommand@2
   displayName: 'Restore Solution'

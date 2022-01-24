@@ -15,7 +15,7 @@ Redirects the console to enable unit testing of console output and the injecting
     <copyright>Copyright 2018</copyright>
     <tags>IntelliTect, TestTools, Console, TestAPI</tags>
     <dependencies>
-      <group targetFramework=".NETCoreApp2.0" />
+      <group targetFramework=".NETCoreApp3.1" />
     </dependencies>
   </metadata>
 </package>

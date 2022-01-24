@@ -7,7 +7,7 @@ trigger:
       - IntelliTect.TestTools.Selenate/*
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2022'
 
 variables:
   solution: '**/IntelliTect.TestTools.Selenate.slnf'
@@ -16,11 +16,8 @@ variables:
   version: '2.1.0'
 
 steps:
-- task: NuGetToolInstaller@0
+- task: NuGetToolInstaller@1
   displayName: 'Use latest NuGet'
-  inputs:
-    versionSpec: '5.x'
-    checkLatest: true
 
 - task: NuGetCommand@2
   displayName: 'Restore Solution'
