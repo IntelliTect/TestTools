@@ -5,6 +5,7 @@ trigger:
   paths:
     include:
       - IntelliTect.TestTools.TestFramework/*
+      - testframework-pipeline.yml
 
 pool:
   vmImage: 'windows-2022'
