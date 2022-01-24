@@ -12,7 +12,7 @@ trigger:
       - IntelliTect.TestTools.Data/*
       - IntelliTect.TestTools.Data.slnf
       - Samples/IntelliTect.TestTools.Data.Sample/*
-      - TestTools/azure-pipelines-IntelliTect.TestTools.Data.yml
+      - azure-pipelines-IntelliTect.TestTools.Data.yml
 
 variables:
   version: '0.3.0'

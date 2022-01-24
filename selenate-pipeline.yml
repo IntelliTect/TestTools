@@ -5,6 +5,7 @@ trigger:
   paths:
     include:
       - IntelliTect.TestTools.Selenate/*
+      - selenate-pipeline.yml
 
 pool:
   vmImage: 'windows-2022'
