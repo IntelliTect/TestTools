@@ -19,7 +19,13 @@ namespace IntelliTect.TestTools.Data
 
         private IServiceProvider ServiceProvider { get; set; }
 
-        private Dictionary<(Type, string), object> ConstructorDependencies { get; } = new Dictionary<(Type, string), object>();
+        /// <summary>
+        /// Evaluated immediately after database is first constructed - useful for seeding database when
+        /// used in test collection
+        /// </summary>
+        public Func<TDbContext, Task> InitializeDatabase { get; set; }
+
+        private Dictionary<(Type, string), object> ConstructorDependencies { get; } = new();
 
         public DatabaseFixture()
         {
@@ -59,11 +65,11 @@ namespace IntelliTect.TestTools.Data
                 .GetService<ILoggerFactory>();
         }
 
-        private TDbContext CreateNewContext()
+        private async Task<TDbContext> CreateNewContext()
         {
             var constructorInfo = typeof(TDbContext)
                 .GetConstructors()
-                .Where(x => 
+                .Where(x =>
                 {
                     var parameters = x.GetParameters();
                     if (parameters.Length < 1) return false;
@@ -84,14 +90,18 @@ namespace IntelliTect.TestTools.Data
 
             var db = (TDbContext)constructorInfo.Invoke(GetConstructorValues(constructorInfo));
 
-            if (!alreadyCreated)
+            if (alreadyCreated) return db;
+
+            await db.Database.EnsureCreatedAsync();
+
+            if (InitializeDatabase is not null)
             {
-                db.Database.EnsureCreated();
+                await InitializeDatabase(await CreateNewContext());
             }
 
             return db;
 
-            static bool IsDbContextOptions(ParameterInfo parameter) 
+            static bool IsDbContextOptions(ParameterInfo parameter)
                 => parameter.ParameterType == typeof(DbContextOptions<>).MakeGenericType(typeof(TDbContext)) ||
                    parameter.ParameterType == typeof(DbContextOptions);
 
@@ -148,7 +158,7 @@ namespace IntelliTect.TestTools.Data
         /// <param name="operation">The database operation to be performed</param>
         public async Task PerformDatabaseOperation(Func<TDbContext, Task> operation)
         {
-            var db = CreateNewContext();
+            var db = await CreateNewContext();
             await operation(db);
         }
 
