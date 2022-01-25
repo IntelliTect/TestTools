@@ -15,7 +15,7 @@ trigger:
       - azure-pipelines-IntelliTect.TestTools.Data.yml
 
 variables:
-  version: '0.3.0'
+  version: '0.4.0'
   BuildConfiguration: Release
 
 pool:
