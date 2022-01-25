@@ -94,9 +94,9 @@ namespace IntelliTect.TestTools.Data
 
             await db.Database.EnsureCreatedAsync();
 
-            if (InitializeDatabase is not null)
+            if (InitializeDatabase is { } init)
             {
-                await InitializeDatabase(await CreateNewContext());
+                await init(await CreateNewContext());
             }
 
             return db;
