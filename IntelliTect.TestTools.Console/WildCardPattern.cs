@@ -1,4 +1,4 @@
-﻿// This code was originally sourced from https://github.com/PowerShell/PowerShell/blob/master/src/System.Management.Automation/engine/regex.cs
+// This code was originally sourced from https://github.com/PowerShell/PowerShell/blob/main/src/System.Management.Automation/engine/regex.cs
 // and then modified to remove of PowerShell specific elements.
 #pragma warning disable 1634, 1691
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
