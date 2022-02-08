@@ -47,6 +47,14 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
         }
     }
 
+    public class ExampleTestBlockWithMultipleExecuteArgs : TestBlock
+    {
+        public void Execute(int inputNumber1, int inputNumber2)
+        {
+            Assert.Equal(inputNumber1, inputNumber2);
+        }
+    }
+
     public class ExampleTestBlockWithStringReturn : TestBlock
     {
         public string Execute()

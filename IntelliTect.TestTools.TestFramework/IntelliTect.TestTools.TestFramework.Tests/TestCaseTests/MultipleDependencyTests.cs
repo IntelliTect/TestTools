@@ -1,43 +1,12 @@
-﻿using Xunit;
+﻿using IntelliTect.TestTools.TestFramework.Tests.TestData;
+using Xunit;
 
 namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
 {
-    public class ResolveDependenciesTests
+    public class MultipleDependencyTests
     {
-        //[Fact]
-        //public void TestingMultpDep()
-        //{
-        //    TestBuilder builder = new();
-        //    TestCase tc = builder
-        //        .AddDependencyService<SomeDependency>()
-        //        .AddTestBlock<SomeOtherTestBlockWithExec>()
-        //        .Build();
-        //    tc.Execute();
-        //}
-
-        //[Fact]
-        //public void TestingExecDep()
-        //{
-        //    TestBuilder builder = new();
-        //    TestCase tc = builder
-        //        .AddDependencyService<SomeDependency>()
-        //        .AddTestBlock<SomeTestBlock>()
-        //        .AddTestBlock<SomeOtherTestBlockWithExec>()
-        //        .Build();
-        //    tc.Execute();
-        //}
-
-        //[Fact]
-        //public void TestingCtorDep()
-        //{
-        //    TestBuilder builder = new();
-        //    TestCase tc = builder
-        //        .AddDependencyService<SomeDependency>()
-        //        .AddTestBlock<SomeTestBlock>()
-        //        .AddTestBlock<SomeOtherTestBlockWithCtor>()
-        //        .Build();
-        //    tc.Execute();
-        //}
+        // Test for...
+        // Two of the same type last one should win, but that's basic MS DI behavior
 
         [Fact]
         public void TestingReturningTwoOfSameType()
@@ -47,6 +16,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
             TestCase tc = builder
                 .AddTestBlock<SomeTestBlock>()
                 .AddTestBlock<SomeTestBlock>()
+                .AddTestBlock<ExampleTestBlockWithBoolReturn>()
                 .Build();
             tc.Execute();
         }

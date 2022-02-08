@@ -85,7 +85,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
         }
 
         [Fact]
-        public void BuildWithMismatchedCountDependencyInstanceAsTestBlockParamThrowsAggregateException()
+        public void BuildWithDuplicateExecuteOverridesThrowsAggregateException()
         {
             // Arrange
             TestBuilder builder = new();
@@ -101,6 +101,26 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
                 1,
                 ErrorMessages.AlreadyAddedError);
         }
-        // Need to test above with adding two dependencies, too
+
+        [Fact]
+        public void BuildWithExecuteOverrideOutOfOrderReturnThrowsAggregateException()
+        {
+            // Arrange
+            TestBuilder builder = new();
+            builder
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>(true)
+                .AddTestBlock<ExampleTestBlockWithStringReturn>();
+
+            // Act
+            var result = Assert.Throws<AggregateException>(() =>
+                builder.Build());
+
+            // Assert
+            ValidateAggregateException(
+                result,
+                2,
+                ErrorMessages.MismatchedExecuteOverrideError,
+                ErrorMessages.MissingInputError);
+        }
     }
 }

@@ -4,47 +4,95 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
 {
     public class LoggerTests
     {
-        // Add tests for having the logger ask for an IObjectSerializer
         [Fact]
         public void DefaultLoggerIsAddedOnCreate()
         {
+            // Arrange
             TestCase tc = new TestBuilder()
                 .AddTestBlock<DefaultLogBlock>()
                 .Build();
 
+            // Act / Assert
             tc.Execute();
         }
 
         [Fact]
         public void RemovedLoggerDoesNotThrowWhenAttemptingToActivateProp()
         {
+            // Arrange
             TestCase tc = new TestBuilder()
                 .RemoveLogger()
                 .AddTestBlock<RemovedLogBlockProp>()
                 .Build();
 
+            // Act / Assert
             tc.Execute();
         }
 
-        //[Fact]
-        //public void RemovedLoggerDoesNotThrowWhenAttemptingToActivateCtor()
-        //{
-        //    TestCase tc = new TestBuilder()
-        //        .RemoveLogger()
-        //        .AddTestBlock<RemovedLogBlockCtor>()
-        //        .Build();
+        [Fact]
+        public void RemovedLoggerDoesNotThrowWhenAttemptingToActivateCtor()
+        {
+            // Arrange
+            TestCase tc = new TestBuilder()
+                .RemoveLogger()
+                .AddTestBlock<RemovedLogBlockCtor>()
+                .Build();
 
-        //    tc.Execute();
-        //}
+            // Act / Assert
+            tc.Execute();
+        }
+
+        [Fact]
+        public void RemovedLoggerDoesNotThrowWhenAttemptingToActivateExecuteArg()
+        {
+            // Arrange
+            TestCase tc = new TestBuilder()
+                .RemoveLogger()
+                .AddTestBlock<RemovedLogBlockExecuteArg>()
+                .Build();
+
+            // Act / Assert
+            tc.Execute();
+        }
 
         [Fact]
         public void CustomLoggerAddsWithoutError()
         {
+            // Arrange
             TestCase tc = new TestBuilder()
                 .AddLogger<CustomLogger>()
                 .AddTestBlock<CustomLogBlock>()
                 .Build();
 
+            // Act / Assert
+            tc.Execute();
+        }
+
+        [Fact]
+        public void RemovingLoggerTwiceDoesNotThrow()
+        {
+            // Arrange
+            TestCase tc = new TestBuilder()
+                .RemoveLogger()
+                .RemoveLogger()
+                .AddTestBlock<RemovedLogBlockProp>()
+                .Build();
+
+            // Act / Assert
+            tc.Execute();
+        }
+
+        [Fact]
+        public void AddingLoggerThanRemovingDoesNotThrow()
+        {
+            // Arrange
+            TestCase tc = new TestBuilder()
+                .AddLogger<CustomLogger>()
+                .RemoveLogger()
+                .AddTestBlock<RemovedLogBlockProp>()
+                .Build();
+
+            // Act / Assert
             tc.Execute();
         }
     }
@@ -76,6 +124,14 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
         public void Execute()
         {
             Assert.Null(Log);
+        }
+    }
+
+    public class RemovedLogBlockExecuteArg : TestBlock
+    {
+        public void Execute(ITestCaseLogger? log)
+        {
+            Assert.Null(log);
         }
     }
 

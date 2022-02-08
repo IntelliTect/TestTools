@@ -164,8 +164,6 @@ namespace IntelliTect.TestTools.TestFramework
                 testCase.FinallyBlocks.Add(fb);
             }
 
-            CheckContainer(outputs/*, provider*/);
-
             if (ValidationExceptions.Count > 0)
             {
                 throw new AggregateException(ValidationExceptions);
@@ -180,14 +178,11 @@ namespace IntelliTect.TestTools.TestFramework
 
             MethodInfo execute = FindExecuteMethod(typeof(T));
             Block b = new(typeof(T), execute);
-            foreach (object? a in args)
+            foreach (object a in args)
             {
-                // What happens if the value is null?
-                // May need to null check.
-                // Might need to better handle adding duplicates than the default Dictionary error
                 if(b.ExecuteArgumentOverrides.ContainsKey(a.GetType()))
                 {
-                    ValidationExceptions.Add(new ArgumentException($"An item with the same key has already been added. Key: {a.GetType()}"));
+                    ValidationExceptions.Add(new ArgumentException($"TestBlock: {typeof(T)} - Multiple execute argument overrides of the same type are not allowed: {a.GetType()}"));
                 }
                 else
                 {
@@ -247,11 +242,11 @@ namespace IntelliTect.TestTools.TestFramework
             }
 
             if (!HasLogger) inputs.RemoveWhere(i => i == typeof(ITestCaseLogger));
-            if (tb.ExecuteArgumentOverrides is not null)
+            if (tb.ExecuteArgumentOverrides.Count is not 0)
             {
                 if (tb.ExecuteArgumentOverrides.Count > tb.ExecuteParams.Length)
                 {
-                    ValidationExceptions.Add(new ArgumentException($"TestBuilder error - TestBlock: {tb.Type} - Too many execute overrides were provided. More were handed in than parameters on Execute method."));
+                    ValidationExceptions.Add(new ArgumentException($"TestBlock: {tb.Type} - Too many execute overrides were provided. More were handed in than parameters on Execute method."));
                 }
                 else
                 {
@@ -259,7 +254,7 @@ namespace IntelliTect.TestTools.TestFramework
                     {
                         if (!tb.ExecuteParams.Any(ep => ep.ParameterType == eao.Key))
                         {
-                            ValidationExceptions.Add(new ArgumentException($"TestBuilder error - TestBlock: {tb.Type} - Unable to find corresponding Execute parameter for override argument {eao}"));
+                            ValidationExceptions.Add(new ArgumentException($"TestBlock: {tb.Type} - Unable to find corresponding Execute parameter for override argument {eao}"));
                         }
                         else
                         {
@@ -275,7 +270,7 @@ namespace IntelliTect.TestTools.TestFramework
             {
                 // Do we also need to match on implementation here?
                 ServiceDescriptor desc = new(i, i, ServiceLifetime.Scoped);
-                CheckContainerForFirstLevelDependency(desc, outputs, $"TestBuilder error - TestBlock: {tb.Type} - Unable to satisfy test block input: {i}.");
+                CheckContainerForFirstLevelDependency(desc, outputs, $"TestBlock: {tb.Type} - Unable to satisfy test block input: {i}.");
             }
 
             Type executeReturns = tb.ExecuteMethod.ReturnType;
@@ -285,17 +280,9 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        private void CheckContainer(List<Type?> outputs/*, ServiceProvider provider*/)
-        {
-            foreach (var s in Services)
-            {
-                CheckContainerForFirstLevelDependency(s, outputs, $"TestBuilder error - ServiceContainer - Unable to satisfy service: {s}.");
-            }
-        }
-
         private void CheckContainerForFirstLevelDependency(ServiceDescriptor desc, List<Type?> outputs, string errorMessage)
         {
-            // This will NOT check that dependencies of dependencies are satisfied.
+            // This method will NOT check that dependencies of dependencies are satisfied.
             ServiceDescriptor? obj = Services.FirstOrDefault(x => x.ServiceType == desc.ServiceType || x.ImplementationType == desc.ImplementationType);
             if (obj is null)
             {

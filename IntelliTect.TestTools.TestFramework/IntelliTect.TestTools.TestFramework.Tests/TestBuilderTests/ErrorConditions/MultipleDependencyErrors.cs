@@ -19,7 +19,10 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
                 builder.Build());
 
             // Assert
-            ValidateAggregateException(result, 2);
+            ValidateAggregateException(
+                result, 
+                2,
+                ErrorMessages.MissingInputError);
         }
 
         [Fact]
@@ -27,34 +30,41 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
         {
             // Arrange
             TestBuilder builder = new TestBuilder()
+                .AddDependencyInstance(true)
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>()
-                .AddTestBlock<ExampleTestBlockWithExecuteArg>()
-                .AddDependencyInstance(true);
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>();
 
             // Act
             var result = Assert.Throws<AggregateException>(() =>
                 builder.Build());
 
             // Assert
-            ValidateAggregateException(result, 2);
+            ValidateAggregateException(
+                result,
+                2,
+                ErrorMessages.MissingInputError);
         }
 
-        //[Fact]
-        //public void BuildWithMismatchedDependencyAsTestBlockParamThrowsAggregateException()
-        //{
-        //    // Arrange
-        //    TestBuilder builder = new();
-        //    builder
-        //        .AddTestBlock<ExampleTestBlockWithExecuteArg>(true)
-        //        .AddTestBlock<ExampleTestBlockWithExecuteArg>(true);
+        [Fact]
+        public void BuildWithMismatchedDependencyAsTestBlockParamThrowsAggregateException()
+        {
+            // Arrange
+            TestBuilder builder = new();
+            builder
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>(true)
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>(true);
 
-        //    // Act
-        //    var result = Assert.Throws<AggregateException>(() =>
-        //        builder.Build());
+            // Act
+            var result = Assert.Throws<AggregateException>(() =>
+                builder.Build());
 
-        //    // Assert
-        //    ValidateAggregateException(result, 2);
-        //}
+            // Assert
+            ValidateAggregateException(
+                result,
+                4,
+                ErrorMessages.MissingInputError,
+                ErrorMessages.MismatchedExecuteOverrideError);
+        }
 
         [Fact]
         public void BuildWithMismatchedTestBlockReturnThrowsAggregateException()
@@ -66,15 +76,37 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
                 .AddTestBlock<ExampleTestBlockWithBoolReturn>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>();
-            //builder = AddCommonBlock(builder)
-            //    ;
 
             // Act
             var result = Assert.Throws<AggregateException>(() =>
                 builder.Build());
 
             // Assert
-            ValidateAggregateException(result, 2);
+            ValidateAggregateException(
+                result,
+                2,
+                ErrorMessages.MissingInputError);
+        }
+
+        [Fact]
+        public void BuildWithExecuteOverrideAndMismatchedTestBlockReturnThrowsAggregateException()
+        {
+            // Arrange
+            TestBuilder builder = new();
+            builder
+                .AddTestBlock<ExampleTestBlockWithBoolReturn>(true)
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>()
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>();
+
+            // Act
+            var result = Assert.Throws<AggregateException>(() =>
+                builder.Build());
+
+            // Assert
+            ValidateAggregateException(
+                result,
+                2,
+                ErrorMessages.MissingInputError);
         }
     }
 }
