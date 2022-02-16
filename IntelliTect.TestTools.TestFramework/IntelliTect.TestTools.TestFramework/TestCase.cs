@@ -55,7 +55,7 @@ namespace IntelliTect.TestTools.TestFramework
                 foreach (var tb in TestBlocks)
                 {
                     if (Log is not null) Log.CurrentTestBlock = tb.Type.ToString();
-                    Log?.Info($"Starting test block: {tb.Type}");
+                    Log?.Debug($"Starting test block: {tb.Type}");
 
                     if (!TryGetBlock(testCaseScope, tb, out object testBlockInstance)) break;
                     if (!TrySetBlockProperties(testCaseScope, tb, testBlockInstance)) break;
