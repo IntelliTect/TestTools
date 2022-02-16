@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.TestTools.TestFramework.Tests
+﻿namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
 {
     public interface IExampleDataInterface
     {

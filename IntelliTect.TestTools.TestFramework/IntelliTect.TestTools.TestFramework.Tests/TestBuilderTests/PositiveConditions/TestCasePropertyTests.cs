@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.TestTools.TestFramework.Tests.TestData.TestBlocks;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
@@ -110,6 +111,19 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
             Assert.Equal(1, tc.TestCaseId);
         }
 
+        // May not need below test.
+        // Still undecided if this should even be configurable.
+        [Fact]
+        public void ThrowOnFinallyBlockDefaultsToTrue()
+        {
+            // Arrange / Act
+            TestBuilder tb = new();
+            TestCase tc = tb.Build();
+
+            // Assert
+            Assert.True(tc.ThrowOnFinallyBlockException);
+        }
+
         [Fact]
         public void TestCasePassedDefaultsToFalse()
         {
@@ -121,16 +135,36 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
             Assert.False(tc.Passed);
         }
 
-        // May not need below test.
-        // Still undecided if this should even be configurable.
         [Fact]
-        public void ThrowOnFinallyBlockDefaultsToTrue()
+        public void TestCasePassedRemainsFalseOnFailure()
         {
-            TestBuilder tb = new();
-            TestCase tc = tb.Build();
+            // Arrange
+            TestCase tc = new TestBuilder()
+                .AddDependencyInstance("Fail")
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>()
+                .Build();
+
+            // Act
+            Assert.Throws<TestCaseException>(() => tc.Execute());
 
             // Assert
-            Assert.True(tc.ThrowOnFinallyBlockException);
+            Assert.False(tc.Passed);
+        }
+
+        [Fact]
+        public void TestCasePassedTurnsTrueOnSuccessfulExecution()
+        {
+            // Arrange
+            TestCase tc = new TestBuilder()
+                .AddDependencyInstance("Testing")
+                .AddTestBlock<ExampleTestBlockWithExecuteArg>()
+                .Build();
+
+            // Act
+            tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
     }
 }

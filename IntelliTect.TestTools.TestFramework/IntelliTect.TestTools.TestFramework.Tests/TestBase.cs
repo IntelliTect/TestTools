@@ -20,21 +20,6 @@ namespace IntelliTect.TestTools.TestFramework.Tests
                         s,
                         StringComparison.InvariantCultureIgnoreCase));
             }
-
-            //foreach (Exception? ie in result.InnerExceptions)
-            //{
-            //    Assert.Equal(typeof(InvalidOperationException), ie.GetType());
-            //    // Do we need to verify that every single error message gets triggered?
-            //    Assert.Contains(
-            //        messages, 
-            //        m => m.Contains(
-            //            ie.Message,
-            //            StringComparison.InvariantCultureIgnoreCase));
-            //    //Assert.Contains(
-            //    //    messages,
-            //    //    ie.Message,
-            //    //    StringComparison.InvariantCultureIgnoreCase);
-            //}
         }
     }
 }

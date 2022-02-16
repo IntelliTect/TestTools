@@ -1,4 +1,5 @@
-﻿using IntelliTect.TestTools.TestFramework.Tests.TestData;
+﻿using IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies;
+using IntelliTect.TestTools.TestFramework.Tests.TestData.TestBlocks;
 using Xunit;
 
 namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
@@ -8,6 +9,8 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
         // Test for...
         // Adding a dependency that itself does not have a satisfied dependency
         // A test block output is successfully used in a subsequent test block
+        // Do we need to test asking for a null type?
+        // Do we need to test returning a null type?
 
         [Fact]
         public void ExecuteTestWithAvailableInstanceForExecuteArg()
@@ -18,8 +21,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .AddTestBlock<ExampleTestBlockWithExecuteArg>()
                 .Build();
 
-            // Act / Assert
+            // Act
             tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
 
         [Fact]
@@ -31,8 +37,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .AddTestBlock<ExampleTestBlockWithProperty>()
                 .Build();
 
-            // Act / Assert
+            // Act
             tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
 
         [Fact]
@@ -44,8 +53,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .AddTestBlock<ExampleTestBlockWithConstructor>()
                 .Build();
 
-            // Act / Assert
+            // Act
             tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
 
         [Fact]
@@ -57,8 +69,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .AddTestBlock<ExampleTestBlockWithPropertyWithNoSetter>()
                 .Build();
 
-            // Act / Assert
+            // Act
             tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
 
         // Note: the following tests should be exercising out of the box MS DI functionality.
@@ -73,8 +88,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
                 .Build();
 
-            // Act / Assert
+            // Act
             tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
 
         [Fact]
@@ -83,11 +101,14 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
             // Arrange
             TestCase tc = new TestBuilder()
                 .AddDependencyInstance<IExampleDataInterface>(new ExampleInterface())
-                .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
+                .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
                 .Build();
 
-            // Act / Assert
+            // Act
             tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
 
         [Fact]
@@ -96,11 +117,14 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
             // Arrange
             TestCase tc = new TestBuilder()
                 .AddDependencyService<IExampleDataInterface, ExampleInterface>()
-                .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
+                .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
                 .Build();
 
-            // Act / Assert
+            // Act
             tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
 
         [Fact]
@@ -108,64 +132,15 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
         {
             // Arrange
             TestCase tc = new TestBuilder()
-                .AddDependencyService<ExampleInterface>(new ExampleDataThingFactory().ExampleDataThing)
+                .AddDependencyService<ExampleInterface>(new ExampleFactory().DoesNotThrow)
                 .AddTestBlock<ExampleTestBlockForFactoryWithExecuteArg>()
                 .Build();
 
-            // Act / Assert
+            // Act
             tc.Execute();
+
+            // Assert
+            Assert.True(tc.Passed);
         }
-
-
-        // OLD TESTS
-        // REFACTOR AND MOVE AS NEEDED
-
-
-        //[Fact]
-        //public void FetchByObjectInstanceForMultipleDependencies()
-        //{
-        //    TestBuilder builder = new();
-        //    builder
-        //        .AddDependencyInstance("Testing")
-        //        .AddDependencyInstance(1234)
-        //        .AddTestBlock<ExampleTestBlockWithMultipleDependencies>()
-        //        .ExecuteTestCase()
-        //        ;
-        //}
-
-        //[Fact]
-        //public void AddFinallyBlockThrowsExpectedException()
-        //{
-        //    TestBuilder builder = new();
-        //    builder
-        //        .AddTestBlock<ExampleTestBlockWithReturn>(false)
-        //        .AddFinallyBlock<ExampleFinallyBlock>()
-        //        .ExecuteTestCase();
-        //}
-
-        //// Actually... this probably shouldn't throw since it's a "finally" block meant to clean stuff up
-        //// Figure out the right behavior and fix test before moving further with finally blocks
-        //[Fact]
-        //public void AddFinallyBlockDoesNotThrowIfExceptionOccursInFinally()
-        //{
-        //    TestBuilder builder = new();
-        //    builder
-        //        .AddTestBlock<ExampleTestBlockWithReturn>(true)
-        //        .AddFinallyBlock<ExampleFinallyBlock>()
-        //        .ExecuteTestCase();
-        //}
-
-        //// How do we verify this is working correctly?
-        //[Fact]
-        //public void AddFinallyBlockExecutesAfterException()
-        //{
-        //    TestBuilder builder = new();
-        //    builder
-        //        .AddDependencyInstance(true)
-        //        .AddTestBlock<ExampleTestBlockWithMultipleExecuteMethods>()
-        //        .AddFinallyBlock<ExampleFinallyBlock>();
-
-        //    Assert.Throws<TestCaseException>(() => builder.ExecuteTestCase());
-        //}
     }
 }

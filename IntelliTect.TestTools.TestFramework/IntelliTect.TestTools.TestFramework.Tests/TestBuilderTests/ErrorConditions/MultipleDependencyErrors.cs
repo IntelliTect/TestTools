@@ -1,4 +1,4 @@
-﻿using IntelliTect.TestTools.TestFramework.Tests.TestData;
+﻿using IntelliTect.TestTools.TestFramework.Tests.TestData.TestBlocks;
 using System;
 using Xunit;
 

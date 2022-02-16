@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit;
 
-namespace IntelliTect.TestTools.TestFramework.Tests.TestData
+namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
 {
     // BREAK OUT INTO OWN FILES AS NEEDED
 
@@ -84,11 +84,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
 
     public class ExampleTestBlockWithPropertyWithNoSetter : TestBlock
     {
-        public string Input { get; } = "";
+        public string Input { get; } = "Not Set";
 
         public void Execute()
         {
-            Assert.Null(Input);
+            Assert.Equal("Not Set", Input);
         }
     }
 
@@ -101,13 +101,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
         }
     }
 
-    
-
     public class ExampleFinallyBlock : TestBlock
     {
         public void Execute(bool result)
         {
-            Assert.True(result, "Finally block did not receive correct input");
+            Assert.True(result, "This is an expected failure.");
         }
     }
 }

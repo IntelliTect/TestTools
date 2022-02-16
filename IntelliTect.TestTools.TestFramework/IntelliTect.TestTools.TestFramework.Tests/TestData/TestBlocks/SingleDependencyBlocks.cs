@@ -1,7 +1,8 @@
-﻿using System;
+﻿using IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies;
+using System;
 using Xunit;
 
-namespace IntelliTect.TestTools.TestFramework.Tests.TestData
+namespace IntelliTect.TestTools.TestFramework.Tests.TestData.TestBlocks
 {
     public class ExampleTestBlockWithExecuteArg : TestBlock
     {
@@ -28,30 +29,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
             Input = input;
         }
 
+        private string Input { get; }
+
         public void Execute()
         {
             Assert.Equal("Testing", Input);
-        }
-
-        private string Input { get; }
-    }
-
-    public class ExampleTestBlockWithMultipleDependencies : TestBlock
-    {
-        public string? InputText { get; set; }
-
-        public void Execute(int inputNumber)
-        {
-            Assert.Equal("Testing", InputText);
-            Assert.Equal(1234, inputNumber);
-        }
-    }
-
-    public class ExampleTestBlockWithMultipleExecuteArgs : TestBlock
-    {
-        public void Execute(int inputNumber1, int inputNumber2)
-        {
-            Assert.Equal(inputNumber1, inputNumber2);
         }
     }
 
@@ -75,6 +57,17 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData
             {
                 return !arg;
             }
+        }
+    }
+
+    public class SomeTestBlock : ITestBlock
+    {
+        public ITestCaseLogger? Log { get; }
+
+        public bool Execute(SomeDependency dep)
+        {
+            Assert.NotNull(dep);
+            return true;
         }
     }
 }
