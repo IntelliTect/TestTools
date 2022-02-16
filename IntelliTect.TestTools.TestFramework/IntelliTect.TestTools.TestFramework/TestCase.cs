@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -53,37 +54,22 @@ namespace IntelliTect.TestTools.TestFramework
 
                 foreach (var tb in TestBlocks)
                 {
-                    // If we do below, where we add the result back to the container, does it make sense to do...
-                    // using (var testBlockScope = Services.CreateScope())?
-                    // Then we resolve testblocks from *that* scope?
-                    // Will need to test things like:
-                    // null return
-                    // Duplicate returns from dif test blocks
-                    // Interface returns
                     if (Log is not null) Log.CurrentTestBlock = tb.Type.ToString();
                     Log?.Info($"Starting test block: {tb.Type}");
 
-                    // Should we un-nest these?
-                    // Might be easier to break if any single one fails if we do.
-                    // Should we re-nest these and have two out args?
                     if (!TryGetBlock(testCaseScope, tb, out object testBlockInstance)) break;
                     if (!TrySetBlockProperties(testCaseScope, tb, testBlockInstance)) break;
-                    if (!TryGetExecuteArguments(testCaseScope, tb, out List<object> executeArgs)) break;
+                    if (!TryGetExecuteArguments(testCaseScope, tb, out List<object?> executeArgs)) break;
 
-                    if(TryRunBlock(tb, testBlockInstance, executeArgs))
+                    if (!TryRunBlock(tb, testBlockInstance, executeArgs))
                     {
-                        Passed = true;
-                    }
-                    else
-                    {
-                        if (TestBlockException is not null)
+                        if (TestBlockException is null)
                         {
-                            break;
+                            TestBlockException = new(
+                                $"Unknown error occurred while running test block {tb}. " +
+                                "Please file an issue: https://github.com/IntelliTect/TestTools/issues");
                         }
-                        else
-                        {
-                            TestBlockException = new($"Unknown error occurred while running test block {tb}");
-                        }
+                        break;
                     }
                 }
 
@@ -92,29 +78,23 @@ namespace IntelliTect.TestTools.TestFramework
                     if (Log is not null) Log.CurrentTestBlock = fb.Type.ToString();
                     Log?.Info($"Starting finally block: {fb.Type}");
 
-                    if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance)) break;
-                    if (!TrySetBlockProperties(testCaseScope, fb, finallyBlockInstance)) break;
-                    if (!TryGetExecuteArguments(testCaseScope, fb, out List<object> executeArgs)) break;
-                    if(TryRunBlock(fb, finallyBlockInstance, executeArgs))
+                    if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance)) continue;
+                    if (!TrySetBlockProperties(testCaseScope, fb, finallyBlockInstance)) continue;
+                    if (!TryGetExecuteArguments(testCaseScope, fb, out List<object?> executeArgs)) continue;
+                    // What should we do here if any of these fail?
+                    // Desired behavior is to still run the next finally block.
+                    // Maybe log?
+                    if (!TryRunBlock(fb, finallyBlockInstance, executeArgs))
                     {
-                        // Do nothing?
-                    }
-                    else
-                    {
-                        // If ThrowOnFinallyError do stuff?
+                        // Maybe change this to foreach loop so we can check if the number of FinallyBlockExceptions matches the iteration we're on?
+                        Log?.Critical($"Finally block failed: {FinallyBlockExceptions.LastOrDefault()}");
                     }
                 }
 
-
-                // Do we need to do all of the below checks, or can we just do if (Passed) { }?
-                if (TestBlockException is null && Passed)
+                if (TestBlockException is null)
                 {
+                    Passed = true;
                     Log?.Info("Test case finished successfully.");
-                }
-                else if ((TestBlockException is not null && Passed)
-                    || (TestBlockException is null && !Passed))
-                {
-                    //TestBlockExceptions.Add(new SystemException("Unknown error occured, please review logs."));
                 }
                 else
                 {
@@ -124,10 +104,31 @@ namespace IntelliTect.TestTools.TestFramework
 
             services.Dispose();
 
-            if (TestBlockException is not null)
+            // This seems... gross. Revisit after sleeping.
+            // Maybe call out in a code review.
+            if (TestBlockException is not null
+                && (!ThrowOnFinallyBlockException
+                || !FinallyBlockExceptions.Any()))
             {
                 throw new TestCaseException("Test case failed.", TestBlockException);
             }
+            else if(TestBlockException is not null
+                && ThrowOnFinallyBlockException
+                && FinallyBlockExceptions.Any())
+            {
+                FinallyBlockExceptions.Insert(0, TestBlockException);
+                throw new AggregateException("Test case failed and finally blocks failed.",
+                    FinallyBlockExceptions);
+            }
+            else if(TestBlockException is null
+                && ThrowOnFinallyBlockException
+                && FinallyBlockExceptions.Any())
+            {
+                throw new AggregateException("Test case succeeded, but one or more finally blocks failed.",
+                        FinallyBlockExceptions);
+            }
+
+            //if (tce is not null) throw tce;
         }
 
         // Does it make sense for testBlock to be nullable?
@@ -202,13 +203,24 @@ namespace IntelliTect.TestTools.TestFramework
                 object? obj = ActivateObject(scope, block, c.ParameterType, "constructor argument");
                 if (obj is null)
                 {
-                    blockInstance = null;
-                    return false;
+                    if(!CheckForITestLogger(c.ParameterType))
+                    {
+                        blockInstance = null;
+                        return false;
+                    }
                 }
 
                 blockParams.Add(obj);
             }
-            blockInstance = Activator.CreateInstance(block.Type, blockParams);
+            blockInstance = Activator.CreateInstance(block.Type,
+                BindingFlags.CreateInstance |
+                BindingFlags.Public |
+                BindingFlags.Instance |
+                BindingFlags.OptionalParamBinding,
+                null,
+                blockParams.ToArray(),
+                CultureInfo.CurrentCulture);
+            //blockInstance = Activator.CreateInstance(block.Type, blockParams);
             return true;
         }
 
@@ -225,15 +237,8 @@ namespace IntelliTect.TestTools.TestFramework
                 object? obj = ActivateObject(scope, block, prop.PropertyType, "property");
                 if (obj is null)
                 {
-                    // Seems like we need a better way to handle this.
-                    if (prop.PropertyType == typeof(ITestCaseLogger))
+                    if(CheckForITestLogger(prop.PropertyType))
                     {
-                        TestBlockException = null;
-                        if(FinallyBlockExceptions.Count > 0)
-                        {
-                            FinallyBlockExceptions.Remove(FinallyBlockExceptions.Last());
-                        }
-                        
                         continue;
                     }
 
@@ -247,15 +252,14 @@ namespace IntelliTect.TestTools.TestFramework
             return true;
         }
 
-        private bool TryGetExecuteArguments(IServiceScope scope, Block block, out List<object> executeArgs)
+        private bool TryGetExecuteArguments(IServiceScope scope, Block block, out List<object?> executeArgs)
         {
-            executeArgs = new List<object>();
+            executeArgs = new List<object?>();
             foreach (ParameterInfo? ep in block.ExecuteParams)
             {
                 object? obj = null;
                 if(block.ExecuteArgumentOverrides.Count > 0)
                 {
-                    //obj = executeArgs.FirstOrDefault(a => a.GetType() == ep.ParameterType);
                     block.ExecuteArgumentOverrides.TryGetValue(ep.ParameterType, out obj);
                 }
 
@@ -264,6 +268,12 @@ namespace IntelliTect.TestTools.TestFramework
                     obj = ActivateObject(scope, block, ep.ParameterType, "execute method argument");
                     if (obj is null)
                     {
+                        if (CheckForITestLogger(ep.ParameterType))
+                        {
+                            executeArgs.Add(null);
+                            continue;
+                        }
+
                         return false;
                     }
                 }
@@ -295,7 +305,9 @@ namespace IntelliTect.TestTools.TestFramework
                 }
             }
 
-            if (obj is null)
+            // If we've already set an exception, i.e. the GetService call above failed, don't override it.
+            // This is to account for two different scenarios: a dependency is not present (below) vs. a dependency is present but failed to activate (above).
+            if (obj is null && TestBlockException is null)
             {
                 HandleFinallyBlock(
                         block,
@@ -309,14 +321,15 @@ namespace IntelliTect.TestTools.TestFramework
             return obj;
         }
 
-        private bool TryRunBlock(Block block, object blockInstance, List<object> executeArgs)
+        private bool TryRunBlock(Block block, object blockInstance, List<object?> executeArgs)
         {
-            Log?.Info($"Starting test block {block.Type}");
             bool result = false;
-            foreach (var arg in executeArgs)
-            {
-                Log?.TestBlockInput(arg);
-            }
+
+            HandleFinallyBlock(
+                block,
+                () => Log?.Debug($"Executing test block: {block.Type}"),
+                () => Log?.Debug($"Executing finally block: {block.Type}")
+            );
 
             try
             {
@@ -331,16 +344,28 @@ namespace IntelliTect.TestTools.TestFramework
             }
             catch (TargetInvocationException ex)
             {
-                TestBlockException = ex.InnerException;
+                HandleFinallyBlock(
+                    block,
+                    () => TestBlockException = ex.InnerException,
+                    () => FinallyBlockExceptions.Add(ex.InnerException)
+                );
             }
             catch (ArgumentException ex)
             {
-                TestBlockException = ex;
+                HandleFinallyBlock(
+                    block,
+                    () => TestBlockException = ex,
+                    () => FinallyBlockExceptions.Add(ex)
+                );
             }
             catch (TargetParameterCountException ex)
             {
                 ex.Data.Add("AdditionalInfo", "Test block failed: Mismatched count between Execute method arguments and supplied dependencies.");
-                TestBlockException = ex;
+                HandleFinallyBlock(
+                    block,
+                    () => TestBlockException = ex,
+                    () => FinallyBlockExceptions.Add(ex)
+                );
             }
 
             if (result) Log?.Debug($"Test block completed successfully.");
@@ -359,173 +384,21 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-
-        // TEMPORARY
-        // RE-WRITE ALL OF THIS NOW THAT WE BUILD FIRST
-        //private object GetTestBlock(IServiceScope scope, Type tbType)
-        //{
-        //    var tb = scope.ServiceProvider.GetService(tbType);
-        //    if (tb == null)
-        //    {
-        //        TestBlockException = new InvalidOperationException($"Unable to find test block: {tbType.FullName}.");
-        //    }
-
-        //    return tb!;
-        //}
-
-        //private void SetTestBlockProperties(IServiceScope scope, object testBlockInstance, ITestCaseLogger logger)
-        //{
-        //    // Populate all of our properties
-        //    var properties = testBlockInstance.GetType().GetProperties();
-        //    foreach (var prop in properties)
-        //    {
-        //        if (!prop.CanWrite)
-        //        {
-        //            logger?.Debug($"Skipping property {prop}. No setter found.");
-        //            continue;
-        //        }
-        //        object propertyValue = scope.ServiceProvider.GetService(prop.PropertyType);
-        //        if (propertyValue == null)
-        //        {
-        //            TestBlockException = new InvalidOperationException($"Unable to find an object or service for property {prop.Name} of type {prop.PropertyType.FullName} on test block {testBlockInstance.GetType()}.");
-        //            break;
-        //        }
-
-        //        prop.SetValue(testBlockInstance, propertyValue);
-        //    }
-        //}
-
-        //private MethodInfo? GetExecuteMethod(object testBlockInstance)
-        //{
-        //    List<MethodInfo> methods = testBlockInstance.GetType().GetMethods().Where(m => m.Name.ToUpperInvariant() == "EXECUTE").ToList();
-        //    // No longer need to do this check since we now do it in Build()
-        //    // UNLESS we end up supporting multiple Execute methods, then there may still be a need to double check at run-time?
-        //    if (methods.Count != 1)
-        //    {
-        //        TestBlockException = new InvalidOperationException($"There can be one and only one Execute method on a test block. " +
-        //            $"Please review test block {testBlockInstance.GetType()}.");
-        //        return null;
-        //    }
-
-        //    return methods[0];
-        //}
-
-        //private object[]? GatherTestBlockArguments(IServiceScope scope, MethodInfo execute, (Type TestBlockType, object[] TestBlockParameters) tb)
-        //{
-        //    var executeParams = execute.GetParameters();
-
-        //    object[] executeArgs = new object[executeParams.Length];
-
-        //    // Is this the right order of checking? Or should we prioritize test block results first?
-        //    // Initial thought is that if someone is passing in explicit arguments, they probably have a good reason, so we should start there
-        //    // Populate and log all of our Execute arguments
-        //    if (executeArgs.Length > 0)
-        //    {
-        //        // We should change this to just match on type instead of length of args
-        //        // That way you can override just a single parameter if desired. That seems to be the primary (albeit rare) use case here.
-        //        if (tb.TestBlockParameters != null && executeParams.Length == tb.TestBlockParameters.Length)
-        //        {
-        //            // Eventually need to add more validation around making sure the types match here.
-        //            executeArgs = tb.TestBlockParameters;
-        //        }
-        //        else
-        //        {
-        //            for (int i = 0; i < executeArgs.Length; i++)
-        //            {
-        //                object foundResult = TestBlockResults.FirstOrDefault(tbr => tbr.GetType() == executeParams[i].ParameterType)
-        //                    ?? scope.ServiceProvider.GetService(executeParams[i].ParameterType);
-        //                if (foundResult == null)
-        //                {
-        //                    TestBlockException = new InvalidOperationException($"Unable to find an object or service for Execute parameter {executeParams[i].Name} of type {executeParams[i].ParameterType.FullName} on test block {tb.TestBlockType.FullName}.");
-        //                    break;
-        //                }
-
-        //                executeArgs[i] = foundResult;
-        //            }
-        //        }
-
-        //        // Instead of doing this, might be worth extracting the above for loop into a private method and if that fails, then break out of the foreach we're in now
-        //        if (TestBlockException != null) return null;
-        //    }
-        //    return executeArgs;
-        //}
-
-        //private void RunTestBlocks(object testBlockInstance, MethodInfo execute, object[] executeArgs, ITestCaseLogger logger)
-        //{
-        //    logger?.Debug($"Starting test block.");
-        //    // Log ALL inputs
-        //    // Is it worth distinguishing between Properties and Execute args?
-        //    PropertyInfo[] props = testBlockInstance.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
-        //    object[] allArgs = new object[props.Length + executeArgs.Length];
-
-        //    for (int i = 0; i < props.Length; i++)
-        //    {
-        //        allArgs[i] = props[i].GetValue(testBlockInstance);
-        //    }
-
-        //    executeArgs.CopyTo(allArgs, props.Length);
-        //    foreach (var arg in allArgs)
-        //    {
-        //        logger?.TestBlockInput(arg);
-        //    }
-
-        //    try
-        //    {
-        //        var result = execute.Invoke(testBlockInstance, executeArgs);
-        //        if (result != null)
-        //        {
-        //            logger?.TestBlockOutput(result);
-        //            TestBlockResults.Add(result);
-        //        }
-
-        //    }
-        //    catch (TargetInvocationException ex)
-        //    {
-        //        TestBlockException = ex.InnerException;
-        //        return;
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        TestBlockException = ex;
-        //        return;
-        //    }
-        //    catch (TargetParameterCountException ex)
-        //    {
-        //        ex.Data.Add("AdditionalInfo", "Test block failed: Mismatched count between Execute method arguments and supplied dependencies.");
-        //        TestBlockException = ex;
-        //        return;
-        //    }
-
-        //    logger?.Debug($"Test block completed successfully.");
-        //}
-
-        //protected virtual void Dispose(bool disposing)
-        //{
-        //    if (!_DisposedValue)
-        //    {
-        //        if (disposing)
-        //        {
-        //            // TODO: dispose managed state (managed objects)
-        //        }
-
-        //        // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-        //        // TODO: set large fields to null
-        //        _DisposedValue = true;
-        //    }
-        //}
-
-        //// // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        //// ~TestCase()
-        //// {
-        ////     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        ////     Dispose(disposing: false);
-        //// }
-
-        //public void Dispose()
-        //{
-        //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //    Dispose(disposing: true);
-        //    GC.SuppressFinalize(this);
-        //}
+        // Type checking every single time we find no dependency seems a bit inefficient.
+        // Call this out specifically in a code review.
+        private bool CheckForITestLogger(Type type)
+        {
+            bool isLogger = false;
+            if (!HasLogger && type == typeof(ITestCaseLogger))
+            {
+                TestBlockException = null;
+                if (FinallyBlockExceptions.Count > 0)
+                {
+                    FinallyBlockExceptions.Remove(FinallyBlockExceptions.Last());
+                }
+                isLogger = true;
+            }
+            return isLogger;
+        }
     }
 }

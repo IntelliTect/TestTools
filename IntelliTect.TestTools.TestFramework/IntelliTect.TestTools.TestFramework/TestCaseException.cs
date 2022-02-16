@@ -19,13 +19,18 @@ namespace IntelliTect.TestTools.TestFramework
         {
         }
 
+        //public TestCaseException(string message, List<Exception> finallyExceptions, Exception? innerException = null) : base(message, innerException)
+        //{
+        //    FinallyBlockExceptions = new AggregateException(finallyExceptions);
+        //}
+
         public TestCaseException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             ResourceReferenceProperty = info.GetString("ResourceReferenceProperty");
         }
 
         public string ResourceReferenceProperty { get; set; } = "";
-        public AggregateException? FinallyBlockExceptions { get; set; }
+        //public AggregateException? FinallyBlockExceptions { get; }
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)

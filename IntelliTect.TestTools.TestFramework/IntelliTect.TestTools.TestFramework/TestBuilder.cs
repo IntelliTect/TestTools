@@ -101,7 +101,7 @@ namespace IntelliTect.TestTools.TestFramework
         /// Adds an instance of a Type to the container that is needed for a TestBlock to execute
         /// </summary>
         /// <param name="objToAdd">The instance of a Type that a TestBlock needs</param>
-        /// <returns>This</returns>
+        /// <returns>this</returns>
         public TestBuilder AddDependencyInstance(object objToAdd)
         {
             if (objToAdd is null) throw new ArgumentNullException(nameof(objToAdd));
@@ -123,6 +123,11 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        /// <summary>
+        /// Removes the current logger from the test case dependency registration.<br />
+        /// NOTE: if you remove the logger but have a test block or dependency that needs it, an error will occur.
+        /// </summary>
+        /// <returns>this</returns>
         public TestBuilder RemoveLogger()
         {
             ServiceDescriptor? logger = Services.FirstOrDefault(d => d.ServiceType == typeof(ITestCaseLogger));
@@ -146,6 +151,7 @@ namespace IntelliTect.TestTools.TestFramework
             }
 
             TestCase testCase = new(TestCaseName!, TestMethodName, TestCaseId, Services);
+            testCase.HasLogger = HasLogger;
             Services.AddSingleton(testCase);
 
             // Probably need to profile all of this for performance at some point.
