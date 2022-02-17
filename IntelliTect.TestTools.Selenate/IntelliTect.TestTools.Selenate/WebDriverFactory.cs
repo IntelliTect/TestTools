@@ -49,7 +49,6 @@ namespace IntelliTect.TestTools.Selenate
                 case BrowserType.Edge:
                     EdgeOptions edgeOptions = new EdgeOptions
                     {
-                        UseInPrivateBrowsing = true,
                         UnhandledPromptBehavior = UnhandledPromptBehavior.Accept
                     };
                     driver = new EdgeDriver(Directory.GetCurrentDirectory(), edgeOptions);
