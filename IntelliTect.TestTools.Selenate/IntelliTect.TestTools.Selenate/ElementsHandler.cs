@@ -109,7 +109,7 @@ namespace IntelliTect.TestTools.Selenate
                 var foundElem = foundElems.Where(predicate).ToList();
                 if (foundElem.Count != 1)
                 {
-                    throw new InvalidOperationException("The provided predicate did not match exactly one result.");
+                    throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match exactly one result.");
                 }
                 return foundElem[0];
             });
