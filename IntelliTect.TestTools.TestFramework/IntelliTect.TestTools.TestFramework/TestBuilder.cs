@@ -274,9 +274,7 @@ namespace IntelliTect.TestTools.TestFramework
 
             foreach (Type i in inputs)
             {
-                // Do we also need to match on implementation here?
-                ServiceDescriptor desc = new(i, i, ServiceLifetime.Scoped);
-                CheckContainerForFirstLevelDependency(desc, outputs, $"TestBlock: {tb.Type} - Unable to satisfy test block input: {i}.");
+                CheckContainerForFirstLevelDependency(i, outputs, $"TestBlock: {tb.Type} - Unable to satisfy test block input: {i}.");
             }
 
             Type executeReturns = tb.ExecuteMethod.ReturnType;
@@ -286,17 +284,16 @@ namespace IntelliTect.TestTools.TestFramework
             }
         }
 
-        private void CheckContainerForFirstLevelDependency(ServiceDescriptor desc, List<Type?> outputs, string errorMessage)
+        private void CheckContainerForFirstLevelDependency(Type type, List<Type?> outputs, string errorMessage)
         {
-            // This method will NOT check that dependencies of dependencies are satisfied.
-            ServiceDescriptor? obj = Services.FirstOrDefault(x => x.ServiceType == desc.ServiceType || x.ImplementationType == desc.ImplementationType);
+            ServiceDescriptor? obj = Services.FirstOrDefault(x => x.ServiceType == type || x.ImplementationType == type);
             if (obj is null)
             {
-                Type? output = outputs.FirstOrDefault(o => o == desc.ServiceType || o == desc.ImplementationType);
+                Type? output = outputs.FirstOrDefault(o => o == type || o == type);
 
                 if (output is null)
                 {
-                    if (desc.ServiceType is ITestCaseLogger) return;
+                    if (type is ITestCaseLogger) return;
                     ValidationExceptions.Add(new InvalidOperationException(errorMessage));
                 }
             }

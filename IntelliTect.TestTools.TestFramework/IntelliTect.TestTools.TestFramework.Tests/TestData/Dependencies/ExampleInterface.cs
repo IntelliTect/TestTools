@@ -9,4 +9,9 @@
     {
         public string Testing { get; set; } = "Testing";
     }
+
+    public class OtherExampleInterface : IExampleDataInterface
+    {
+        public string Testing { get; set; } = "Testing";
+    }
 }

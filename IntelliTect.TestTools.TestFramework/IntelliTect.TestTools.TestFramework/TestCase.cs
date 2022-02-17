@@ -76,7 +76,7 @@ namespace IntelliTect.TestTools.TestFramework
                 foreach (var fb in FinallyBlocks)
                 {
                     if (Log is not null) Log.CurrentTestBlock = fb.Type.ToString();
-                    Log?.Info($"Starting finally block: {fb.Type}");
+                    Log?.Debug($"Starting finally block: {fb.Type}");
 
                     if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance)) continue;
                     if (!TrySetBlockProperties(testCaseScope, fb, finallyBlockInstance)) continue;
@@ -220,7 +220,7 @@ namespace IntelliTect.TestTools.TestFramework
                 null,
                 blockParams.ToArray(),
                 CultureInfo.CurrentCulture);
-            //blockInstance = Activator.CreateInstance(block.Type, blockParams);
+
             return true;
         }
 
@@ -292,6 +292,18 @@ namespace IntelliTect.TestTools.TestFramework
                 try
                 {
                     obj = scope.ServiceProvider.GetService(objectType);
+                    // Is the below check worth it?
+                    // It is avoided if the test block asks for an interface if the dependency is implementing an interface.
+                    // HOWEVER, this would facilitate injecting multiple different implementations in a test.
+                    if(obj is null)
+                    {
+                        foreach(var i in objectType.GetInterfaces())
+                        {
+                            IEnumerable<object?> objs = scope.ServiceProvider.GetServices(i);
+                            obj = objs.FirstOrDefault(o => o?.GetType() == objectType);
+                            if (obj is not null) break;
+                        }
+                    }
                 }
                 catch (InvalidOperationException e)
                 {
