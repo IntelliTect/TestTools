@@ -19,9 +19,16 @@ namespace IntelliTect.TestTools.Selenate
             Locator = locator;
         }
 
+        public ElementHandler(IWebDriver driver, By locator, IWebElement originalElement) : base(driver)
+        {
+            Locator = locator;
+            _SourceElement = originalElement;
+        }
+
         public  By Locator { get; private set; }
 
         private bool _IgnoreExceptions;
+        private IWebElement? _SourceElement;
 
         /// <summary>
         /// Sets the locator to use for operations within this instance.
@@ -82,6 +89,19 @@ namespace IntelliTect.TestTools.Selenate
         {
             _IgnoreExceptions = shouldIgnoreExceptions;
             return this;
+        }
+
+        public ElementHandler FindElement(By by)
+        {
+            IWait<IWebDriver> wait = ElementWait();
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            IWebElement foundElem = wait.Until(d => {
+                return d.FindElement(Locator);
+                //IWebElement foundElem = elem.FindElement(by);
+                //return foundElem;
+            });
+
+            return new ElementHandler(WrappedDriver, by, foundElem);
         }
 
         /// <summary>
