@@ -1,6 +1,8 @@
 using Moq;
 using OpenQA.Selenium;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Xunit;
 
 namespace IntelliTect.TestTools.Selenate.Tests
@@ -324,7 +326,114 @@ namespace IntelliTect.TestTools.Selenate.Tests
 
             var element = SetupElementHandler(mockDriver.Object);
 
-            Assert.Throws<WebDriverTimeoutException>(() => element.GetAttribute("Test"));
+            var ex = Assert.Throws<WebDriverTimeoutException>(() => element.GetAttribute("Test"));
+            Assert.Equal(typeof(NoSuchElementException), ex.InnerException?.GetType());
+        }
+
+        [Fact]
+        public void ChainElementFindsReturnsChildElement()
+        {
+            var childElement = new Mock<IWebElement>();
+            childElement
+                .Setup(c => c.GetAttribute(It.IsAny<string>()))
+                .Returns("Success");
+
+            var parentElement = new Mock<IWebElement>();
+            parentElement
+                .Setup(c => c.FindElement(It.IsAny<By>()))
+                .Returns(childElement.Object);
+
+            var mockDriver = new Mock<IWebDriver>();
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
+                .Returns(parentElement.Object);
+
+            var element = SetupElementHandler(mockDriver.Object);
+            var result = element
+                .FindElement(By.Id("test"))
+                .SetTimeout(TimeSpan.FromMilliseconds(20))
+                .GetAttribute("test");
+
+            Assert.Equal("Success", result);
+        }
+
+        [Fact]
+        public void ChainElementFindsThrowsExceptionIfChildNotFound()
+        {
+            var mockParentElement = new Mock<IWebElement>();
+            mockParentElement
+                .Setup(c => c.FindElement(It.IsAny<By>()))
+                .Throws<NoSuchElementException>();
+
+            var mockDriver = new Mock<IWebDriver>();
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
+                .Returns(mockParentElement.Object);
+
+            var parentElement = SetupElementHandler(mockDriver.Object);
+            var childElement = parentElement
+                .FindElement(By.Id("test"))
+                .SetTimeout(TimeSpan.FromMilliseconds(20));
+
+            var ex = Assert.Throws<WebDriverTimeoutException>(() => childElement.GetAttribute("Test"));
+            Assert.Equal(typeof(NoSuchElementException), ex.InnerException?.GetType());
+        }
+
+        [Fact]
+        public void ChainElementsFindReturnsElementHandler()
+        {
+            var childElement = new Mock<IWebElement>();
+            childElement
+                .Setup(c => c.Text)
+                .Returns("Success");
+
+            List<IWebElement> elements = new()
+            {
+                childElement.Object,
+                childElement.Object
+            };
+
+            ReadOnlyCollection<IWebElement> childElements = new ReadOnlyCollection<IWebElement>(elements);
+
+            var parentElement = new Mock<IWebElement>();
+            parentElement
+                .Setup(c => c.FindElements(It.IsAny<By>()))
+                .Returns(childElements);
+
+            var mockDriver = new Mock<IWebDriver>();
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
+                .Returns(parentElement.Object);
+
+            var element = SetupElementHandler(mockDriver.Object);
+            var result = element
+                .FindElements(By.Id("test"))
+                .SetTimeout(TimeSpan.FromMilliseconds(20))
+                .GetSingleWebElement(d => d.Text == "Success");
+
+            Assert.Equal("Success", result.Text);
+        }
+
+        [Fact]
+        public void ChainElementsFindThrowsExceptionIfChildNotFound()
+        {
+            var mockParentElement = new Mock<IWebElement>();
+            mockParentElement
+                .Setup(c => c.FindElement(It.IsAny<By>()))
+                .Throws<NoSuchElementException>();
+
+            var mockDriver = new Mock<IWebDriver>();
+            mockDriver
+                .Setup(f => f.FindElement(It.IsAny<By>()))
+                .Returns(mockParentElement.Object);
+
+            var parentElement = SetupElementHandler(mockDriver.Object);
+            var childElement = parentElement
+                .FindElements(By.Id("test"))
+                .SetTimeout(TimeSpan.FromMilliseconds(20));
+
+            var ex = Assert.Throws<WebDriverTimeoutException>(() => childElement.ContainsText("Test"));
+            Assert.Equal(typeof(NoSuchElementException), ex.InnerException?.GetType());
         }
 
         private static ElementHandler SetupElementHandler(IWebDriver driver)

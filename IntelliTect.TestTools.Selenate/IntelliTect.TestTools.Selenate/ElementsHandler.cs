@@ -9,19 +9,19 @@ namespace IntelliTect.TestTools.Selenate
     /// <summary>
     /// Main class for handling interactions with a group of IWebElements.
     /// </summary>
-    public class ElementsHandler : HandlerBase
+    public class ElementsHandler : ElementBase
     {
         /// <summary>
         /// Constructor to wrap a specific instace of a WebDriver and to set the locator method when interacting with WebElements
         /// </summary>
         /// <param name="driver">The WebDriver to wrap.</param>
         /// <param name="locator">Method for locating elements.</param>
-        public ElementsHandler(IWebDriver driver, By locator) : base(driver)
+        public ElementsHandler(IWebDriver driver, By locator) : base(driver, locator)
         {
-            Locator = locator;
+            //Locator = locator;
         }
 
-        public By Locator { get; private set; }
+        //public By Locator { get; private set; }
 
         /// <summary>
         /// Sets the locator to use for operations within this instance.
@@ -98,7 +98,7 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="predicate">The criteria to attempt to match on.</param>
         /// <returns></returns>
-        public IWebElement GetSingleExistingElement(Func<IWebElement, bool> predicate)
+        public IWebElement GetSingleWebElement(Func<IWebElement, bool> predicate)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
@@ -109,7 +109,7 @@ namespace IntelliTect.TestTools.Selenate
                 var foundElem = foundElems.Where(predicate).ToList();
                 if (foundElem.Count != 1)
                 {
-                    throw new InvalidOperationException("The provided predicate did not match exactly one result.");
+                    throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match exactly one result.");
                 }
                 return foundElem[0];
             });
