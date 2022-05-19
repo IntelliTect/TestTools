@@ -164,8 +164,6 @@ namespace IntelliTect.TestTools.Selenate
 
             wait.Until(d =>
             {
-                //IWebElement elem = _ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
-                //elem.SendKeys(textToSend);
                 FindElement(d).SendKeys(textToSend);
                 return true;
             });
@@ -185,8 +183,6 @@ namespace IntelliTect.TestTools.Selenate
 
             wait.Until(d =>
             {
-                //IWebElement elem = d.FindElement(Locator);
-                //elem.Clear();
                 FindElement(d).Clear();
                 return true;
             });
@@ -207,7 +203,6 @@ namespace IntelliTect.TestTools.Selenate
 #pragma warning disable CS8603 // Possible null reference return. Needed for proper WebDriverWait behavior
             return wait.Until(d =>
             {
-                //IWebElement elem = d.FindElement(Locator);
                 IWebElement elem = FindElement(d);
                 if (elem.Displayed) return elem;
                 return null;
@@ -231,8 +226,6 @@ namespace IntelliTect.TestTools.Selenate
 
             return wait.Until(d =>
             {
-                //IWebElement elem = d.FindElement(Locator);
-                //return elem.Text;
                 return FindElement(d).Text;
             });
         }
@@ -253,9 +246,6 @@ namespace IntelliTect.TestTools.Selenate
 
             return wait.Until(d =>
             {
-                // This needs to happen everywhere in order to support chained element finds.
-                //IWebElement elem = _ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
-                //return elem.GetAttribute(attributeName);
                 return FindElement(d).GetAttribute(attributeName);
             });
         }
@@ -276,8 +266,6 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return wait.Until(d =>
                 {
-                    //IWebElement elem = d.FindElement(Locator);
-                    //return elem.Displayed;
                     return FindElement(d).Displayed;
                 });
             }
@@ -303,8 +291,6 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return wait.Until(d =>
                 {
-                    //IWebElement elem = d.FindElement(Locator);
-                    //return !elem.Displayed;
                     return !FindElement(d).Displayed;
                 });
             }
@@ -334,8 +320,6 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return wait.Until(d =>
                 {
-                    //IWebElement elem = d.FindElement(Locator);
-                    //return elem.Enabled;
                     return FindElement(d).Enabled;
                 });
             }
@@ -363,8 +347,6 @@ namespace IntelliTect.TestTools.Selenate
             {
                 return wait.Until(d =>
                 {
-                    //IWebElement elem = d.FindElement(Locator);
-                    //return !elem.Enabled;
                     return !FindElement(d).Enabled;
                 });
             }

@@ -85,7 +85,11 @@ namespace IntelliTect.TestTools.Selenate
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             try
             {
-                return wait.Until(d => d.FindElements(Locator).Any(h => h.Text == text));
+                return wait.Until(d =>
+                {
+                    IReadOnlyCollection<IWebElement> elems = FindElements(d);
+                    return elems.Any(h => h.Text == text);
+                });
             }
             catch (WebDriverTimeoutException)
             {
@@ -104,7 +108,7 @@ namespace IntelliTect.TestTools.Selenate
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             return wait.Until(d =>
             {
-                var foundElems = d.FindElements(Locator);
+                IReadOnlyCollection<IWebElement> foundElems = FindElements(d);
                 if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No element found matching pattern: {Locator}");
                 var foundElem = foundElems.Where(predicate).ToList();
                 if (foundElem.Count != 1)
@@ -113,6 +117,11 @@ namespace IntelliTect.TestTools.Selenate
                 }
                 return foundElem[0];
             });
+        }
+
+        private IReadOnlyCollection<IWebElement> FindElements(IWebDriver d)
+        {
+            return ParentElement?.FindElements(Locator) ?? d.FindElements(Locator);
         }
     }
 }

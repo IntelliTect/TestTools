@@ -23,6 +23,8 @@ namespace IntelliTect.TestTools.Selenate.Examples
         {
             DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/dynamic_loading/1");
 
+            _DynamicLoadingPage.StartButton.GetWebElement().FindElements(OpenQA.Selenium.By.Id("testing"));
+
             _DynamicLoadingPage.StartButton.Click();
 
             Assert.True(

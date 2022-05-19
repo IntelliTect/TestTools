@@ -382,18 +382,23 @@ namespace IntelliTect.TestTools.Selenate.Tests
         [Fact]
         public void ChainElementsFindReturnsElementHandler()
         {
-            var childElement = new Mock<IWebElement>();
-            childElement
+            var childElement1 = new Mock<IWebElement>();
+            childElement1
                 .Setup(c => c.Text)
                 .Returns("Success");
 
+            var childElement2 = new Mock<IWebElement>();
+            childElement2
+                .Setup(c => c.Text)
+                .Returns("Failure");
+
             List<IWebElement> elements = new()
             {
-                childElement.Object,
-                childElement.Object
+                childElement1.Object,
+                childElement2.Object
             };
 
-            ReadOnlyCollection<IWebElement> childElements = new ReadOnlyCollection<IWebElement>(elements);
+            ReadOnlyCollection<IWebElement> childElements = new(elements);
 
             var parentElement = new Mock<IWebElement>();
             parentElement
@@ -412,28 +417,6 @@ namespace IntelliTect.TestTools.Selenate.Tests
                 .GetSingleWebElement(d => d.Text == "Success");
 
             Assert.Equal("Success", result.Text);
-        }
-
-        [Fact]
-        public void ChainElementsFindThrowsExceptionIfChildNotFound()
-        {
-            var mockParentElement = new Mock<IWebElement>();
-            mockParentElement
-                .Setup(c => c.FindElement(It.IsAny<By>()))
-                .Throws<NoSuchElementException>();
-
-            var mockDriver = new Mock<IWebDriver>();
-            mockDriver
-                .Setup(f => f.FindElement(It.IsAny<By>()))
-                .Returns(mockParentElement.Object);
-
-            var parentElement = SetupElementHandler(mockDriver.Object);
-            var childElement = parentElement
-                .FindElements(By.Id("test"))
-                .SetTimeout(TimeSpan.FromMilliseconds(20));
-
-            var ex = Assert.Throws<WebDriverTimeoutException>(() => childElement.ContainsText("Test"));
-            Assert.Equal(typeof(NoSuchElementException), ex.InnerException?.GetType());
         }
 
         private static ElementHandler SetupElementHandler(IWebDriver driver)
