@@ -15,30 +15,29 @@ public class DatabaseFixture<TDbContext1, TDbContext2, TDbContext3, TDbContext4>
     : DatabaseFixture<TDbContext1, TDbContext2, TDbContext3>
     where TDbContext1 : DbContext
     where TDbContext2 : DbContext
+    where TDbContext3 : DbContext
+    where TDbContext4 : DbContext
 {
     public DatabaseFixture()
     {
         SqliteConnection = new SqliteConnection("DataSource=:memory:");
         SqliteConnection.Open();
 
-        Options = new[] { typeof(TDbContext1), typeof(TDbContext2), typeof(TDbContext3), typeof(TDbContext4) }
-            .Select(BuildOptions)
-            .ToDictionary(x => x.DbContextType, x => x);
+        Options = BuildOptions(typeof(TDbContext1), typeof(TDbContext2), typeof(TDbContext3));
     }
 }
 
 public class DatabaseFixture<TDbContext1, TDbContext2, TDbContext3> : DatabaseFixture<TDbContext1, TDbContext2>
     where TDbContext1 : DbContext
     where TDbContext2 : DbContext
+    where TDbContext3 : DbContext
 {
     public DatabaseFixture()
     {
         SqliteConnection = new SqliteConnection("DataSource=:memory:");
         SqliteConnection.Open();
 
-        Options = new[] { typeof(TDbContext1), typeof(TDbContext2), typeof(TDbContext3) }
-            .Select(BuildOptions)
-            .ToDictionary(x => x.DbContextType, x => x);
+        Options = BuildOptions(typeof(TDbContext1), typeof(TDbContext2), typeof(TDbContext3));
     }
 }
 
@@ -51,9 +50,7 @@ public class DatabaseFixture<TDbContext1, TDbContext2> : DatabaseFixture<TDbCont
         SqliteConnection = new SqliteConnection("DataSource=:memory:");
         SqliteConnection.Open();
 
-        Options = new[] { typeof(TDbContext1), typeof(TDbContext2) }
-            .Select(BuildOptions)
-            .ToDictionary(x => x.DbContextType, x => x);
+        Options = BuildOptions(typeof(TDbContext1), typeof(TDbContext2));
     }
     
     public Task PerformDatabaseOperation<T>(Func<T, Task> operation) where T : DbContext
@@ -79,11 +76,22 @@ public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbCont
 
     private IServiceProvider ServiceProvider { get; set; }
 
+    private bool _SeedComplete;
+    private Func<Task> _Seed;
+
     /// <summary>
-    /// Evaluated immediately after database is first constructed - useful for seeding database when
-    /// used in test collection
+    /// Set seed function to be used on database initialization
     /// </summary>
-    public Func<TDbContext, Task> InitializeDatabase { get; set; }
+    public void SetInitialize<T>(Func<T, Task> seed) where T : DbContext
+    {
+        GetOrAddConstructionInfo<T>();
+
+        _Seed = async () =>
+        {
+            var db = await CreateNewContext<T>();
+            await seed(db);
+        };
+    }
 
     private Dictionary<(Type, string), object> ConstructorDependencies { get; } = new();
 
@@ -92,12 +100,17 @@ public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbCont
         SqliteConnection = new SqliteConnection("DataSource=:memory:");
         SqliteConnection.Open();
 
-        Options = new[] { typeof(TDbContext) }
-            .Select(BuildOptions)
+        Options = BuildOptions(typeof(TDbContext));
+    }
+
+    internal Dictionary<Type, ContextConstructionInfo> BuildOptions(params Type[] types)
+    {
+        return types
+            .Select(BuildContextConstructionInfo)
             .ToDictionary(x => x.DbContextType, x => x);
     }
 
-    internal ContextConstructionInfo BuildOptions(Type t)
+    internal ContextConstructionInfo BuildContextConstructionInfo(Type t)
     {
         var optionsBuilderType = typeof(DbContextOptionsBuilder<>).MakeGenericType(t);
         var dbContextOptions = (DbContextOptionsBuilder)Activator.CreateInstance(optionsBuilderType);
@@ -203,24 +216,34 @@ public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbCont
             : null;
     }
 
+    internal ContextConstructionInfo GetOrAddConstructionInfo<T>()
+    {
+        var type = typeof(T);
+        if (Options.ContainsKey(type)) return Options[type];
+        
+        var newOptions = BuildOptions(type).Single().Value;
+        Options.Add(type, newOptions);
+        return newOptions;
+    }
+    
     private async Task<T> CreateNewContext<T>() where T : DbContext
     {
-        var ourOptions = Options[typeof(T)];
+        ContextConstructionInfo ourOptions = GetOrAddConstructionInfo<T>();
 
         var alreadyCreated = ourOptions.Lazy.IsValueCreated;
         
         var ctorInfo = GetConstructorInfo<T>();
-        
+
         var db = (T)ctorInfo.Invoke(GetConstructorValues(ctorInfo));
 
         if (alreadyCreated) return db;
 
         await db.Database.EnsureCreatedAsync();
 
-        if (InitializeDatabase is { } init)
-        {
-            await init(await CreateNewContext<TDbContext>());
-        }
+        if (_SeedComplete) return db;
+
+        _Seed?.Invoke();
+        _SeedComplete = true;
 
         return db;
 

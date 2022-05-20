@@ -1,25 +1,21 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace IntelliTect.TestTools.Data.Test;
 
-public class DatabaseFixtureMultipleDbContextsTests : IClassFixture<DatabaseFixture<SampleDbContext, OtherSampleDbContext>>
+public class DatabaseFixtureMultipleDbContextsTests
 {
-    private readonly DatabaseFixture<SampleDbContext, OtherSampleDbContext> _DatabaseFixture;
-
-    public DatabaseFixtureMultipleDbContextsTests(DatabaseFixture<SampleDbContext, OtherSampleDbContext> dbFixture)
-    {
-        _DatabaseFixture = dbFixture ?? throw new ArgumentNullException(nameof(dbFixture));
-    }
+    public DatabaseFixtureMultipleDbContextsTests()
+    { }
 
     [Fact]
     public async Task DatabaseFixture_MultipleDbContexts_AccessToSameConnection()
     {
+        var dbFixture = new DatabaseFixture<SampleDbContext, OtherSampleDbContext>();
         const int personCount = 5;
         
-        await _DatabaseFixture.PerformDatabaseOperation(async context =>
+        await dbFixture.PerformDatabaseOperation(async context =>
         {
             var persons = Enumerable.Range(1, 5)
                 .Select(_ => FakesFactory.Create<Person>());
@@ -27,19 +23,38 @@ public class DatabaseFixtureMultipleDbContextsTests : IClassFixture<DatabaseFixt
             await context.SaveChangesAsync();
         });
 
-        await _DatabaseFixture.PerformDatabaseOperation<OtherSampleDbContext>(context =>
+        await dbFixture.PerformDatabaseOperation<OtherSampleDbContext>(context =>
         {
             Assert.Equal(personCount, context.Persons.Count());
         });
 
-        await _DatabaseFixture.PerformDatabaseOperation(context =>
+        await dbFixture.PerformDatabaseOperation(context =>
         {
             Assert.Equal(personCount, context.Persons.Count());
         });
 
-        await _DatabaseFixture.PerformDatabaseOperation<SampleDbContext>(context =>
+        await dbFixture.PerformDatabaseOperation<SampleDbContext>(context =>
         {
             Assert.Equal(personCount, context.Persons.Count());
+        });
+    }
+
+    [Fact]
+    public async Task DatabaseFixture_MultipleDbContexts_UnregisteredDbContextRequested_DbContextCreated()
+    {
+        var dbFixture = new DatabaseFixture<SampleDbContext, OtherSampleDbContext>();
+
+        await dbFixture.PerformDatabaseOperation(async context =>
+        {
+            var persons = Enumerable.Range(1, 5)
+                .Select(_ => FakesFactory.Create<Person>());
+            context.Persons.AddRange(persons);
+            await context.SaveChangesAsync();
+        });
+
+        await dbFixture.PerformDatabaseOperation<OtherSampleDbContextCopy>(context =>
+        {
+            Assert.Equal(5, context.Persons.Count());
         });
     }
 }

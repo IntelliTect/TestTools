@@ -13,7 +13,7 @@ public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<Databas
     {
         _DatabaseFixture = dbFixture ?? throw new ArgumentNullException(nameof(dbFixture));
 
-        _DatabaseFixture.InitializeDatabase = SeedData;
+        _DatabaseFixture.SetInitialize<SampleDbContext>(SeedData);
     }
 
     private Task SeedData(SampleDbContext dbContext)
@@ -26,7 +26,7 @@ public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<Databas
     }
 
     [Fact]
-    public async Task DatabaseFixtureReused_SeedDataExists()
+    public async Task DatabaseFixtureSeed_DatabaseFixtureReused_SeedDataExists()
     {
         await _DatabaseFixture.PerformDatabaseOperation(context =>
         {
@@ -36,12 +36,31 @@ public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<Databas
     }
 
     [Fact]
-    public async Task DatabaseFixtureReused_SeedDataExists2()
+    public async Task DatabaseFixtureSeed_PerformMultipleDatabaseOperations_SeedDataExistsOnce()
     {
         await _DatabaseFixture.PerformDatabaseOperation(context =>
         {
             Assert.Equal(5, context.Persons.Count());
             Assert.False(context.Persons.Any(x => x == null));
+        });
+
+        await _DatabaseFixture.PerformDatabaseOperation(context => { });
+    }
+
+    [Fact]
+    public async Task DatabaseFixtureSeed_UseDbContextOutsideOfFixtureGeneric_DbContextCreatedAndUsedForSeed()
+    {
+        var fixture = new DatabaseFixture<SampleDbContext>();
+        fixture.SetInitialize<OtherSampleDbContext>(async context =>
+        {
+            var persons = Enumerable.Range(1, 5).Select(_ => FakesFactory.Create<Person>());
+            context.Persons.AddRange(persons);
+            await context.SaveChangesAsync();
+        });
+
+        await _DatabaseFixture.PerformDatabaseOperation(context =>
+        {
+            Assert.Equal(5, context.Persons.Count());
         });
     }
 }
