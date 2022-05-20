@@ -9,186 +9,308 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace IntelliTect.TestTools.Data
+namespace IntelliTect.TestTools.Data;
+
+public class DatabaseFixture<TDbContext1, TDbContext2, TDbContext3, TDbContext4> 
+    : DatabaseFixture<TDbContext1, TDbContext2, TDbContext3>
+    where TDbContext1 : DbContext
+    where TDbContext2 : DbContext
 {
-    public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbContext
+    public DatabaseFixture()
     {
-        private SqliteConnection SqliteConnection { get; }
+        SqliteConnection = new SqliteConnection("DataSource=:memory:");
+        SqliteConnection.Open();
 
-        private Lazy<DbContextOptions<TDbContext>> Options { get; }
+        Options = new[] { typeof(TDbContext1), typeof(TDbContext2), typeof(TDbContext3), typeof(TDbContext4) }
+            .Select(BuildOptions)
+            .ToDictionary(x => x.DbContextType, x => x);
+    }
+}
 
-        private IServiceProvider ServiceProvider { get; set; }
+public class DatabaseFixture<TDbContext1, TDbContext2, TDbContext3> : DatabaseFixture<TDbContext1, TDbContext2>
+    where TDbContext1 : DbContext
+    where TDbContext2 : DbContext
+{
+    public DatabaseFixture()
+    {
+        SqliteConnection = new SqliteConnection("DataSource=:memory:");
+        SqliteConnection.Open();
 
-        /// <summary>
-        /// Evaluated immediately after database is first constructed - useful for seeding database when
-        /// used in test collection
-        /// </summary>
-        public Func<TDbContext, Task> InitializeDatabase { get; set; }
+        Options = new[] { typeof(TDbContext1), typeof(TDbContext2), typeof(TDbContext3) }
+            .Select(BuildOptions)
+            .ToDictionary(x => x.DbContextType, x => x);
+    }
+}
 
-        private Dictionary<(Type, string), object> ConstructorDependencies { get; } = new();
+public class DatabaseFixture<TDbContext1, TDbContext2> : DatabaseFixture<TDbContext1>
+    where TDbContext1 : DbContext
+    where TDbContext2 : DbContext
+{
+    public DatabaseFixture()
+    {
+        SqliteConnection = new SqliteConnection("DataSource=:memory:");
+        SqliteConnection.Open();
 
-        public DatabaseFixture()
+        Options = new[] { typeof(TDbContext1), typeof(TDbContext2) }
+            .Select(BuildOptions)
+            .ToDictionary(x => x.DbContextType, x => x);
+    }
+    
+    public Task PerformDatabaseOperation<T>(Func<T, Task> operation) where T : DbContext
+        => NewContextAndExecute(operation);
+    
+    public async Task PerformDatabaseOperation<T>(Action<T> operation) where T : DbContext
+    {
+        Func<T, Task> func = context =>
         {
-            SqliteConnection = new SqliteConnection("DataSource=:memory:");
-            SqliteConnection.Open();
+            operation(context);
+            return Task.CompletedTask;
+        };
 
-            Options = new Lazy<DbContextOptions<TDbContext>>(() => new DbContextOptionsBuilder<TDbContext>()
-                .UseSqlite(SqliteConnection)
-                .EnableSensitiveDataLogging()
-                .UseLoggerFactory(GetLoggerFactory())
-                .Options);
+        await NewContextAndExecute(func);
+    }
+}
+
+public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbContext
+{
+    protected SqliteConnection SqliteConnection { get; set; }
+
+    internal Dictionary<Type, ContextConstructionInfo> Options { get; set; }
+
+    private IServiceProvider ServiceProvider { get; set; }
+
+    /// <summary>
+    /// Evaluated immediately after database is first constructed - useful for seeding database when
+    /// used in test collection
+    /// </summary>
+    public Func<TDbContext, Task> InitializeDatabase { get; set; }
+
+    private Dictionary<(Type, string), object> ConstructorDependencies { get; } = new();
+
+    public DatabaseFixture()
+    {
+        SqliteConnection = new SqliteConnection("DataSource=:memory:");
+        SqliteConnection.Open();
+
+        Options = new[] { typeof(TDbContext) }
+            .Select(BuildOptions)
+            .ToDictionary(x => x.DbContextType, x => x);
+    }
+
+    internal ContextConstructionInfo BuildOptions(Type t)
+    {
+        var optionsBuilderType = typeof(DbContextOptionsBuilder<>).MakeGenericType(t);
+        var dbContextOptions = (DbContextOptionsBuilder)Activator.CreateInstance(optionsBuilderType);
+
+        var lazyType = typeof(Lazy<>).MakeGenericType(typeof(DbContextOptions));
+        var funcType = typeof(Func<>).MakeGenericType(typeof(DbContextOptions));
+
+        var lazyObjectConstructor = lazyType
+            .GetConstructors()
+            .Where(xi => xi.GetParameters().Length == 1)
+            .Single(xi => xi.GetParameters().Single().ParameterType == funcType);
+
+        Func<DbContextOptions> func = () => dbContextOptions
+            .UseSqlite(SqliteConnection)
+            .EnableSensitiveDataLogging()
+            .UseLoggerFactory(GetLoggerFactory())
+            .Options;
+
+        var lazy = (Lazy<DbContextOptions>)lazyObjectConstructor.Invoke(new object[] { func });
+        var contextInfo = new ContextConstructionInfo
+        {
+            Lazy = lazy,
+            DbContextType = t
+        };
+        return contextInfo;
+    }
+
+    public void AddDependency<T>(T contextConstructorDependency, string name = null)
+    {
+        ConstructorDependencies.Add((typeof(T), name ?? ""), contextConstructorDependency);
+    }
+
+    /// <summary>
+    /// Fired when loggers are being setup. Immediately follows adding the InMemoryLogger
+    /// </summary>
+    public event EventHandler<ILoggingBuilder> BeforeLoggingSetup;
+
+    private ILoggerFactory GetLoggerFactory()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder =>
+        {
+            builder.AddInMemory();
+
+            BeforeLoggingSetup?.Invoke(this, builder); ;
+        });
+
+        ServiceProvider = serviceCollection.BuildServiceProvider();
+
+        return ServiceProvider
+            .GetService<ILoggerFactory>();
+    }
+    
+    private static bool IsDbContextOptions<T>(ParameterInfo parameter)
+        => parameter.ParameterType == typeof(DbContextOptions<>).MakeGenericType(typeof(T)) ||
+           parameter.ParameterType == typeof(DbContextOptions);
+
+    private ConstructorInfo GetConstructorInfo<T>()
+    {
+        var ourOptions = Options[typeof(T)];
+
+        if (ourOptions.ConstructorInfo is { } ctorInfo) return ctorInfo;
+
+        var constructorInfo = typeof(T)
+            .GetConstructors()
+            .Where(x =>
+            {
+                var parameters = x.GetParameters();
+                if (parameters.Length < 1) return false;
+                return parameters.Any(IsDbContextOptions<T>) 
+                       && parameters.All(p => GetConstructorParameter<T>(p) != null);
+            })
+            .OrderByDescending(x => x.GetParameters().Length)
+            .FirstOrDefault();
+
+        if (constructorInfo is null)
+        {
+            throw new InvalidOperationException(
+                $"'{typeof(T)}' does not contain constructor that has a valid signature");
         }
 
-        public void AddDependency<T>(T contextConstructorDependency, string name = null)
+        ourOptions.ConstructorInfo = constructorInfo;
+
+        return constructorInfo;
+    }
+
+    private Func<object> GetConstructorParameter<T>(ParameterInfo parameter)
+    {
+        var ourOptions = Options[typeof(T)];
+        
+        if (IsDbContextOptions<T>(parameter))
         {
-            ConstructorDependencies.Add((typeof(T), name ?? ""), contextConstructorDependency);
+            return () => ourOptions.Lazy.Value;
+        }
+        if (ConstructorDependencies.TryGetValue(
+                (parameter.ParameterType, parameter.Name),
+                out object typeAndNameMatch))
+        {
+            return () => typeAndNameMatch;
+        }
+        return ConstructorDependencies.TryGetValue((parameter.ParameterType, ""), out object typeMatch) 
+            ? () => typeMatch 
+            : null;
+    }
+
+    private async Task<T> CreateNewContext<T>() where T : DbContext
+    {
+        var ourOptions = Options[typeof(T)];
+
+        var alreadyCreated = ourOptions.Lazy.IsValueCreated;
+        
+        var ctorInfo = GetConstructorInfo<T>();
+        
+        var db = (T)ctorInfo.Invoke(GetConstructorValues(ctorInfo));
+
+        if (alreadyCreated) return db;
+
+        await db.Database.EnsureCreatedAsync();
+
+        if (InitializeDatabase is { } init)
+        {
+            await init(await CreateNewContext<TDbContext>());
         }
 
-        /// <summary>
-        /// Fired when loggers are being setup. Immediately follows adding the InMemoryLogger
-        /// </summary>
-        public event EventHandler<ILoggingBuilder> BeforeLoggingSetup;
+        return db;
 
-        private ILoggerFactory GetLoggerFactory()
+        object[] GetConstructorValues(ConstructorInfo constructor)
         {
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddLogging(builder =>
+            var parameters = constructor.GetParameters();
+
+            var values = new object[parameters.Length];
+
+            for (int i = 0; i < parameters.Length; i++)
             {
-                builder.AddInMemory();
-
-                BeforeLoggingSetup?.Invoke(this, builder); ;
-            });
-
-            ServiceProvider = serviceCollection.BuildServiceProvider();
-
-            return ServiceProvider
-                .GetService<ILoggerFactory>();
-        }
-
-        private async Task<TDbContext> CreateNewContext()
-        {
-            var constructorInfo = typeof(TDbContext)
-                .GetConstructors()
-                .Where(x =>
+                Func<object> constructorValue = GetConstructorParameter<T>(parameters[i]);
+                if (constructorValue != null)
                 {
-                    var parameters = x.GetParameters();
-                    if (parameters.Length < 1) return false;
-                    if (!parameters.Any(IsDbContextOptions)) return false;
-                    if (parameters.Any(p => GetConstructorParameter(p) == null)) return false;
-                    return true;
-                })
-                .OrderByDescending(x => x.GetParameters().Length)
-                .FirstOrDefault();
-
-            if (constructorInfo is null)
-            {
-                throw new InvalidOperationException(
-                    $"'{typeof(TDbContext)}' does not contain constructor that has a valid signature");
-            }
-
-            bool alreadyCreated = Options.IsValueCreated;
-
-            var db = (TDbContext)constructorInfo.Invoke(GetConstructorValues(constructorInfo));
-
-            if (alreadyCreated) return db;
-
-            await db.Database.EnsureCreatedAsync();
-
-            if (InitializeDatabase is { } init)
-            {
-                await init(await CreateNewContext());
-            }
-
-            return db;
-
-            static bool IsDbContextOptions(ParameterInfo parameter)
-                => parameter.ParameterType == typeof(DbContextOptions<>).MakeGenericType(typeof(TDbContext)) ||
-                   parameter.ParameterType == typeof(DbContextOptions);
-
-            Func<object> GetConstructorParameter(ParameterInfo parameter)
-            {
-                if (IsDbContextOptions(parameter))
-                {
-                    return () => Options.Value;
-                }
-                else if (ConstructorDependencies.TryGetValue((parameter.ParameterType, parameter.Name), out object typeAndNameMatch))
-                {
-                    return () => typeAndNameMatch;
-                }
-                else if (ConstructorDependencies.TryGetValue((parameter.ParameterType, ""), out object typeMatch))
-                {
-                    return () => typeMatch;
+                    values[i] = constructorValue();
                 }
                 else
                 {
-                    return null;
+                    throw new InvalidOperationException();
                 }
             }
 
-            object[] GetConstructorValues(ConstructorInfo constructor)
-            {
-                var parameters = constructor.GetParameters();
-
-                var values = new object[parameters.Length];
-
-                for (int i = 0; i < parameters.Length; i++)
-                {
-                    Func<object> constructorValue = GetConstructorParameter(parameters[i]);
-                    if (constructorValue != null)
-                    {
-                        values[i] = constructorValue();
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException();
-                    }
-                }
-
-                return values;
-            }
+            return values;
         }
+    }
 
-        /// <summary>
-        /// Creates new instance of TDBContext and executes database operation.
-        /// This avoids issues where reusing the same DbContext can result in cached objects being returned,
-        /// suppressing issues with your LINQ to SQL code.
-        /// At minimum the Arrange/Act/Assert portions should each invoke this method separately, but more invocations
-        /// of this method should be preferred whenever possible.
-        /// </summary>
-        /// <param name="operation">The database operation to be performed</param>
-        public async Task PerformDatabaseOperation(Func<TDbContext, Task> operation)
+    /// <summary>
+    /// Creates new instance of TDBContext and executes database operation.
+    /// This avoids issues where reusing the same DbContext can result in cached objects being returned,
+    /// suppressing issues with your LINQ to SQL code.
+    /// At minimum the Arrange/Act/Assert portions should each invoke this method separately, but more invocations
+    /// of this method should be preferred whenever possible.
+    /// </summary>
+    /// <param name="operation">The database operation to be performed</param>
+    public async Task PerformDatabaseOperation(Func<TDbContext, Task> operation)
+    {
+        await NewContextAndExecute(operation);
+    }
+
+    /// <summary>
+    /// Creates new instance of TDBContext and executes database operation.
+    /// This avoids issues where reusing the same DbContext can result in cached objects being returned,
+    /// suppressing issues with your LINQ to SQL code.
+    /// At minimum the Arrange/Act/Assert portions should each invoke this method separately, but more invocations
+    /// of this method should be preferred whenever possible.
+    /// </summary>
+    /// <param name="operation">The database operation to be performed</param>
+    public async Task PerformDatabaseOperation(Action<TDbContext> operation)
+    {
+        Func<TDbContext, Task> func = context =>
         {
-            var db = await CreateNewContext();
-            await operation(db);
-        }
+            operation(context);
+            return Task.CompletedTask;
+        };
 
-        /// <summary>
-        /// If <see cref="InMemoryLogger"/> is configured and DbContext has been accessed at least once, returns a
-        /// Dictionary of all InMemoryLoggers
-        /// </summary>
-        /// <returns>Dictionary with category name, and instance of all InMemoryLoggers</returns>
-        /// <exception cref="InvalidOperationException">InMemoryLogger is not configured, or DbContext has not yet
-        /// been accessed</exception>
-        public ConcurrentDictionary<string, InMemoryLogger> GetInMemoryLoggers()
+        await NewContextAndExecute(func);
+    }
+
+    protected async Task NewContextAndExecute<T>(Func<T, Task> operation) where T : DbContext
+    {
+        var db = await CreateNewContext<T>();
+        await operation(db);
+    }
+
+    /// <summary>
+    /// If <see cref="InMemoryLogger"/> is configured and DbContext has been accessed at least once, returns a
+    /// Dictionary of all InMemoryLoggers
+    /// </summary>
+    /// <returns>Dictionary with category name, and instance of all InMemoryLoggers</returns>
+    /// <exception cref="InvalidOperationException">InMemoryLogger is not configured, or DbContext has not yet
+    /// been accessed</exception>
+    public ConcurrentDictionary<string, InMemoryLogger> GetInMemoryLoggers()
+    {
+        if (ServiceProvider is null)
         {
-            if (ServiceProvider is null)
-            {
-                throw new InvalidOperationException("ServiceCollection is not yet initialized. " +
-                                                    "Perform some database operation to initialize loggers");
-            }
-
-            if (!(ServiceProvider.GetService<ILoggerProvider>() is InMemoryLoggerProvider loggerProvider))
-            {
-                throw new InvalidOperationException($"{typeof(ILoggerProvider).FullName} of type " +
-                                                    $"{typeof(InMemoryLoggerProvider).FullName} could not be found.");
-            }
-
-            return loggerProvider.GetLoggers();
+            throw new InvalidOperationException("ServiceCollection is not yet initialized. " +
+                                                "Perform some database operation to initialize loggers");
         }
 
-        public void Dispose()
+        if (!(ServiceProvider.GetService<ILoggerProvider>() is InMemoryLoggerProvider loggerProvider))
         {
-            SqliteConnection?.Dispose();
+            throw new InvalidOperationException($"{typeof(ILoggerProvider).FullName} of type " +
+                                                $"{typeof(InMemoryLoggerProvider).FullName} could not be found.");
         }
+
+        return loggerProvider.GetLoggers();
+    }
+
+    public void Dispose()
+    {
+        SqliteConnection?.Dispose();
     }
 }

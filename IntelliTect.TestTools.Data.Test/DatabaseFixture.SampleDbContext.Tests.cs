@@ -2,144 +2,136 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IntelliTect.IntelliTime.Data.Test.Util;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace IntelliTect.TestTools.Data.Test
+namespace IntelliTect.TestTools.Data.Test;
+
+public class DatabaseFixtureSampleDbContextTests : IClassFixture<DatabaseFixture<SampleDbContext>>
 {
-    public class DatabaseFixtureSampleDbContextTests : IClassFixture<DatabaseFixture<SampleDbContext>>
+    private readonly DatabaseFixture<SampleDbContext> _DatabaseFixture;
+
+    public DatabaseFixtureSampleDbContextTests(DatabaseFixture<SampleDbContext> dbFixture)
     {
-        private readonly DatabaseFixture<SampleDbContext> _DatabaseFixture;
+        _DatabaseFixture = dbFixture ?? throw new ArgumentNullException(nameof(dbFixture));
+    }
 
-        public DatabaseFixtureSampleDbContextTests(DatabaseFixture<SampleDbContext> dbFixture)
+    [Fact]
+    public async Task DatabaseFixture_CanPerformDatabaseOperation()
+    {
+        var person = FakesFactory.Create<Person>();
+
+        await _DatabaseFixture.PerformDatabaseOperation(async context =>
         {
-            _DatabaseFixture = dbFixture ?? throw new ArgumentNullException(nameof(dbFixture));
-        }
+            context.Persons.Add(person);
+            await context.SaveChangesAsync();
+        });
 
-        [Fact]
-        public async Task DatabaseFixture_CanPerformDatabaseOperation()
+        await _DatabaseFixture.PerformDatabaseOperation(context =>
         {
-            var person = FakesFactory.Create<Person>();
+            var personInDatabase = context.Persons.SingleOrDefault(x => x.PersonId == person.PersonId);
 
-            await _DatabaseFixture.PerformDatabaseOperation(async context =>
-            {
-                context.Persons.Add(person);
-                await context.SaveChangesAsync();
-            });
+            Assert.NotNull(personInDatabase);
+            Assert.Equal(person.Age, personInDatabase.Age);
+            Assert.Equal(person.Name, personInDatabase.Name);
+        });
+    }
 
-            await _DatabaseFixture.PerformDatabaseOperation(context =>
-            {
-                var personInDatabase = context.Persons.SingleOrDefault(x => x.PersonId == person.PersonId);
+    [Fact]
+    public async Task DatabaseFixture_EFInMemoryLoggingEnabled_LogsPopulated()
+    {
+        var person = FakesFactory.Create<Person>();
 
-                Assert.NotNull(personInDatabase);
-                Assert.Equal(person.Age, personInDatabase.Age);
-                Assert.Equal(person.Name, personInDatabase.Name);
-
-                return Task.CompletedTask;
-            });
-        }
-
-        [Fact]
-        public async Task DatabaseFixture_EFInMemoryLoggingEnabled_LogsPopulated()
+        await _DatabaseFixture.PerformDatabaseOperation(async context =>
         {
-            var person = FakesFactory.Create<Person>();
+            context.Persons.Add(person);
+            await context.SaveChangesAsync();
+        });
 
-            await _DatabaseFixture.PerformDatabaseOperation(async context =>
-            {
-                context.Persons.Add(person);
-                await context.SaveChangesAsync();
-            });
+        var logger = _DatabaseFixture
+            .GetInMemoryLoggers()["Microsoft.EntityFrameworkCore.Database.Command"];
 
-            var logger = _DatabaseFixture
-                .GetInMemoryLoggers()["Microsoft.EntityFrameworkCore.Database.Command"];
+        Assert.NotEmpty(logger.Logs);
+        Assert.NotEqual(0, logger.Logs.First().EventId);
+    }
 
-            Assert.NotEmpty(logger.Logs);
-            Assert.NotEqual(0, logger.Logs.First().EventId);
-        }
+    [Fact]
+    public async Task DatabaseFixture_WriteAndRetrieveObjectWithNoCaching_NoIncludedNavigationProperties()
+    {
+        var person = FakesFactory.Create<Person>();
 
-        [Fact]
-        public async Task DatabaseFixture_WriteAndRetrieveObjectWithNoCaching_NoIncludedNavigationProperties()
+        await _DatabaseFixture.PerformDatabaseOperation(async context =>
         {
-            var person = FakesFactory.Create<Person>();
+            context.Persons.Add(person);
+            await context.SaveChangesAsync();
+        });
 
-            await _DatabaseFixture.PerformDatabaseOperation(async context =>
+        var blogPosts = Enumerable.Range(0, 5)
+            .Select(x =>
             {
-                context.Persons.Add(person);
-                await context.SaveChangesAsync();
+                var blogPost = FakesFactory.Create<BlogPost>();
+                blogPost.PersonId = person.PersonId;
+
+                return blogPost;
             });
 
-            var blogPosts = Enumerable.Range(0, 5)
-                .Select(x =>
-                {
-                    var blogPost = FakesFactory.Create<BlogPost>();
-                    blogPost.PersonId = person.PersonId;
-
-                    return blogPost;
-                });
-
-            await _DatabaseFixture.PerformDatabaseOperation(async context =>
-            {
-                context.BlogPosts.AddRange(blogPosts);
-                await context.SaveChangesAsync();
-            });
-
-            List<Person> persons = null;
-            await _DatabaseFixture.PerformDatabaseOperation(context =>
-            {
-                persons = context.Persons.Select(x => x).ToList();
-
-                return Task.CompletedTask;
-            });
-
-            Assert.All(persons, curPerson =>
-            {
-                Assert.Null(curPerson.BlogPosts);
-            });
-        }
-
-        [Fact]
-        public async Task DatabaseFixture_ExplicitlyCallInclude_NavigationPropertyIncludedProperly()
+        await _DatabaseFixture.PerformDatabaseOperation(async context =>
         {
-            var person = FakesFactory.Create<Person>();
+            context.BlogPosts.AddRange(blogPosts);
+            await context.SaveChangesAsync();
+        });
 
-            await _DatabaseFixture.PerformDatabaseOperation(async context =>
+        List<Person> persons = null;
+        await _DatabaseFixture.PerformDatabaseOperation(context =>
+        {
+            persons = context.Persons.Select(x => x).ToList();
+        });
+
+        Assert.All(persons, curPerson =>
+        {
+            Assert.Null(curPerson.BlogPosts);
+        });
+    }
+
+    [Fact]
+    public async Task DatabaseFixture_ExplicitlyCallInclude_NavigationPropertyIncludedProperly()
+    {
+        var person = FakesFactory.Create<Person>();
+
+        await _DatabaseFixture.PerformDatabaseOperation(async context =>
+        {
+            context.Persons.Add(person);
+            await context.SaveChangesAsync();
+        });
+
+        var blogPosts = Enumerable.Range(0, 5)
+            .Select(x =>
             {
-                context.Persons.Add(person);
-                await context.SaveChangesAsync();
+                var blogPost = FakesFactory.Create<BlogPost>();
+                blogPost.PersonId = person.PersonId;
+
+                return blogPost;
             });
 
-            var blogPosts = Enumerable.Range(0, 5)
-                .Select(x =>
-                {
-                    var blogPost = FakesFactory.Create<BlogPost>();
-                    blogPost.PersonId = person.PersonId;
+        await _DatabaseFixture.PerformDatabaseOperation(async context =>
+        {
+            context.BlogPosts.AddRange(blogPosts);
+            await context.SaveChangesAsync();
+        });
 
-                    return blogPost;
-                });
+        List<Person> persons = null;
+        await _DatabaseFixture.PerformDatabaseOperation(context =>
+        {
+            persons = context
+                .Persons
+                .Include(x => x.BlogPosts)
+                .Select(x => x)
+                .ToList();
+        });
 
-            await _DatabaseFixture.PerformDatabaseOperation(async context =>
-            {
-                context.BlogPosts.AddRange(blogPosts);
-                await context.SaveChangesAsync();
-            });
-
-            List<Person> persons = null;
-            await _DatabaseFixture.PerformDatabaseOperation(context =>
-            {
-                persons = context
-                    .Persons
-                    .Include(x => x.BlogPosts)
-                    .Select(x => x)
-                    .ToList();
-
-                return Task.CompletedTask;
-            });
-
-            Assert.All(persons, curPerson =>
-            {
-                Assert.NotNull(curPerson.BlogPosts);
-            });
-        }
+        Assert.All(persons, curPerson =>
+        {
+            Assert.NotNull(curPerson.BlogPosts);
+        });
     }
 }
