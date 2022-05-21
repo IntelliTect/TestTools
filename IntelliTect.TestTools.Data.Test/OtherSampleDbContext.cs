@@ -1,21 +1,22 @@
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.TestTools.Data.Test;
 
-public class OtherSampleDbContext : DbContext
+public class ReadOnlySampleDbContext : BaseDbContext
 {
-    public DbSet<Person> Persons { get; set; }
+    public new IQueryable<Person> Persons => base.Persons;
+    public new IQueryable<BlogPost> BlogPosts => base.BlogPosts;
 
-    public OtherSampleDbContext(DbContextOptions<OtherSampleDbContext> options) : base(options)
+    public ReadOnlySampleDbContext(DbContextOptions options) : base(options)
     { }
 }
 
-public class OtherSampleDbContextCopy : DbContext 
+public class BaseDbContext : DbContext
 {
     public DbSet<Person> Persons { get; set; }
     public DbSet<BlogPost> BlogPosts { get; set; }
-    public DbSet<UnusedModel> UnusedModels { get; set; }
 
-    public OtherSampleDbContextCopy(DbContextOptions<OtherSampleDbContextCopy> options) : base(options)
+    public BaseDbContext(DbContextOptions options) : base(options)
     { }
 }

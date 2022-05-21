@@ -219,7 +219,11 @@ public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbCont
     internal ContextConstructionInfo GetOrAddConstructionInfo<T>()
     {
         var type = typeof(T);
-        if (Options.ContainsKey(type)) return Options[type];
+
+        if (Options.TryGetValue(type, out var ctorInfo))
+        {
+            return ctorInfo;
+        }
         
         var newOptions = BuildOptions(type).Single().Value;
         Options.Add(type, newOptions);

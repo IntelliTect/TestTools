@@ -51,7 +51,7 @@ public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<Databas
     public async Task DatabaseFixtureSeed_UseDbContextOutsideOfFixtureGeneric_DbContextCreatedAndUsedForSeed()
     {
         var fixture = new DatabaseFixture<SampleDbContext>();
-        fixture.SetInitialize<OtherSampleDbContext>(async context =>
+        fixture.SetInitialize<BaseDbContext>(async context =>
         {
             var persons = Enumerable.Range(1, 5).Select(_ => FakesFactory.Create<Person>());
             context.Persons.AddRange(persons);

@@ -12,7 +12,7 @@ public class DatabaseFixtureMultipleDbContextsTests
     [Fact]
     public async Task DatabaseFixture_MultipleDbContexts_AccessToSameConnection()
     {
-        var dbFixture = new DatabaseFixture<SampleDbContext, OtherSampleDbContext>();
+        var dbFixture = new DatabaseFixture<SampleDbContext, ReadOnlySampleDbContext>();
         const int personCount = 5;
         
         await dbFixture.PerformDatabaseOperation(async context =>
@@ -23,7 +23,7 @@ public class DatabaseFixtureMultipleDbContextsTests
             await context.SaveChangesAsync();
         });
 
-        await dbFixture.PerformDatabaseOperation<OtherSampleDbContext>(context =>
+        await dbFixture.PerformDatabaseOperation<BaseDbContext>(context =>
         {
             Assert.Equal(personCount, context.Persons.Count());
         });
@@ -42,7 +42,7 @@ public class DatabaseFixtureMultipleDbContextsTests
     [Fact]
     public async Task DatabaseFixture_MultipleDbContexts_UnregisteredDbContextRequested_DbContextCreated()
     {
-        var dbFixture = new DatabaseFixture<SampleDbContext, OtherSampleDbContext>();
+        var dbFixture = new DatabaseFixture<SampleDbContext, BaseDbContext>();
 
         await dbFixture.PerformDatabaseOperation(async context =>
         {
@@ -52,7 +52,7 @@ public class DatabaseFixtureMultipleDbContextsTests
             await context.SaveChangesAsync();
         });
 
-        await dbFixture.PerformDatabaseOperation<OtherSampleDbContextCopy>(context =>
+        await dbFixture.PerformDatabaseOperation<ReadOnlySampleDbContext>(context =>
         {
             Assert.Equal(5, context.Persons.Count());
         });
