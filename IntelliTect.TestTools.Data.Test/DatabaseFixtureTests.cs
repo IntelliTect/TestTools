@@ -2,34 +2,33 @@
 using System.Threading.Tasks;
 using Xunit;
 
-namespace IntelliTect.TestTools.Data.Test
+namespace IntelliTect.TestTools.Data.Test;
+
+public class DatabaseFixtureTests
 {
-    public class DatabaseFixtureTests
+    [Fact]
+    public void DatabaseFixture_AttemptToGetInMemoryLoggersBeforeInitialization_InvalidOperationException()
     {
-        [Fact]
-        public void DatabaseFixture_AttemptToGetInMemoryLoggersBeforeInitialization_InvalidOperationException()
+        var databaseFixture = new DatabaseFixture<SampleDbContext>();
+        Assert.Throws<InvalidOperationException>(() =>
         {
-            var databaseFixture = new DatabaseFixture<SampleDbContext>();
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                _ = databaseFixture.GetInMemoryLoggers();
-            });
-        }
+            _ = databaseFixture.GetInMemoryLoggers();
+        });
+    }
 
-        [Fact]
-        public void DatabaseFixture_HookIntoBeforeLoggingSetup_EventExecuted()
+    [Fact]
+    public async Task DatabaseFixture_HookIntoBeforeLoggingSetup_EventExecuted()
+    {
+        var databaseFixture = new DatabaseFixture<SampleDbContext>();
+
+        bool operationPerformed = false;
+        databaseFixture.BeforeLoggingSetup += (sender, builder) =>
         {
-            var databaseFixture = new DatabaseFixture<SampleDbContext>();
+            operationPerformed = true;
+        };
 
-            bool operationPerformed = false;
-            databaseFixture.BeforeLoggingSetup += (sender, builder) =>
-            {
-                operationPerformed = true;
-            };
+        await databaseFixture.PerformDatabaseOperation(_ => Task.CompletedTask);
 
-            databaseFixture.PerformDatabaseOperation(_ => Task.CompletedTask);
-
-            Assert.True(operationPerformed);
-        }
+        Assert.True(operationPerformed);
     }
 }
