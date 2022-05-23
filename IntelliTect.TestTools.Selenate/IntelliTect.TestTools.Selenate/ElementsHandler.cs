@@ -9,19 +9,19 @@ namespace IntelliTect.TestTools.Selenate
     /// <summary>
     /// Main class for handling interactions with a group of IWebElements.
     /// </summary>
-    public class ElementsHandler : HandlerBase
+    public class ElementsHandler : ElementBase
     {
         /// <summary>
         /// Constructor to wrap a specific instace of a WebDriver and to set the locator method when interacting with WebElements
         /// </summary>
         /// <param name="driver">The WebDriver to wrap.</param>
         /// <param name="locator">Method for locating elements.</param>
-        public ElementsHandler(IWebDriver driver, By locator) : base(driver)
+        public ElementsHandler(IWebDriver driver, By locator) : base(driver, locator)
         {
-            Locator = locator;
+            //Locator = locator;
         }
 
-        public By Locator { get; private set; }
+        //public By Locator { get; private set; }
 
         /// <summary>
         /// Sets the locator to use for operations within this instance.
@@ -74,6 +74,12 @@ namespace IntelliTect.TestTools.Selenate
             return SetPollingInterval<ElementsHandler>(TimeSpan.FromMilliseconds(pollIntervalInMilliseconds));
         }
 
+        public ElementsHandler SetSearchContext(ISearchContext searchContext)
+        {
+            SearchContext = searchContext;
+            return this;
+        }
+
         /// <summary>
         /// Checks if any element found by <see cref="Locator"/> contains the matching text.
         /// </summary>
@@ -85,7 +91,11 @@ namespace IntelliTect.TestTools.Selenate
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             try
             {
-                return wait.Until(d => d.FindElements(Locator).Any(h => h.Text == text));
+                return wait.Until(_ =>
+                {
+                    IReadOnlyCollection<IWebElement> elems = SearchContext.FindElements(Locator);
+                    return elems.Any(h => h.Text == text);
+                });
             }
             catch (WebDriverTimeoutException)
             {
@@ -98,13 +108,13 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="predicate">The criteria to attempt to match on.</param>
         /// <returns></returns>
-        public IWebElement GetSingleExistingElement(Func<IWebElement, bool> predicate)
+        public IWebElement GetSingleWebElement(Func<IWebElement, bool> predicate)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-            return wait.Until(d =>
+            return wait.Until(_ =>
             {
-                var foundElems = d.FindElements(Locator);
+                IReadOnlyCollection<IWebElement> foundElems = SearchContext.FindElements(Locator);
                 if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No element found matching pattern: {Locator}");
                 var foundElem = foundElems.Where(predicate).ToList();
                 if (foundElem.Count != 1)
@@ -114,5 +124,10 @@ namespace IntelliTect.TestTools.Selenate
                 return foundElem[0];
             });
         }
+
+        //private IReadOnlyCollection<IWebElement> FindElements(IWebDriver d)
+        //{
+        //    return ParentElement?.FindElements(Locator) ?? d.FindElements(Locator);
+        //}
     }
 }

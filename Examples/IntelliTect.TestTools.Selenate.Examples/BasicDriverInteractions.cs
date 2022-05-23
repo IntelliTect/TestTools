@@ -15,17 +15,6 @@ namespace IntelliTect.TestTools.Selenate.Examples
         }
 
         [Fact]
-        public void Click()
-        {
-            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/")
-                .FindElement(By.CssSelector("a[href='/abtest']"))
-                .Click();
-
-            Assert.Equal("A/B Test Control", DriverHandler.FindElement(By.CssSelector("div[class='example']>h3"))
-                .Text());
-        }
-
-        [Fact]
         public void FindAlert()
         {
             DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/javascript_alerts")

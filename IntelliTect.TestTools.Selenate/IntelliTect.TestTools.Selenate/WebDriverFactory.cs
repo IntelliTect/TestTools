@@ -33,7 +33,7 @@ namespace IntelliTect.TestTools.Selenate
             switch (BrowserType)
             {
                 case BrowserType.Chrome:
-                    ChromeOptions chromeOptions = new ChromeOptions();
+                    ChromeOptions chromeOptions = new();
                     chromeOptions.AddArgument("--disable-extension");
                     chromeOptions.AddArgument("--no-sandbox");
                     chromeOptions.AddArgument("--disable-infobars");
@@ -42,19 +42,19 @@ namespace IntelliTect.TestTools.Selenate
                     driver = new ChromeDriver(Directory.GetCurrentDirectory(), chromeOptions);
                     break;
                 case BrowserType.Firefox:
-                    FirefoxOptions ffOptions = new FirefoxOptions();
+                    FirefoxOptions ffOptions = new();
                     ffOptions.AddArgument("-safe-mode");
                     driver = new FirefoxDriver(Directory.GetCurrentDirectory(), ffOptions);
                     break;
                 case BrowserType.Edge:
-                    EdgeOptions edgeOptions = new EdgeOptions
+                    EdgeOptions edgeOptions = new()
                     {
                         UnhandledPromptBehavior = UnhandledPromptBehavior.Accept
                     };
                     driver = new EdgeDriver(Directory.GetCurrentDirectory(), edgeOptions);
                     break;
                 case BrowserType.HeadlessChrome:
-                    ChromeOptions headlessChromeOptions = new ChromeOptions();
+                    ChromeOptions headlessChromeOptions = new();
                     headlessChromeOptions.AddArgument("--disable-extension");
                     headlessChromeOptions.AddArgument("--headless");
                     headlessChromeOptions.AddArgument("--no-sandbox");

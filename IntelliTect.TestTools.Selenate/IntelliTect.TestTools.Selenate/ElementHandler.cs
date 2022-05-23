@@ -1,25 +1,30 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.Generic;
 
 namespace IntelliTect.TestTools.Selenate
 {
     /// <summary>
     /// Main class for handling interactions with a specific IWebElement.
     /// </summary>
-    public class ElementHandler : HandlerBase
+    public class ElementHandler : ElementBase
     {
         /// <summary>
         /// Takes an IWebDriver and a Selenium By locator used for operations with this element.
         /// </summary>
         /// <param name="driver">The WebDriver to wrap.</param>
         /// <param name="locator">Method for locating an element.</param>
-        public ElementHandler(IWebDriver driver, By locator) : base(driver)
+        public ElementHandler(IWebDriver driver, By locator) : base(driver, locator)
         {
-            Locator = locator;
+            //Locator = locator;
         }
 
-        public  By Locator { get; private set; }
+        //public ElementHandler(IWebDriver driver, By locator, IWebElement parentElement) : base(driver)
+        //{
+        //    Locator = locator;
+        //    _ParentElement = parentElement;
+        //}
 
         private bool _IgnoreExceptions;
 
@@ -74,6 +79,12 @@ namespace IntelliTect.TestTools.Selenate
             return SetPollingInterval<ElementHandler>(TimeSpan.FromMilliseconds(pollIntervalInMilliseconds));
         }
 
+        public ElementHandler SetSearchContext(ISearchContext searchContext)
+        {
+            SearchContext = searchContext;
+            return this;
+        }
+
         /// <summary>
         /// Ignores all exceptions of type WebDriverException when trying operations within this instance. This should be used as sparingly as possible.
         /// </summary>
@@ -82,6 +93,42 @@ namespace IntelliTect.TestTools.Selenate
         {
             _IgnoreExceptions = shouldIgnoreExceptions;
             return this;
+        }
+
+        public ElementHandler FindElement(By by)
+        {
+            IWait<IWebDriver> wait = ElementWait();
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            IWebElement foundElem = wait.Until(_ => {
+                // I think I need to set every other interaction to this same pattern?
+                //return _ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
+                return SearchContext.FindElement(Locator);
+            });
+
+            ElementHandler newHandler = new(WrappedDriver, by);
+            newHandler.SetSearchContext(foundElem);
+            //newHandler.ParentElement = foundElem;
+
+            //return new ElementHandler(WrappedDriver, by, foundElem);
+            return newHandler;
+        }
+
+        public ElementsHandler FindElements(By by)
+        {
+            IWait<IWebDriver> wait = ElementWait();
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            IWebElement foundElem = wait.Until(_ => {
+                // I think I need to set every other interaction to this same pattern?
+                //return ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
+                return SearchContext.FindElement(Locator);
+            });
+
+            ElementsHandler newHandler = new(WrappedDriver, by);
+            newHandler.SetSearchContext(foundElem);
+            //newHandler.ParentElement = foundElem;
+
+            //return new ElementHandler(WrappedDriver, by, foundElem);
+            return newHandler;
         }
 
         /// <summary>
@@ -98,9 +145,12 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(ElementClickInterceptedException)
                 );
 
-            wait.Until(d =>
+            wait.Until(_ =>
             {
-                d.FindElement(Locator).Click();
+                //IWebElement elem = _ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
+                //elem.Click();
+                //d.FindElement(Locator).Click();
+                SearchContext.FindElement(Locator).Click();
                 return true;
             });
         }
@@ -120,10 +170,9 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(ElementNotInteractableException)
                 );
 
-            wait.Until(d =>
+            wait.Until(_ =>
             {
-                IWebElement elem = d.FindElement(Locator);
-                elem.SendKeys(textToSend);
+                SearchContext.FindElement(Locator).SendKeys(textToSend);
                 return true;
             });
         }
@@ -140,10 +189,9 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(StaleElementReferenceException)
                 );
 
-            wait.Until(d =>
+            wait.Until(_ =>
             {
-                IWebElement elem = d.FindElement(Locator);
-                elem.Clear();
+                SearchContext.FindElement(Locator).Clear();
                 return true;
             });
         }
@@ -161,9 +209,9 @@ namespace IntelliTect.TestTools.Selenate
                 );
 
 #pragma warning disable CS8603 // Possible null reference return. Needed for proper WebDriverWait behavior
-            return wait.Until(d =>
+            return wait.Until(_ =>
             {
-                IWebElement elem = d.FindElement(Locator);
+                IWebElement elem = SearchContext.FindElement(Locator);
                 if (elem.Displayed) return elem;
                 return null;
             });
@@ -184,10 +232,9 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(StaleElementReferenceException)
                 );
 
-            return wait.Until(d =>
+            return wait.Until(_ =>
             {
-                IWebElement elem = d.FindElement(Locator);
-                return elem.Text;
+                return SearchContext.FindElement(Locator).Text;
             });
         }
 
@@ -205,10 +252,9 @@ namespace IntelliTect.TestTools.Selenate
                 typeof(StaleElementReferenceException)
                 );
 
-            return wait.Until(d =>
+            return wait.Until(_ =>
             {
-                IWebElement elem = d.FindElement(Locator);
-                return elem.GetAttribute(attributeName);
+                return SearchContext.FindElement(Locator).GetAttribute(attributeName);
             });
         }
 
@@ -226,10 +272,9 @@ namespace IntelliTect.TestTools.Selenate
 
             try
             {
-                return wait.Until(d =>
+                return wait.Until(_ =>
                 {
-                    IWebElement elem = d.FindElement(Locator);
-                    return elem.Displayed;
+                    return SearchContext.FindElement(Locator).Displayed;
                 });
             }
             catch (WebDriverTimeoutException ex)
@@ -252,10 +297,9 @@ namespace IntelliTect.TestTools.Selenate
 
             try
             {
-                return wait.Until(d =>
+                return wait.Until(_ =>
                 {
-                    IWebElement elem = d.FindElement(Locator);
-                    return !elem.Displayed;
+                    return !SearchContext.FindElement(Locator).Displayed;
                 });
             }
             catch (NoSuchElementException)
@@ -282,10 +326,9 @@ namespace IntelliTect.TestTools.Selenate
 
             try
             {
-                return wait.Until(d =>
+                return wait.Until(_ =>
                 {
-                    IWebElement elem = d.FindElement(Locator);
-                    return elem.Enabled;
+                    return SearchContext.FindElement(Locator).Enabled;
                 });
             }
             // A Null inner exception implies the element was found but was in a disabled state
@@ -310,10 +353,9 @@ namespace IntelliTect.TestTools.Selenate
 
             try
             {
-                return wait.Until(d =>
+                return wait.Until(_ =>
                 {
-                    IWebElement elem = d.FindElement(Locator);
-                    return !elem.Enabled;
+                    return !SearchContext.FindElement(Locator).Enabled;
                 });
             }
             // A Null inner exception implies the element was found but was in an enabled state
@@ -335,5 +377,11 @@ namespace IntelliTect.TestTools.Selenate
 
             return wait;
         }
+
+        //private IWebElement FindElement(IWebDriver d)
+        //{
+        //    return SearchContext.FindElement(Locator);
+        //    //return ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
+        //}
     }
 }

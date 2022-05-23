@@ -1,4 +1,5 @@
 ﻿using IntelliTect.TestTools.Selenate.Examples.Pages;
+using OpenQA.Selenium;
 using Xunit;
 
 namespace IntelliTect.TestTools.Selenate.Examples
@@ -10,11 +11,13 @@ namespace IntelliTect.TestTools.Selenate.Examples
             _DynamicLoadingPage = new DynamicLoadingPages(WebDriver);
             _DynamicControlsPage = new DynamicControlsPage(WebDriver);
             _DropDownPage = new DropDownPage(WebDriver);
+            _ShadowDomPage = new ShadowDomPage(WebDriver);
         }
 
         private readonly DynamicLoadingPages _DynamicLoadingPage;
         private readonly DynamicControlsPage _DynamicControlsPage;
         private readonly DropDownPage _DropDownPage;
+        private readonly ShadowDomPage _ShadowDomPage;
 
 
         // Below two tests should functionally operate the same
@@ -22,6 +25,8 @@ namespace IntelliTect.TestTools.Selenate.Examples
         public void FindElementThatIsUnhiddenAfterPageLoad()
         {
             DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/dynamic_loading/1");
+
+            _DynamicLoadingPage.StartButton.GetWebElement().FindElements(OpenQA.Selenium.By.Id("testing"));
 
             _DynamicLoadingPage.StartButton.Click();
 
@@ -87,6 +92,16 @@ namespace IntelliTect.TestTools.Selenate.Examples
             DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/dropdown");
             _DropDownPage.DropDownSelect.SelectByText("Option 2");
             Assert.Equal("Option 2", _DropDownPage.DropDownSelect.SelectedOption.Text);
+        }
+
+        [Fact]
+        public void FindElementsInShadowDom()
+        {
+            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/shadowdom");
+            string originalText = _ShadowDomPage.OriginalText.Text();
+            string displayedText = _ShadowDomPage.DisplayedText.Text();
+            Assert.Equal("My default text", originalText);
+            Assert.Equal("Let's have some different text!", displayedText);
         }
     }
 }
