@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace IntelliTect.TestTools.Data.Test;
@@ -38,13 +39,25 @@ public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<Databas
     [Fact]
     public async Task DatabaseFixtureSeed_PerformMultipleDatabaseOperations_SeedDataExistsOnce()
     {
+        await _DatabaseFixture.PerformDatabaseOperation(_ => { });
+
         await _DatabaseFixture.PerformDatabaseOperation(context =>
         {
             Assert.Equal(5, context.Persons.Count());
             Assert.False(context.Persons.Any(x => x == null));
         });
+    }
 
-        await _DatabaseFixture.PerformDatabaseOperation(context => { });
+    [Fact]
+    public async Task DatabaseFixtureSeed_DatabaseFixtureWithMultipleContexts_SeedDataExistsOnce()
+    {
+        var dbFixture = new DatabaseFixture<ReadOnlySampleDbContext, SampleDbContext>();
+        dbFixture.SetInitialize<SampleDbContext>(SeedData);
+
+        await dbFixture.PerformDatabaseOperation(async context =>
+        {
+            Assert.Equal(5, await context.Persons.CountAsync());
+        });
     }
 
     [Fact]

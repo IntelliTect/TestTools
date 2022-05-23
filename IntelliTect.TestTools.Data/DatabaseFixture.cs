@@ -84,12 +84,12 @@ public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbCont
     /// </summary>
     public void SetInitialize<T>(Func<T, Task> seed) where T : DbContext
     {
-        GetOrAddConstructionInfo<T>();
-
+        var seedProcessed = false;
         _Seed = async () =>
         {
             var db = await CreateNewContext<T>();
-            await seed(db);
+            if (!seedProcessed) await seed(db);
+            seedProcessed = true;
         };
     }
 
@@ -246,7 +246,8 @@ public class DatabaseFixture<TDbContext> : IDisposable where TDbContext : DbCont
 
         if (_SeedComplete) return db;
 
-        _Seed?.Invoke();
+        if (_Seed is null) return db;
+        await _Seed.Invoke();
         _SeedComplete = true;
 
         return db;
