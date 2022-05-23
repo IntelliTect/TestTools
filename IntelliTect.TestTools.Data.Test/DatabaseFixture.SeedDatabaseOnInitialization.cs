@@ -38,13 +38,25 @@ public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<Databas
     [Fact]
     public async Task DatabaseFixtureSeed_PerformMultipleDatabaseOperations_SeedDataExistsOnce()
     {
+        await _DatabaseFixture.PerformDatabaseOperation(_ => { });
+
         await _DatabaseFixture.PerformDatabaseOperation(context =>
         {
             Assert.Equal(5, context.Persons.Count());
             Assert.False(context.Persons.Any(x => x == null));
         });
+    }
 
-        await _DatabaseFixture.PerformDatabaseOperation(context => { });
+    [Fact]
+    public async Task DatabaseFixtureSeed_DatabaseFixtureWithMultipleContexts_SeedDataExistsOnce()
+    {
+        var dbFixture = new DatabaseFixture<ReadOnlySampleDbContext, SampleDbContext>();
+        dbFixture.SetInitialize<SampleDbContext>(SeedData);
+
+        await dbFixture.PerformDatabaseOperation(context =>
+        {
+            Assert.Equal(5, context.Persons.Count());
+        });
     }
 
     [Fact]
