@@ -53,9 +53,9 @@ public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<Databas
         var dbFixture = new DatabaseFixture<ReadOnlySampleDbContext, SampleDbContext>();
         dbFixture.SetInitialize<SampleDbContext>(SeedData);
 
-        await dbFixture.PerformDatabaseOperation(context =>
+        await dbFixture.PerformDatabaseOperation(async context =>
         {
-            Assert.Equal(5, context.Persons.Count());
+            Assert.Equal(5, await context.Persons.CountAsync());
         });
     }
 
