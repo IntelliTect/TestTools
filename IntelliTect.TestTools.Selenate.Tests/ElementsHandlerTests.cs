@@ -40,12 +40,31 @@ namespace IntelliTect.TestTools.Selenate.Tests
         }
 
         [Fact]
+        public void GetElementsThrowsWhenNoElementsMatch()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                SetupMockedData()
+                .GetSingleWebElement(x =>
+                    x.Text.Contains("Blaaaargh", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        [Fact]
         public void GetSpecificExistingElementThrowsWhenMultipleElementsMatch()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 SetupMockedData()
                 .GetSingleWebElement(x =>
                     x.Text.Contains("Testing", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        [Fact]
+        public void GetElementsReturnsWhenMultipleElementsMatch()
+        {
+            Assert.Equal(2,
+                SetupMockedData()
+                .GetAllWebElements(x =>
+                    x.Text.Contains("Testing", StringComparison.OrdinalIgnoreCase))
+                .Count);
         }
 
         [Theory]

@@ -116,7 +116,7 @@ namespace IntelliTect.TestTools.Selenate
             {
                 IReadOnlyCollection<IWebElement> foundElems = SearchContext.FindElements(Locator);
                 if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No element found matching pattern: {Locator}");
-                var foundElem = foundElems.Where(predicate).ToList();
+                List<IWebElement> foundElem = foundElems.Where(predicate).ToList();
                 if (foundElem.Count != 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match exactly one result.");
@@ -125,9 +125,29 @@ namespace IntelliTect.TestTools.Selenate
             });
         }
 
-        //private IReadOnlyCollection<IWebElement> FindElements(IWebDriver d)
-        //{
-        //    return ParentElement?.FindElements(Locator) ?? d.FindElements(Locator);
-        //}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <param name="expectedCount">Minimum expected number of elements. Use 0 for no minimum.</param>
+        /// <returns></returns>
+        /// <exception cref="NoSuchElementException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public IList<IWebElement> GetAllWebElements(Func<IWebElement, bool> predicate/*, int expectedCount = 0*/)
+        {
+            IWait<IWebDriver> wait = Wait;
+            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+            return wait.Until(_ =>
+            {
+                IReadOnlyCollection<IWebElement> foundElems = SearchContext.FindElements(Locator);
+                if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No elements found matching pattern: {Locator}");
+                IList<IWebElement> elements = foundElems.Where(predicate).ToList();
+                if (elements.Count < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match any results.");
+                }
+                return elements;
+            });
+        }
     }
 }
