@@ -44,7 +44,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 SetupMockedData()
-                .GetSingleWebElement(x =>
+                .GetAllWebElements(x =>
                     x.Text.Contains("Blaaaargh", StringComparison.OrdinalIgnoreCase)));
         }
 

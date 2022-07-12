@@ -205,7 +205,8 @@ namespace IntelliTect.TestTools.Selenate
         {
             IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(
-                typeof(NoSuchElementException)
+                typeof(NoSuchElementException),
+                typeof(StaleElementReferenceException)
                 );
 
 #pragma warning disable CS8603 // Possible null reference return. Needed for proper WebDriverWait behavior
