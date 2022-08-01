@@ -361,31 +361,31 @@ namespace IntelliTect.TestTools.Console
         /// <param name="action">The action to run.</param>
         public static string Execute(string givenInput, Action action)
         {
-            TextWriter savedOutputStream = System.Console.Out;
-            TextReader savedInputStream = System.Console.In;
-            try
+            lock (ExecuteLock)
             {
-                lock (ExecuteLock)
+                TextWriter savedOutputStream = System.Console.Out;
+                TextReader savedInputStream = System.Console.In;
+                try
                 {
-                    string output;
-                    using (TextWriter writer = new StringWriter())
-                    using (TextReader reader = new StringReader(string.IsNullOrWhiteSpace(givenInput) ? "" : givenInput))
-                    {
-                        System.Console.SetOut(writer);
+                        string output;
+                        using (TextWriter writer = new StringWriter())
+                        using (TextReader reader = new StringReader(string.IsNullOrWhiteSpace(givenInput) ? "" : givenInput))
+                        {
+                            System.Console.SetOut(writer);
 
-                        System.Console.SetIn(reader);
-                        action();
+                            System.Console.SetIn(reader);
+                            action();
 
-                        output = writer.ToString();
+                            output = writer.ToString();
+                        }
+
+                        return output;
                     }
-
-                    return output;
+                finally
+                {
+                    System.Console.SetOut(savedOutputStream);
+                    System.Console.SetIn(savedInputStream);
                 }
-            }
-            finally
-            {
-                System.Console.SetOut(savedOutputStream);
-                System.Console.SetIn(savedInputStream);
             }
         }
 
