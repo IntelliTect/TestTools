@@ -100,16 +100,12 @@ namespace IntelliTect.TestTools.Selenate
             IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             IWebElement foundElem = wait.Until(_ => {
-                // I think I need to set every other interaction to this same pattern?
-                //return _ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
                 return SearchContext.FindElement(Locator);
             });
 
             ElementHandler newHandler = new(WrappedDriver, by);
             newHandler.SetSearchContext(foundElem);
-            //newHandler.ParentElement = foundElem;
 
-            //return new ElementHandler(WrappedDriver, by, foundElem);
             return newHandler;
         }
 
@@ -118,16 +114,12 @@ namespace IntelliTect.TestTools.Selenate
             IWait<IWebDriver> wait = ElementWait();
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             IWebElement foundElem = wait.Until(_ => {
-                // I think I need to set every other interaction to this same pattern?
-                //return ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
                 return SearchContext.FindElement(Locator);
             });
 
             ElementsHandler newHandler = new(WrappedDriver, by);
             newHandler.SetSearchContext(foundElem);
-            //newHandler.ParentElement = foundElem;
 
-            //return new ElementHandler(WrappedDriver, by, foundElem);
             return newHandler;
         }
 
@@ -147,9 +139,6 @@ namespace IntelliTect.TestTools.Selenate
 
             wait.Until(_ =>
             {
-                //IWebElement elem = _ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
-                //elem.Click();
-                //d.FindElement(Locator).Click();
                 SearchContext.FindElement(Locator).Click();
                 return true;
             });
@@ -378,11 +367,5 @@ namespace IntelliTect.TestTools.Selenate
 
             return wait;
         }
-
-        //private IWebElement FindElement(IWebDriver d)
-        //{
-        //    return SearchContext.FindElement(Locator);
-        //    //return ParentElement?.FindElement(Locator) ?? d.FindElement(Locator);
-        //}
     }
 }
