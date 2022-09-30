@@ -145,7 +145,7 @@ namespace IntelliTect.TestTools.Selenate
             return wait.Until(_ =>
             {
                 IReadOnlyCollection<IWebElement> foundElems = SearchContext.FindElements(Locator);
-                if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No elements found matching pattern: {Locator}");
+                if (foundElems.Count == 0) throw new NoSuchElementException($"No elements found matching pattern: {Locator}");
                 IList<IWebElement> elements = foundElems.Where(predicate).ToList();
                 if(elements.Any())
                 { 
