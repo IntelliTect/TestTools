@@ -15,7 +15,6 @@ namespace IntelliTect.TestTools.TestFramework
             TestMethodName = testMethodName;
             TestCaseId = testCaseId;
             ServiceCollection = services;
-            //Provider = provider;
         }
         // Switch to get; init; when this can be updated to .net5
         // Maybe target .net5 support for v3?
@@ -25,7 +24,7 @@ namespace IntelliTect.TestTools.TestFramework
         public bool ThrowOnFinallyBlockException { get; set; } = true;
 
         // May make sense to make some of the below public if it's needed for debugging.
-        // If so, definitely need to change them to internal/private sets.
+        // If so, definitely need to change them to internal or private sets.
 
         internal List<Block> TestBlocks { get; set; } = new();
         internal List<Block> FinallyBlocks { get; set; } = new();
@@ -39,6 +38,11 @@ namespace IntelliTect.TestTools.TestFramework
 
         public bool Passed { get; set; }
 
+        /// <summary>
+        /// Executes the test case.
+        /// </summary>
+        /// <exception cref="TestCaseException"></exception>
+        /// <exception cref="AggregateException"></exception>
         public void Execute()
         {
             ServiceProvider services = ServiceCollection.BuildServiceProvider();

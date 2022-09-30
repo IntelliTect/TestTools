@@ -1,4 +1,5 @@
-﻿using IntelliTect.TestTools.TestFramework.Tests.TestData.TestBlocks;
+﻿using IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies;
+using IntelliTect.TestTools.TestFramework.Tests.TestData.TestBlocks;
 using System;
 using Xunit;
 
@@ -105,6 +106,20 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
                 result,
                 1,
                 ErrorMessages.MissingInputError);
+        }
+
+        [Fact]
+        public void AddNullInstanceAndTypeThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new TestBuilder()
+                .AddDependencyInstance<IExampleDataInterface>(null!));
+        }
+
+        [Fact]
+        public void AddNullInstanceThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new TestBuilder()
+                .AddDependencyInstance(null!));
         }
     }
 }

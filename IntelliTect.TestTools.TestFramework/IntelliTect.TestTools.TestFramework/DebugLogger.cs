@@ -5,15 +5,12 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class DebugLogger : ITestCaseLogger
     {
-        public DebugLogger(TestCase testCase/*, IObjectSerializer serializer*/)
+        public DebugLogger(TestCase testCase)
         {
             TestCase = testCase;
-            //Serializer = serializer;
         }
 
-        //public IObjectSerializer Serializer { get; set; }
         public TestCase TestCase { get; }
-        //public string? TestCaseKey { get; set; }
         public string? CurrentTestBlock { get; set; }
 
         public void Debug(string message)
@@ -48,9 +45,6 @@ namespace IntelliTect.TestTools.TestFramework
             System.Diagnostics.Debug.WriteLine(message);
         }
 
-        // Is it worth making this injectable?
-        // That way we can override just this...
-        // However, we've only ever had to swap out loggers, not the actual serializer.
         private string Serialize(object objectToParse)
         {
             // JsonSerializer.Serialize has some different throw behavior between versions.

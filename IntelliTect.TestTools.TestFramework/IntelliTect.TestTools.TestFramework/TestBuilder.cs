@@ -9,7 +9,10 @@ namespace IntelliTect.TestTools.TestFramework
 {
     public class TestBuilder
     {
-
+        /// <summary>
+        /// Constructs a TestBuilder instance with a given test name.
+        /// </summary>
+        /// <param name="testMethodName">The name for the test method, defaults to the calling member.</param>
         public TestBuilder([CallerMemberName] string? testMethodName = null)
         {
             TestMethodName = testMethodName ?? "UndefinedTestMethodName";
@@ -26,9 +29,9 @@ namespace IntelliTect.TestTools.TestFramework
         private List<Exception> ValidationExceptions { get; } = new();
 
         /// <summary>
-        /// Used when a test case may be associated to a unique ID
+        /// Used when a test case may be associated to a unique ID.
         /// </summary>
-        /// <param name="testCaseKey"></param>
+        /// <param name="testCaseKey">The key associated to this test.</param>
         /// <returns></returns>
         public TestBuilder AddTestCaseId(int testCaseKey)
         {
@@ -37,9 +40,9 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         /// <summary>
-        /// Used to give a friendly name to the test case
+        /// Used to give a friendly name to the test case. Defaults to the test method name.
         /// </summary>
-        /// <param name="testCaseName"></param>
+        /// <param name="testCaseName">A friendly name associated to the test case.</param>
         /// <returns></returns>
         public TestBuilder AddTestCaseName(string testCaseName)
         {
@@ -48,11 +51,11 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         /// <summary>
-        /// Adds a test block (some related group of test actions) with an optional list of arguments. 
+        /// Adds a test block (some related group of test actions) with an optional list of arguments.<br />
         /// Any argument passed here will override all other matched arguments for the blocks TestBlock.Execute() method.
         /// </summary>
-        /// <typeparam name="T">The type of dependency a test block needs to execute</typeparam>
-        /// <param name="testBlockArgs">The list of arguments to fulfill a set of Execute(params object[]) parameters</param>
+        /// <typeparam name="T">The type of dependency a test block needs to execute.</typeparam>
+        /// <param name="testBlockArgs">The list of arguments to fulfill a set of Execute(params object[]) parameters.</param>
         /// <returns>This</returns>
         public TestBuilder AddTestBlock<T>(params object[] testBlockArgs) where T : ITestBlock
         {
@@ -61,6 +64,12 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        /// <summary>
+        /// Adds a finally block, a special test block that will always run after all test blocks, regardless of if a prior test block fails.
+        /// </summary>
+        /// <typeparam name="T">The type of dependency a test block needs to execute.</typeparam>
+        /// <param name="finallyBlockArgs">The list of arguments to fulfill a set of Execute(params object[]) parameters.</param>
+        /// <returns></returns>
         public TestBuilder AddFinallyBlock<T>(params object[] finallyBlockArgs) where T : ITestBlock
         {
             Block fb = CreateBlock<T>(true, finallyBlockArgs);
@@ -69,10 +78,10 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         /// <summary>
-        /// Adds a service as a factory a container that is used to fulfill TestBlock dependencies
+        /// Adds a service as a factory a container that is used to fulfill TestBlock dependencies.
         /// </summary>
-        /// <typeparam name="T">The type of dependency a test block needs to execute</typeparam>
-        /// <param name="serviceFactory">The factory to provide an instance of the type needed for a test block to execute</param>
+        /// <typeparam name="T">The type of dependency a test block needs to execute.</typeparam>
+        /// <param name="serviceFactory">The factory to provide an instance of the type needed for a test block to execute.</param>
         /// <returns></returns>
         public TestBuilder AddDependencyService<T>(Func<IServiceProvider, object> serviceFactory)
         {
@@ -81,7 +90,7 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         /// <summary>
-        /// Adds a service as a Type to the container that is used to fulfill TestBlock dependencies
+        /// Adds a service as a Type to the container that is used to fulfill TestBlock dependencies.
         /// </summary>
         /// <typeparam name="T">The type of test block, as an ITestBlock, to run</typeparam>
         /// <returns>This</returns>
@@ -91,6 +100,12 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        /// <summary>
+        /// Adds a service as a Type with an Implementation that is used to fulfill TestBlock dependencies.
+        /// </summary>
+        /// <typeparam name="TServiceType">The type of the service to add.</typeparam>
+        /// <typeparam name="TImplementationType">A specific implementation of the type.</typeparam>
+        /// <returns>This</returns>
         public TestBuilder AddDependencyService<TServiceType, TImplementationType>()
         {
             Services.AddSingleton(typeof(TServiceType), typeof(TImplementationType));
@@ -98,7 +113,7 @@ namespace IntelliTect.TestTools.TestFramework
         }
 
         /// <summary>
-        /// Adds an instance of a Type to the container that is needed for a TestBlock to execute
+        /// Adds an instance of a Type to the container that is needed for a TestBlock to execute.
         /// </summary>
         /// <param name="objToAdd">The instance of a Type that a TestBlock needs</param>
         /// <returns>this</returns>
@@ -109,12 +124,24 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
+        /// <summary>
+        /// Adds an instance of a Type to the container that is needed for a TestBlock to execute.
+        /// </summary>
+        /// <typeparam name="T">The type of the object.</typeparam>
+        /// <param name="objToAdd">The object to add.</param>
+        /// <returns></returns>
         public TestBuilder AddDependencyInstance<T>(object objToAdd)
         {
+            if (objToAdd is null) throw new ArgumentNullException(nameof(objToAdd));
             Services.AddSingleton(typeof(T), objToAdd);
             return this;
         }
 
+        /// <summary>
+        /// Adds a new logger to be used during test execution. This will remove any existing loggers.
+        /// </summary>
+        /// <typeparam name="T">Type of logger.</typeparam>
+        /// <returns></returns>
         public TestBuilder AddLogger<T>() where T : ITestCaseLogger
         {
             RemoveLogger();
@@ -136,13 +163,11 @@ namespace IntelliTect.TestTools.TestFramework
             return this;
         }
 
-        // Legacy support. Will get removed before final version is pushed out.
-        public void ExecuteTestCase()
-        {
-            TestCase tc = Build();
-            tc.Execute();
-        }
-
+        /// <summary>
+        /// Builds the test case. This will validate that test block dependencies are satisfied.
+        /// </summary>
+        /// <returns>An object that can be used to execute a test case.</returns>
+        /// <exception cref="AggregateException"></exception>
         public TestCase Build()
         {
             if (string.IsNullOrWhiteSpace(TestCaseName))
