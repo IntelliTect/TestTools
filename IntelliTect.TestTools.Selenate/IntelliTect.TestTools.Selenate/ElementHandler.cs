@@ -17,14 +17,7 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="locator">Method for locating an element.</param>
         public ElementHandler(IWebDriver driver, By locator) : base(driver, locator)
         {
-            //Locator = locator;
         }
-
-        //public ElementHandler(IWebDriver driver, By locator, IWebElement parentElement) : base(driver)
-        //{
-        //    Locator = locator;
-        //    _ParentElement = parentElement;
-        //}
 
         private bool _IgnoreExceptions;
 

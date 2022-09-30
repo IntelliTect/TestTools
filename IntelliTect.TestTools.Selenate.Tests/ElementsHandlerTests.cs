@@ -33,7 +33,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         [Fact]
         public void GetSpecificExistingElementThrowsWhenNoElementsMatch()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => 
+            Assert.Throws<WebDriverTimeoutException>(() => 
                 SetupMockedData()
                 .GetSingleWebElement(x => 
                     x.Text.Contains("Blaaaargh", StringComparison.OrdinalIgnoreCase)));
@@ -42,7 +42,7 @@ namespace IntelliTect.TestTools.Selenate.Tests
         [Fact]
         public void GetElementsThrowsWhenNoElementsMatch()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.Throws<WebDriverTimeoutException>(() =>
                 SetupMockedData()
                 .GetAllWebElements(x =>
                     x.Text.Contains("Blaaaargh", StringComparison.OrdinalIgnoreCase)));

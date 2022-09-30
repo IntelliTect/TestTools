@@ -10,9 +10,10 @@ namespace IntelliTect.TestTools.Selenate
             SearchContext = driver;
         }
 
-        // Do we need the ParentElement property if we keep track of SearchContext?
-        //public IWebElement? ParentElement { get; internal set; }
-        protected ISearchContext SearchContext { get; set; }
+        /// <summary>
+        /// The locator used to find IWebElements in this handler.
+        /// </summary>
         public By Locator { get; protected set; }
+        protected ISearchContext SearchContext { get; set; }
     }
 }

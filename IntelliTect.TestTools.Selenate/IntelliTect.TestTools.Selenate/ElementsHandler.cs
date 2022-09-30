@@ -18,10 +18,8 @@ namespace IntelliTect.TestTools.Selenate
         /// <param name="locator">Method for locating elements.</param>
         public ElementsHandler(IWebDriver driver, By locator) : base(driver, locator)
         {
-            //Locator = locator;
         }
 
-        //public By Locator { get; private set; }
 
         /// <summary>
         /// Sets the locator to use for operations within this instance.
@@ -74,6 +72,11 @@ namespace IntelliTect.TestTools.Selenate
             return SetPollingInterval<ElementsHandler>(TimeSpan.FromMilliseconds(pollIntervalInMilliseconds));
         }
 
+        /// <summary>
+        /// Sets the search context for this element (Driver, element, shadow dom, etc.)
+        /// </summary>
+        /// <param name="searchContext">The context to use for all future searches.</param>
+        /// <returns></returns>
         public ElementsHandler SetSearchContext(ISearchContext searchContext)
         {
             SearchContext = searchContext;
@@ -110,44 +113,50 @@ namespace IntelliTect.TestTools.Selenate
         /// <returns></returns>
         public IWebElement GetSingleWebElement(Func<IWebElement, bool> predicate)
         {
-            IWait<IWebDriver> wait = Wait;
-            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-            return wait.Until(_ =>
+            IList<IWebElement> elems = GetElements(predicate);
+
+            if (elems.Count != 1)
             {
-                IReadOnlyCollection<IWebElement> foundElems = SearchContext.FindElements(Locator);
-                if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No element found matching pattern: {Locator}");
-                List<IWebElement> foundElem = foundElems.Where(predicate).ToList();
-                if (foundElem.Count != 1)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match exactly one result.");
-                }
-                return foundElem[0];
-            });
+                throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match exactly one result.");
+            }
+
+            return elems[0];
         }
 
         /// <summary>
-        /// 
+        /// Gets all elements found by <see cref="Locator"/>, matching a given predicate.
         /// </summary>
-        /// <param name="predicate"></param>
-        /// <param name="expectedCount">Minimum expected number of elements. Use 0 for no minimum.</param>
-        /// <returns></returns>
+        /// <param name="predicate">The function used to filter to one or more IWebElements</param>
+        /// <returns>A list of found IWebElements</returns>
         /// <exception cref="NoSuchElementException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public IList<IWebElement> GetAllWebElements(Func<IWebElement, bool> predicate/*, int expectedCount = 0*/)
+        public IList<IWebElement> GetAllWebElements(Func<IWebElement, bool> predicate)
+        {
+            return GetElements(predicate);
+
+        }
+
+        public IList<IWebElement> GetElements(Func<IWebElement, bool> predicate)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+
+#pragma warning disable CS8603 // Possible null reference return. Needed for Selenium retry.
             return wait.Until(_ =>
             {
                 IReadOnlyCollection<IWebElement> foundElems = SearchContext.FindElements(Locator);
                 if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No elements found matching pattern: {Locator}");
                 IList<IWebElement> elements = foundElems.Where(predicate).ToList();
-                if (elements.Count < 1)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match any results.");
+                if(elements.Any())
+                { 
+                    return elements;
                 }
-                return elements;
+                else
+                {
+                    return null;
+                }
             });
+#pragma warning restore CS8603 // Possible null reference return.
         }
     }
 }
