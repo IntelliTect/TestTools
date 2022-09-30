@@ -18,9 +18,23 @@ namespace IntelliTect.TestTools.TestFramework
         }
         // Switch to get; init; when this can be updated to .net5
         // Maybe target .net5 support for v3?
+        /// <summary>
+        /// The friendly name for the test case.
+        /// </summary>
         public string TestCaseName { get; }
+        /// <summary>
+        /// The unit test method name. Defaults to the calling member for new TestBuilder().
+        /// </summary>
         public string TestMethodName { get; }
+        /// <summary>
+        /// Any ID associated with the test case, otherwise 0.
+        /// </summary>
         public int TestCaseId { get; }
+        /// <summary>
+        /// If this test case should throw if a finally block has an exception. Defaults to true.
+        /// <br />
+        /// If a finally block fails and this property is true, the test case is still considered passed internally, but most unit test frameworks will mark the test failed.
+        /// </summary>
         public bool ThrowOnFinallyBlockException { get; set; } = true;
 
         // May make sense to make some of the below public if it's needed for debugging.
@@ -36,13 +50,14 @@ namespace IntelliTect.TestTools.TestFramework
         private Exception? TestBlockException { get; set; }
         private List<Exception> FinallyBlockExceptions { get; } = new();
 
+        // Has this test case passed? Will only be true if every regular test block succeeds.
         public bool Passed { get; set; }
 
         /// <summary>
         /// Executes the test case.
         /// </summary>
-        /// <exception cref="TestCaseException"></exception>
-        /// <exception cref="AggregateException"></exception>
+        /// <exception cref="TestCaseException">The exception describing a test failure.</exception>
+        /// <exception cref="AggregateException">Occurs when finally blocks fail, or the test fails and at least one finally block fails.</exception>
         public void Execute()
         {
             ServiceProvider services = ServiceCollection.BuildServiceProvider();
@@ -85,12 +100,9 @@ namespace IntelliTect.TestTools.TestFramework
                     if (!TryGetBlock(testCaseScope, fb, out var finallyBlockInstance)) continue;
                     if (!TrySetBlockProperties(testCaseScope, fb, finallyBlockInstance)) continue;
                     if (!TryGetExecuteArguments(testCaseScope, fb, out List<object?> executeArgs)) continue;
-                    // What should we do here if any of these fail?
-                    // Desired behavior is to still run the next finally block.
-                    // Maybe log?
+
                     if (!TryRunBlock(fb, finallyBlockInstance, executeArgs))
                     {
-                        // Maybe change this to foreach loop so we can check if the number of FinallyBlockExceptions matches the iteration we're on?
                         Log?.Critical($"Finally block failed: {FinallyBlockExceptions.LastOrDefault()}");
                     }
                 }
