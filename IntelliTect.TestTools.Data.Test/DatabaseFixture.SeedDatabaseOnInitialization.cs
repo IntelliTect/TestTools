@@ -1,49 +1,79 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using IntelliTect.IntelliTime.Data.Test.Util;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace IntelliTect.TestTools.Data.Test
+namespace IntelliTect.TestTools.Data.Test;
+
+public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<DatabaseFixture<SampleDbContext>>
 {
-    public class DatabaseFixtureSeedDatabaseOnInitialization : IClassFixture<DatabaseFixture<SampleDbContext>>
+    private readonly DatabaseFixture<SampleDbContext> _DatabaseFixture;
+
+    public DatabaseFixtureSeedDatabaseOnInitialization(DatabaseFixture<SampleDbContext> dbFixture)
     {
-        private readonly DatabaseFixture<SampleDbContext> _DatabaseFixture;
+        _DatabaseFixture = dbFixture ?? throw new ArgumentNullException(nameof(dbFixture));
 
-        public DatabaseFixtureSeedDatabaseOnInitialization(DatabaseFixture<SampleDbContext> dbFixture)
+        _DatabaseFixture.SetInitialize<SampleDbContext>(SeedData);
+    }
+
+    private Task SeedData(SampleDbContext dbContext)
+    {
+        var things = Enumerable.Range(1, 5).Select(_ => FakesFactory.Create<Person>());
+
+        dbContext.Persons.AddRange(things);
+
+        return dbContext.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task DatabaseFixtureSeed_DatabaseFixtureReused_SeedDataExists()
+    {
+        await _DatabaseFixture.PerformDatabaseOperation(context =>
         {
-            _DatabaseFixture = dbFixture ?? throw new ArgumentNullException(nameof(dbFixture));
+            Assert.Equal(5, context.Persons.Count());
+            Assert.False(context.Persons.Any(x => x == null));
+        });
+    }
 
-            _DatabaseFixture.InitializeDatabase = SeedData;
-        }
+    [Fact]
+    public async Task DatabaseFixtureSeed_PerformMultipleDatabaseOperations_SeedDataExistsOnce()
+    {
+        await _DatabaseFixture.PerformDatabaseOperation(_ => { });
 
-        private Task SeedData(SampleDbContext dbContext)
+        await _DatabaseFixture.PerformDatabaseOperation(context =>
         {
-            var things = Enumerable.Range(1, 5).Select(_ => FakesFactory.Create<Person>());
+            Assert.Equal(5, context.Persons.Count());
+            Assert.False(context.Persons.Any(x => x == null));
+        });
+    }
 
-            dbContext.Persons.AddRange(things);
+    [Fact]
+    public async Task DatabaseFixtureSeed_DatabaseFixtureWithMultipleContexts_SeedDataExistsOnce()
+    {
+        var dbFixture = new DatabaseFixture<ReadOnlySampleDbContext, SampleDbContext>();
+        dbFixture.SetInitialize<SampleDbContext>(SeedData);
 
-            return dbContext.SaveChangesAsync();
-        }
-
-        [Fact]
-        public async Task DatabaseFixtureReused_SeedDataExists()
+        await dbFixture.PerformDatabaseOperation(async context =>
         {
-            await _DatabaseFixture.PerformDatabaseOperation(context =>
-            {
-                Assert.Equal(5, context.Persons.Count());
-                Assert.False(context.Persons.Any(x => x == null));
-            });
-        }
+            Assert.Equal(5, await context.Persons.CountAsync());
+        });
+    }
 
-        [Fact]
-        public async Task DatabaseFixtureReused_SeedDataExists2()
+    [Fact]
+    public async Task DatabaseFixtureSeed_UseDbContextOutsideOfFixtureGeneric_DbContextCreatedAndUsedForSeed()
+    {
+        var fixture = new DatabaseFixture<SampleDbContext>();
+        fixture.SetInitialize<BaseDbContext>(async context =>
         {
-            await _DatabaseFixture.PerformDatabaseOperation(context =>
-            {
-                Assert.Equal(5, context.Persons.Count());
-                Assert.False(context.Persons.Any(x => x == null));
-            });
-        }
+            var persons = Enumerable.Range(1, 5).Select(_ => FakesFactory.Create<Person>());
+            context.Persons.AddRange(persons);
+            await context.SaveChangesAsync();
+        });
+
+        await _DatabaseFixture.PerformDatabaseOperation(context =>
+        {
+            Assert.Equal(5, context.Persons.Count());
+        });
     }
 }
