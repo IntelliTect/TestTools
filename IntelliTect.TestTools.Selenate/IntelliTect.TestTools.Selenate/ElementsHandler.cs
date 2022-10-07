@@ -115,7 +115,7 @@ namespace IntelliTect.TestTools.Selenate
         {
             IList<IWebElement> elems = GetElements(predicate);
 
-            if (elems.Count != 1)
+            if (elems.Count is not 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match exactly one result.");
             }
@@ -136,27 +136,26 @@ namespace IntelliTect.TestTools.Selenate
 
         }
 
-        public IList<IWebElement> GetElements(Func<IWebElement, bool> predicate)
+        private IList<IWebElement> GetElements(Func<IWebElement, bool> predicate)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
 
-#pragma warning disable CS8603 // Possible null reference return. Needed for Selenium retry.
             return wait.Until(_ =>
             {
-                IReadOnlyCollection<IWebElement> foundElems = SearchContext.FindElements(Locator);
-                if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No elements found matching pattern: {Locator}");
-                IList<IWebElement> elements = foundElems.Where(predicate).ToList();
-                if(elements.Any())
+                IList<IWebElement> foundElems = SearchContext.FindElements(Locator).Where(predicate).ToList();
+                if(foundElems.Any())
                 { 
-                    return elements;
+                    return foundElems;
                 }
                 else
                 {
-                    return null;
+                    // Selenium treats this as a failure and will retry this action until:
+                    //  1. Something is returned
+                    //  2. The timeout is met and a WebDriverTimeoutException is thrown.
+                    return null!;
                 }
             });
-#pragma warning restore CS8603 // Possible null reference return.
         }
     }
 }
