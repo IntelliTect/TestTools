@@ -1,69 +1,53 @@
-using OpenQA.Selenium;
-using System;
-using Xunit;
+namespace IntelliTect.TestTools.Selenate.Examples;
 
-namespace IntelliTect.TestTools.Selenate.Examples
+public class BasicDriverInteractions : TestBase
 {
-    public class BasicDriverInteractions : TestBase
+    [Fact]
+    public void NavigateAndGetWindowTitle()
     {
-        [Fact]
-        public void NavigateAndGetWindowTitle()
-        {
-            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/");
+        DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/");
 
-            Assert.Equal("The Internet", DriverHandler.GetWindowTitle());
-        }
+        Assert.Equal("The Internet", DriverHandler.GetWindowTitle());
+    }
 
-        [Fact]
-        public void Click()
-        {
-            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/")
-                .FindElement(By.CssSelector("a[href='/abtest']"))
-                .Click();
+    [Fact]
+    public void FindAlert()
+    {
+        DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/javascript_alerts")
+            .FindElement(By.CssSelector("button[onclick='jsConfirm()']"))
+            .Click();
 
-            Assert.Equal("A/B Test Control", DriverHandler.FindElement(By.CssSelector("div[class='example']>h3"))
-                .Text());
-        }
+        DriverHandler.SwitchToAlert().Accept();
 
-        [Fact]
-        public void FindAlert()
-        {
-            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/javascript_alerts")
-                .FindElement(By.CssSelector("button[onclick='jsConfirm()']"))
-                .Click();
+        Assert.Equal(
+            "You clicked: Ok",
+            DriverHandler.FindElement(By.CssSelector("p[id='result']")).Text());
+    }
 
-            DriverHandler.SwitchToAlert().Accept();
+    [Fact]
+    public void FindWindow()
+    {
+        DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/windows")
+            .FindElement(By.CssSelector("a[href='/windows/new']"))
+            .Click();
 
-            Assert.Equal(
-                "You clicked: Ok",
-                DriverHandler.FindElement(By.CssSelector("p[id='result']")).Text());
-        }
+        // If the window is not found, this will throw
+        Assert.Equal("New Window",
+            DriverHandler
+            .SwitchToWindow("New Window")
+            .GetWindowTitle());
+    }
 
-        [Fact]
-        public void FindWindow()
-        {
-            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/windows")
-                .FindElement(By.CssSelector("a[href='/windows/new']"))
-                .Click();
+    [Fact]
+    public void FindFrame()
+    {
+        DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/nested_frames");
 
-            // If the window is not found, this will throw
-            Assert.Equal("New Window",
-                DriverHandler
-                .SwitchToWindow("New Window")
-                .GetWindowTitle());
-        }
-
-        [Fact]
-        public void FindFrame()
-        {
-            DriverHandler.NavigateToPage("https://the-internet.herokuapp.com/nested_frames");
-
-            Assert.Equal("LEFT",
-                DriverHandler.SwitchToIFrame(
-                    By.CssSelector("frame[src='/frame_top']"),
-                    By.CssSelector("frame[src='/frame_left']"))
-                .FindElement(By.CssSelector("body"))
-                .Text());
-        }
+        Assert.Equal("LEFT",
+            DriverHandler.SwitchToIFrame(
+                By.CssSelector("frame[src='/frame_top']"),
+                By.CssSelector("frame[src='/frame_left']"))
+            .FindElement(By.CssSelector("body"))
+            .Text());
     }
 }
