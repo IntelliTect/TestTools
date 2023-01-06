@@ -9,19 +9,17 @@ namespace IntelliTect.TestTools.Selenate
     /// <summary>
     /// Main class for handling interactions with a group of IWebElements.
     /// </summary>
-    public class ElementsHandler : HandlerBase
+    public class ElementsHandler : ElementBase
     {
         /// <summary>
         /// Constructor to wrap a specific instace of a WebDriver and to set the locator method when interacting with WebElements
         /// </summary>
         /// <param name="driver">The WebDriver to wrap.</param>
         /// <param name="locator">Method for locating elements.</param>
-        public ElementsHandler(IWebDriver driver, By locator) : base(driver)
+        public ElementsHandler(IWebDriver driver, By locator) : base(driver, locator)
         {
-            Locator = locator;
         }
 
-        public By Locator { get; private set; }
 
         /// <summary>
         /// Sets the locator to use for operations within this instance.
@@ -75,6 +73,17 @@ namespace IntelliTect.TestTools.Selenate
         }
 
         /// <summary>
+        /// Sets the search context for this element (Driver, element, shadow dom, etc.)
+        /// </summary>
+        /// <param name="searchContext">The context to use for all future searches.</param>
+        /// <returns></returns>
+        public ElementsHandler SetSearchContext(ISearchContext searchContext)
+        {
+            SearchContext = searchContext;
+            return this;
+        }
+
+        /// <summary>
         /// Checks if any element found by <see cref="Locator"/> contains the matching text.
         /// </summary>
         /// <param name="text">The text to search for.</param>
@@ -85,7 +94,11 @@ namespace IntelliTect.TestTools.Selenate
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             try
             {
-                return wait.Until(d => d.FindElements(Locator).Any(h => h.Text == text));
+                return wait.Until(_ =>
+                {
+                    IReadOnlyCollection<IWebElement> elems = SearchContext.FindElements(Locator);
+                    return elems.Any(h => h.Text == text);
+                });
             }
             catch (WebDriverTimeoutException)
             {
@@ -98,20 +111,50 @@ namespace IntelliTect.TestTools.Selenate
         /// </summary>
         /// <param name="predicate">The criteria to attempt to match on.</param>
         /// <returns></returns>
-        public IWebElement GetSingleExistingElement(Func<IWebElement, bool> predicate)
+        public IWebElement GetSingleWebElement(Func<IWebElement, bool> predicate)
+        {
+            IList<IWebElement> elems = GetElements(predicate);
+
+            if (elems.Count is not 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(predicate), "The provided predicate did not match exactly one result.");
+            }
+
+            return elems[0];
+        }
+
+        /// <summary>
+        /// Gets all elements found by <see cref="Locator"/>, matching a given predicate.
+        /// </summary>
+        /// <param name="predicate">The function used to filter to one or more IWebElements</param>
+        /// <returns>A list of found IWebElements</returns>
+        /// <exception cref="NoSuchElementException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public IList<IWebElement> GetAllWebElements(Func<IWebElement, bool> predicate)
+        {
+            return GetElements(predicate);
+
+        }
+
+        private IList<IWebElement> GetElements(Func<IWebElement, bool> predicate)
         {
             IWait<IWebDriver> wait = Wait;
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-            return wait.Until(d =>
+
+            return wait.Until(_ =>
             {
-                var foundElems = d.FindElements(Locator);
-                if (foundElems is null || foundElems.Count == 0) throw new NoSuchElementException($"No element found matching pattern: {Locator}");
-                var foundElem = foundElems.Where(predicate).ToList();
-                if (foundElem.Count != 1)
-                {
-                    throw new InvalidOperationException("The provided predicate did not match exactly one result.");
+                IList<IWebElement> foundElems = SearchContext.FindElements(Locator).Where(predicate).ToList();
+                if(foundElems.Any())
+                { 
+                    return foundElems;
                 }
-                return foundElem[0];
+                else
+                {
+                    // Selenium treats this as a failure and will retry this action until:
+                    //  1. Something is returned
+                    //  2. The timeout is met and a WebDriverTimeoutException is thrown.
+                    return null!;
+                }
             });
         }
     }

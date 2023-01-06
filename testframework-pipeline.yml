@@ -1,13 +1,14 @@
 trigger:
   branches:
     include:
-      - master
+      - main
   paths:
     include:
       - IntelliTect.TestTools.TestFramework/*
+      - testframework-pipeline.yml
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2022'
 
 variables:
   solution: '**/IntelliTect.TestTools.TestFramework.slnf'
@@ -16,11 +17,8 @@ variables:
   version: '2.0.0-beta'
 
 steps:
-- task: NuGetToolInstaller@0
+- task: NuGetToolInstaller@1
   displayName: 'Use latest NuGet'
-  inputs:
-    versionSpec: '5.x'
-    checkLatest: true
 
 - task: NuGetCommand@2
   displayName: 'Restore Solution'

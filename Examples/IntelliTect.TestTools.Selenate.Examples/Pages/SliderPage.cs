@@ -1,18 +1,14 @@
-﻿using OpenQA.Selenium;
-using System;
+﻿namespace IntelliTect.TestTools.Selenate.Examples.Pages;
 
-namespace IntelliTect.TestTools.Selenate.Examples.Pages
+public class SliderPage
 {
-    public class SliderPage
+    public SliderPage(IWebDriver driver)
     {
-        public SliderPage(IWebDriver driver)
-        {
-            _Driver = driver ?? throw new ArgumentNullException(nameof(driver));
-        }
-
-        public ElementHandler Slider => new ElementHandler(_Driver, By.CssSelector("input[type='range']"));
-        public ElementHandler Number => new ElementHandler(_Driver, By.Id("range"));
-
-        private IWebDriver _Driver;
+        _Driver = driver ?? throw new ArgumentNullException(nameof(driver));
     }
+
+    public ElementHandler Slider => new ElementHandler(_Driver, By.CssSelector("input[type='range']"));
+    public ElementHandler Number => new ElementHandler(_Driver, By.Id("range"));
+
+    private IWebDriver _Driver;
 }

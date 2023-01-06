@@ -6,19 +6,20 @@
 trigger:
   branches:
     include:
-      - master
+      - main
   paths:
     include:
       - IntelliTect.TestTools.Data/*
       - IntelliTect.TestTools.Data.slnf
       - Samples/IntelliTect.TestTools.Data.Sample/*
+      - azure-pipelines-IntelliTect.TestTools.Data.yml
 
 variables:
-  version: '0.2.0'
+  version: '0.4.0'
   BuildConfiguration: Release
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2022'
 
 steps:
 
