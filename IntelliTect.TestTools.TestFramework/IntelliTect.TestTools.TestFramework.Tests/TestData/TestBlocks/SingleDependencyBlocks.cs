@@ -55,7 +55,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.TestBlocks
             }
             else
             {
-                return !arg;
+                return false;
             }
         }
     }
