@@ -143,7 +143,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
             Assert.Equal(typeof(CustomLogger), Log!.GetType());
             if(Log is CustomLogger cl)
             {
-                Assert.True(cl.Invocations > 0);
+                Assert.True(cl.Invoked);
             }
         }
     }
@@ -158,31 +158,31 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
 
         public string? CurrentTestBlock { get; set; }
 
-        public int Invocations { get; set; }
+        public bool Invoked { get; set; }
 
         public void Critical(string message)
         {
-            Invocations++;
+            Invoked = true;
         }
 
         public void Debug(string message)
         {
-            Invocations++;
+            Invoked = true;
         }
 
         public void Info(string message)
         {
-            Invocations++;
+            Invoked = true;
         }
 
         public void TestBlockInput(object input)
         {
-            Invocations++;
+            Invoked = true;
         }
 
         public void TestBlockOutput(object output)
         {
-            Invocations++;
+            Invoked = true;
         }
     }
 }

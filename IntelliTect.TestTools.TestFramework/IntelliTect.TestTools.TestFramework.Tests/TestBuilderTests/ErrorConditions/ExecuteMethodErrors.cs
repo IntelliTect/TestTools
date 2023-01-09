@@ -44,7 +44,6 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.ErrorCondit
     {
         public void Execute()
         {
-            Assert.True(true);
         }
 
         public void Execute(string input)

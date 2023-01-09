@@ -40,6 +40,5 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
             Assert.Equal(typeof(InvalidOperationException), ex.InnerException!.GetType());
             Assert.Contains("oops", ex.InnerException.Message, StringComparison.InvariantCultureIgnoreCase);
         }
-
     }
 }

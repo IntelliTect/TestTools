@@ -4,7 +4,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
 {
     public class ThrowingLogger : ITestCaseLogger
     {
-        public ExampleLogger(TestCase tc)
+        public ThrowingLogger(TestCase tc)
         {
             TestCase = tc;
         }

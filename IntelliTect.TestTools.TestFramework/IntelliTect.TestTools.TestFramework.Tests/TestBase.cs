@@ -1,6 +1,4 @@
-﻿using IntelliTect.TestTools.TestFramework.Tests.TestData;
-using System;
-using System.Linq;
+﻿using System;
 using Xunit;
 
 namespace IntelliTect.TestTools.TestFramework.Tests
@@ -9,9 +7,8 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         protected static void ValidateAggregateException(AggregateException result, int expectedInnerExceptions, params string[] messages)
         {
-#pragma warning disable CA1062 // Validate arguments of public methods
+            if(result is null) throw new ArgumentNullException(nameof(result));
             Assert.Equal(expectedInnerExceptions, result.InnerExceptions.Count);
-#pragma warning restore CA1062 // Validate arguments of public methods
 
             foreach(string s in messages)
             {
