@@ -2,7 +2,7 @@
 
 namespace IntelliTect.TestTools.TestFramework.Tests
 {
-    public class ExampleLogger : ITestCaseLogger
+    public class ThrowingLogger : ITestCaseLogger
     {
         public ExampleLogger(TestCase tc)
         {
