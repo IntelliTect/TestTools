@@ -41,6 +41,5 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
             Assert.Contains("oops", ex.InnerException.Message, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        // Finally blocks still execute
     }
 }
