@@ -4,8 +4,6 @@
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningLevel>4</WarningLevel>
     <NoWarn>
       CA1303;CS1822;CS1822;<!-- Next ones are temporary. -->CS8620;CS8625;CS8600;CS8602;CS8618;CS8603;CS8604;CA1822;CA1062
     </NoWarn>
