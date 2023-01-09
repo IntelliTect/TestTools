@@ -37,7 +37,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
             var ex = Assert.Throws<TestCaseException>(() => tc.Execute());
             Assert.False(tc.Passed);
             Assert.NotNull(ex.InnerException);
-            Assert.Equal(typeof(InvalidOperationException), ex.InnerException!.GetType());
+            Assert.IsType<InvalidOperationException>(ex.InnerException);
             Assert.Contains("oops", ex.InnerException.Message, StringComparison.InvariantCultureIgnoreCase);
         }
     }
