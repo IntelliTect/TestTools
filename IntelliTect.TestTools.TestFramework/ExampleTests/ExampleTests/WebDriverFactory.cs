@@ -5,9 +5,7 @@ using System.IO;
 
 namespace ExampleTests
 {
-#pragma warning disable CA1001 // Types that own disposable fields should be disposable; Driver should be disposed by DI container, not the factory
     public class WebDriverFactory
-#pragma warning restore CA1001 // Types that own disposable fields should be disposable
     {
         public WebDriverFactory(string browserType)
         {
@@ -19,14 +17,17 @@ namespace ExampleTests
 
         private IWebDriver GetWebDriver(IServiceProvider service)
         {
-            if (_BrowserType == "Chrome")
-                _Driver = new ChromeDriver(Directory.GetCurrentDirectory());
+            IWebDriver? driver;
+            if (_BrowserType is "Chrome")
+                driver = new ChromeDriver(Directory.GetCurrentDirectory());
+            // Add other browser here.
             else
-                _Driver = new ChromeDriver(Directory.GetCurrentDirectory());
-            return _Driver;
+                driver = new ChromeDriver(Directory.GetCurrentDirectory());
+            
+            if(driver is null) throw new NullReferenceException($"Unable to find driver for {_BrowserType}");
+            return driver;
         }
 
-        private IWebDriver? _Driver;
         private string _BrowserType;
     }
 }
