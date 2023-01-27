@@ -53,7 +53,7 @@ namespace IntelliTect.TestTools.TestFramework
             // TL;DR: we don't want logging failures to interrupt the test run.
             try
             {
-                return System.Text.Json.JsonSerializer.Serialize(objectToParse, new JsonSerializerOptions { WriteIndented = true });
+                return JsonSerializer.Serialize(objectToParse, new JsonSerializerOptions { WriteIndented = true });
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception e)
