@@ -102,7 +102,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
         public void Execute()
         {
             Assert.NotNull(Log);
-            Assert.Equal(typeof(DebugLogger), Log!.GetType());
+            Assert.IsType<DebugLogger>(Log);
         }
     }
 
@@ -140,7 +140,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
         public void Execute()
         {
             Assert.NotNull(Log);
-            Assert.Equal(typeof(CustomLogger), Log!.GetType());
+            Assert.IsType<DebugLogger>(Log);
             if(Log is CustomLogger cl)
             {
                 Assert.True(cl.Invoked);

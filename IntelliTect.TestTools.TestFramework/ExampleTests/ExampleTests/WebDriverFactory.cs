@@ -17,15 +17,7 @@ namespace ExampleTests
 
         private IWebDriver GetWebDriver(IServiceProvider service)
         {
-            IWebDriver? driver;
-            if (_BrowserType is "Chrome")
-                driver = new ChromeDriver(Directory.GetCurrentDirectory());
-            // Add other browser here.
-            else
-                driver = new ChromeDriver(Directory.GetCurrentDirectory());
-            
-            if(driver is null) throw new NullReferenceException($"Unable to find driver for {_BrowserType}");
-            return driver;
+            return new ChromeDriver(Directory.GetCurrentDirectory());
         }
 
         private string _BrowserType;
