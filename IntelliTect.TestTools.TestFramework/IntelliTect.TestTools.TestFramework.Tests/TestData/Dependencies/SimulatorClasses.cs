@@ -9,7 +9,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
     {
         public void Execute(ExampleInterface input)
         {
-            ArgumentNullException.ThrowIfNull(nameof(input));
+            if (input is null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("Testing", input.Testing);
         }
     }
@@ -18,7 +18,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
     {
         public void Execute(IExampleDataInterface input)
         {
-            ArgumentNullException.ThrowIfNull(nameof(input));
+            if (input is null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("Testing", input.Testing);
         }
     }
@@ -52,7 +52,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
     {
         public void Execute(ExampleInterface input)
         {
-            ArgumentNullException.ThrowIfNull(nameof(input));
+            if (input is null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("TestingOverride", input.Testing);
         }
     }
@@ -96,7 +96,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
     {
         public void Execute(ITestCaseLogger log)
         {
-            ArgumentNullException.ThrowIfNull(nameof(log));
+            if (log is null) throw new ArgumentNullException(nameof(log));
             log.Debug("This should throw");
         }
     }
