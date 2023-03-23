@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace IntelliTect.TestTools.TestFramework
 {
@@ -9,7 +10,7 @@ namespace IntelliTect.TestTools.TestFramework
         {
             TestCase = testCase;
         }
-
+        
         public TestCase TestCase { get; }
         public string? CurrentTestBlock { get; set; }
 
@@ -47,6 +48,7 @@ namespace IntelliTect.TestTools.TestFramework
 
         private string Serialize(object objectToParse)
         {
+            if(objectToParse is null) throw new ArgumentNullException(nameof(objectToParse));
             // JsonSerializer.Serialize has some different throw behavior between versions.
             // One version threw an exception that occurred on a property, which happened to be a Selenium WebDriverException.
             // In this one specific case, catch all exceptions and move on to provide standard behavior to all package consumers.
@@ -59,7 +61,7 @@ namespace IntelliTect.TestTools.TestFramework
             catch (Exception e)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return $"Unable to serialize object {objectToParse?.GetType()} to JSON. Mark the relevant property with the [{nameof(JsonIgnore)}] attribute: {e}";
+                return $"Unable to serialize object {objectToParse?.GetType()} to JSON. Mark the relevant property with the [{nameof(JsonIgnoreAttribute)}] attribute: {e}";
             }
         }
     }
