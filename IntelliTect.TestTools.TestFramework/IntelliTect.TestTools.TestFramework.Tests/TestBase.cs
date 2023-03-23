@@ -7,7 +7,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests
     {
         protected static void ValidateAggregateException(AggregateException result, int expectedInnerExceptions, params string[] messages)
         {
-            ArgumentNullException.ThrowIfNull(nameof(result));
+            if (result is null) throw new ArgumentNullException(nameof(result));
             Assert.Equal(expectedInnerExceptions, result.InnerExceptions.Count);
 
             foreach(string s in messages)
