@@ -9,7 +9,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
     {
         public void Execute(ExampleInterface input)
         {
-            if(input is null) throw new ArgumentNullException(nameof(input));
+            if (input is null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("Testing", input.Testing);
         }
     }
