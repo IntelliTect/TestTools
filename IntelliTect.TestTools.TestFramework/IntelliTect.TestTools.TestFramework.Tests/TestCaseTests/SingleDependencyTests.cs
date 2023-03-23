@@ -84,7 +84,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
         {
             // Arrange
             TestCase tc = new TestBuilder()
-                .AddDependencyService<ExampleInterface>()
+                .AddDependencyService<ExampleImplementation>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForOwnType>()
                 .Build();
 
@@ -100,7 +100,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
         {
             // Arrange
             TestCase tc = new TestBuilder()
-                .AddDependencyInstance<IExampleDataInterface>(new ExampleInterface())
+                .AddDependencyInstance<IExampleDataInterface>(new ExampleImplementation())
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
                 .Build();
 
@@ -116,7 +116,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
         {
             // Arrange
             TestCase tc = new TestBuilder()
-                .AddDependencyService<IExampleDataInterface, ExampleInterface>()
+                .AddDependencyService<IExampleDataInterface, ExampleImplementation>()
                 .AddTestBlock<ExampleTestBlockWithExecuteArgForInterface>()
                 .Build();
 
@@ -132,7 +132,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestCaseTests
         {
             // Arrange
             TestCase tc = new TestBuilder()
-                .AddDependencyService<ExampleInterface>(new ExampleFactory().DoesNotThrow)
+                .AddDependencyService<ExampleImplementation>(new ExampleFactory().DoesNotThrow)
                 .AddTestBlock<ExampleTestBlockForFactoryWithExecuteArg>()
                 .Build();
 

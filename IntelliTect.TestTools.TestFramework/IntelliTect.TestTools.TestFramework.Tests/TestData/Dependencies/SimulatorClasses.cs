@@ -7,7 +7,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
 
     public class ExampleTestBlockWithExecuteArgForOwnType : TestBlock
     {
-        public void Execute(ExampleInterface input)
+        public void Execute(ExampleImplementation input)
         {
             if (input is null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("Testing", input.Testing);
@@ -25,7 +25,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
 
     public class ExampleTestBlockWithPropertyForOwnType : TestBlock
     {
-        public ExampleInterface Input { get; set; } = new();
+        public ExampleImplementation Input { get; set; } = new();
 
         public void Execute()
         {
@@ -35,7 +35,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
 
     public class ExampleTestBlockWithConstructorForOwnType : TestBlock
     {
-        public ExampleTestBlockWithConstructorForOwnType(ExampleInterface input)
+        public ExampleTestBlockWithConstructorForOwnType(ExampleImplementation input)
         {
             Input = input;
         }
@@ -45,12 +45,12 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
             Assert.Equal("Testing", Input.Testing);
         }
 
-        private ExampleInterface Input { get; }
+        private ExampleImplementation Input { get; }
     }
 
     public class ExampleTestBlockForFactoryWithExecuteArg : TestBlock
     {
-        public void Execute(ExampleInterface input)
+        public void Execute(ExampleImplementation input)
         {
             if (input is null) throw new ArgumentNullException(nameof(input));
             Assert.Equal("TestingOverride", input.Testing);
@@ -59,7 +59,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
 
     public class ExampleTestBlockForFactoryWithProperty : TestBlock
     {
-        public ExampleInterface Input { get; set; } = new();
+        public ExampleImplementation Input { get; set; } = new();
 
         public void Execute()
         {
@@ -69,7 +69,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
 
     public class ExampleTestBlockForFactoryWithConstructor : TestBlock
     {
-        public ExampleTestBlockForFactoryWithConstructor(ExampleInterface input)
+        public ExampleTestBlockForFactoryWithConstructor(ExampleImplementation input)
         {
             Input = input;
         }
@@ -79,7 +79,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
             Assert.Equal("TestingOverride", Input.Testing);
         }
 
-        private ExampleInterface Input { get; }
+        private ExampleImplementation Input { get; }
     }
 
     public class ExampleTestBlockWithPropertyWithNoSetter : TestBlock

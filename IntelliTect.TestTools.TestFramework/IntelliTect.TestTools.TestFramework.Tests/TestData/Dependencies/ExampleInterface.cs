@@ -5,12 +5,12 @@
         string Testing { get; set; }
     }
 
-    public class ExampleInterface : IExampleDataInterface
+    public class ExampleImplementation : IExampleDataInterface
     {
         public string Testing { get; set; } = "Testing";
     }
 
-    public class OtherExampleInterface : IExampleDataInterface
+    public class OtherExampleImplementation : IExampleDataInterface
     {
         public string Testing { get; set; } = "Testing";
     }

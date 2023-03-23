@@ -11,11 +11,11 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestData.Dependencies
         }
 
         public Func<IServiceProvider, AlwaysThrow> Throws { get; }
-        public Func<IServiceProvider, ExampleInterface> DoesNotThrow { get; private set; }
+        public Func<IServiceProvider, ExampleImplementation> DoesNotThrow { get; private set; }
 
-        private ExampleInterface GetExampleObject(IServiceProvider service)
+        private ExampleImplementation GetExampleObject(IServiceProvider service)
         {
-            return new ExampleInterface { Testing = "TestingOverride" };
+            return new ExampleImplementation { Testing = "TestingOverride" };
         }
 
         private AlwaysThrow GetAlwaysThrow(IServiceProvider provider)

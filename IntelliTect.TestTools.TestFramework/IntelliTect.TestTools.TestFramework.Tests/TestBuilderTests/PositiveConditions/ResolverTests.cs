@@ -10,7 +10,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
         public void Test1()
         {
             TestCase tc = new TestBuilder()
-                .AddDependencyService<IExampleDataInterface, ExampleInterface>()
+                .AddDependencyService<IExampleDataInterface, ExampleImplementation>()
                 .AddTestBlock<InterfaceBlock>()
                 .Build();
 
@@ -21,7 +21,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
         public void Test2()
         {
             TestCase tc = new TestBuilder()
-                .AddDependencyService<IExampleDataInterface, ExampleInterface>()
+                .AddDependencyService<IExampleDataInterface, ExampleImplementation>()
                 .AddTestBlock<CorrectInterfaceBlock>()
                 .Build();
 
@@ -32,7 +32,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
         public void Test3()
         {
             var tb = new TestBuilder()
-                .AddDependencyService<IExampleDataInterface, ExampleInterface>()
+                .AddDependencyService<IExampleDataInterface, ExampleImplementation>()
                 .AddTestBlock<IncorrectInterfaceBlock>();
 
             var ex = Assert.Throws<AggregateException>(() => tb.Build());
@@ -43,8 +43,8 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
         public void Test4()
         {
             TestCase tc = new TestBuilder()
-                .AddDependencyService<IExampleDataInterface, OtherExampleInterface>()
-                .AddDependencyService<IExampleDataInterface, ExampleInterface>()
+                .AddDependencyService<IExampleDataInterface, OtherExampleImplementation>()
+                .AddDependencyService<IExampleDataInterface, ExampleImplementation>()
                 .AddTestBlock<IncorrectInterfaceBlock>()
                 .Build();
 
@@ -64,7 +64,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
 
     public class CorrectInterfaceBlock : TestBlock
     {
-        public void Execute(ExampleInterface iface)
+        public void Execute(ExampleImplementation iface)
         {
             Assert.NotNull(iface);
         }
@@ -72,7 +72,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
 
     public class IncorrectInterfaceBlock : TestBlock
     {
-        public void Execute(OtherExampleInterface iface)
+        public void Execute(OtherExampleImplementation iface)
         {
             Assert.NotNull(iface);
         }
