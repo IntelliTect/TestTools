@@ -25,7 +25,7 @@ namespace ExampleTests
                     IsBodyAvailable = true
                 };
 
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddLogger<NewLogger>()
                 .AddDependencyService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
@@ -38,7 +38,7 @@ namespace ExampleTests
         [Fact]
         public void RegisterMembership()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
                 .AddDependencyService<Harness.IntelliTectWebpage>()
@@ -50,7 +50,7 @@ namespace ExampleTests
         [Fact]
         public void LogIn()
         {
-            TestBuilder builder = new TestBuilder();
+            TestBuilder builder = new();
             builder
                 .AddDependencyService<IWebDriver>(new WebDriverFactory("Chrome").Driver)
                 .AddDependencyService<Account>(new AccountFactory().Account)

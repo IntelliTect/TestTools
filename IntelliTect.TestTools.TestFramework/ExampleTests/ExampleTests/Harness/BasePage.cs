@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 using OpenQA.Selenium;
 
 namespace ExampleTests.Harness
@@ -10,7 +11,7 @@ namespace ExampleTests.Harness
             Driver = driver;
         }
 
-        public string BaseUrl { get; set; } = @"https://intellitect.com/";
+        public Uri BaseUrl { get; set; } = new Uri("https://intellitect.com/");
         [JsonIgnore]
         protected IWebDriver Driver { get; set; }
     }

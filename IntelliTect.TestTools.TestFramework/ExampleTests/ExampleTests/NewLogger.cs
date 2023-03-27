@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ExampleTests
 {
-    class NewLogger : ILogger
+    public class NewLogger : ILogger
     {
         public string TestCaseKey { get; set; }
         public string CurrentTestBlock { get; set; }

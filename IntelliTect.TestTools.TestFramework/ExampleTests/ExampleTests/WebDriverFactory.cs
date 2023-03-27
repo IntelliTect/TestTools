@@ -17,14 +17,9 @@ namespace ExampleTests
 
         private IWebDriver GetWebDriver(IServiceProvider service)
         {
-            if (_BrowserType == "Chrome")
-                _Driver = new ChromeDriver(Directory.GetCurrentDirectory());
-            else
-                _Driver = new ChromeDriver(Directory.GetCurrentDirectory());
-            return _Driver;
+            return new ChromeDriver(Directory.GetCurrentDirectory());
         }
 
-        private IWebDriver _Driver;
         private string _BrowserType;
     }
 }

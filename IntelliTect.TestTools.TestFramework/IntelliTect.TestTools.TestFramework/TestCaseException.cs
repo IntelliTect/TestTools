@@ -23,12 +23,12 @@ namespace IntelliTect.TestTools.TestFramework
             ResourceReferenceProperty = info.GetString("ResourceReferenceProperty");
         }
 
-        public string ResourceReferenceProperty { get; set; }
+        public string ResourceReferenceProperty { get; set; } = "";
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null) throw new ArgumentNullException(nameof(info));
+            if (info is null) throw new ArgumentNullException(nameof(info));
             info.AddValue("ResourceReferenceProperty", ResourceReferenceProperty);
             base.GetObjectData(info, context);
         }
