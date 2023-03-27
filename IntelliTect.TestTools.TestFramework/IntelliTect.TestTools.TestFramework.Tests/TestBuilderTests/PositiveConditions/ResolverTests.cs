@@ -7,7 +7,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
     public class ResolverTests
     {
         [Fact]
-        public void Test1()
+        public void DiReturnsCorrectObjectWhenBlockAsksForInterface()
         {
             TestCase tc = new TestBuilder()
                 .AddDependencyService<IExampleDataInterface, ExampleImplementation>()
@@ -18,18 +18,18 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
         }
 
         [Fact]
-        public void Test2()
+        public void DiReturnsCorrectObjectWhenBlockAsksForImplementation()
         {
             TestCase tc = new TestBuilder()
                 .AddDependencyService<IExampleDataInterface, ExampleImplementation>()
-                .AddTestBlock<CorrectInterfaceBlock>()
+                .AddTestBlock<ImplementationBlock>()
                 .Build();
 
             tc.Execute();
         }
 
         [Fact]
-        public void Test3()
+        public void TestCaseThrowsIfBuildingWithMismatchedImplementation()
         {
             var tb = new TestBuilder()
                 .AddDependencyService<IExampleDataInterface, ExampleImplementation>()
@@ -40,7 +40,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
         }
 
         [Fact]
-        public void Test4()
+        public void DiReturnsCorrectObjectWhenBlockAsksOneOfMultipleImplementations()
         {
             TestCase tc = new TestBuilder()
                 .AddDependencyService<IExampleDataInterface, OtherExampleImplementation>()
@@ -62,7 +62,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests.PositiveCon
         }
     }
 
-    public class CorrectInterfaceBlock : TestBlock
+    public class ImplementationBlock : TestBlock
     {
         public void Execute(ExampleImplementation iface)
         {
