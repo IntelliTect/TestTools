@@ -141,7 +141,7 @@ namespace IntelliTect.TestTools.TestFramework.Tests.TestBuilderTests
         {
             Assert.NotNull(Log);
             Assert.IsType<CustomLogger>(Log);
-            if(Log is CustomLogger cl)
+            CustomLogger cl = (CutomLogger)Log;
             {
                 Assert.True(cl.Invoked);
             }
