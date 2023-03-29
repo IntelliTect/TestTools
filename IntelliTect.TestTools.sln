@@ -39,14 +39,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{BD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.Selenate.Examples", "Examples\IntelliTect.TestTools.Selenate.Examples\IntelliTect.TestTools.Selenate.Examples.csproj", "{6F64DE3F-6220-4302-BA3D-25D1C783B673}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IntelliTect.TestTools.TestFramework", "IntelliTect.TestTools.TestFramework", "{8F72C043-0341-4FB9-8503-78C4C0CE1F15}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleTests", "IntelliTect.TestTools.TestFramework\ExampleTests\ExampleTests\ExampleTests.csproj", "{B5389BCD-0919-4A7C-859F-064C19F17258}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.TestFramework", "IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework.csproj", "{DB59B933-DCF8-4A27-968C-AD4D13F72987}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.TestTools.TestFramework.Tests", "IntelliTect.TestTools.TestFramework\IntelliTect.TestTools.TestFramework.Tests\IntelliTect.TestTools.TestFramework.Tests.csproj", "{B23739CA-39AF-4721-A40A-FCA06F418FF5}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3E09C5DD-F7B4-4542-AC13-0EE22DCC230C}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -59,7 +51,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 		selenate-pipeline.yml = selenate-pipeline.yml
 		Test-NuGetPackage.ps1 = Test-NuGetPackage.ps1
-		testframework-pipeline.yml = testframework-pipeline.yml
 	EndProjectSection
 EndProject
 Global
@@ -120,18 +111,6 @@ Global
 		{6F64DE3F-6220-4302-BA3D-25D1C783B673}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F64DE3F-6220-4302-BA3D-25D1C783B673}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F64DE3F-6220-4302-BA3D-25D1C783B673}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5389BCD-0919-4A7C-859F-064C19F17258}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5389BCD-0919-4A7C-859F-064C19F17258}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5389BCD-0919-4A7C-859F-064C19F17258}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5389BCD-0919-4A7C-859F-064C19F17258}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DB59B933-DCF8-4A27-968C-AD4D13F72987}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DB59B933-DCF8-4A27-968C-AD4D13F72987}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DB59B933-DCF8-4A27-968C-AD4D13F72987}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB59B933-DCF8-4A27-968C-AD4D13F72987}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B23739CA-39AF-4721-A40A-FCA06F418FF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B23739CA-39AF-4721-A40A-FCA06F418FF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B23739CA-39AF-4721-A40A-FCA06F418FF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B23739CA-39AF-4721-A40A-FCA06F418FF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -146,9 +125,6 @@ Global
 		{A0D98D56-D48E-42E4-8E1E-6EA3EA0D7860} = {D13DE286-8B5D-45A4-B7A9-EA62E7AF98A5}
 		{B5D26863-D696-4D64-B281-FC118B370FEA} = {EEA49773-F788-4051-8C66-30B90839FCFD}
 		{6F64DE3F-6220-4302-BA3D-25D1C783B673} = {BDBFEAA3-FBC6-48C1-8988-9D6F64875831}
-		{B5389BCD-0919-4A7C-859F-064C19F17258} = {8F72C043-0341-4FB9-8503-78C4C0CE1F15}
-		{DB59B933-DCF8-4A27-968C-AD4D13F72987} = {8F72C043-0341-4FB9-8503-78C4C0CE1F15}
-		{B23739CA-39AF-4721-A40A-FCA06F418FF5} = {8F72C043-0341-4FB9-8503-78C4C0CE1F15}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {06F0B25C-E18B-44E5-9FD1-CD362B8626FF}
